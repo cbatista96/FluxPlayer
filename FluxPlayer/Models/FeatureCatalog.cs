@@ -56,8 +56,8 @@ public static class FeatureCatalog
         new FeatureDefinition(AutoSkipIntroOutro, "Auto skip intro/outro", "Skip the intro and outro using configured durations."),
         new FeatureDefinition(PlayNextQueue, "Play next queue", "Right-click a playlist item > Play next. The playlist order is preserved."),
         new FeatureDefinition(PresentationLockControls, "Control lock", "Lock the keyboard and mouse for presentations (Ctrl+L or context menu)."),
-        new FeatureDefinition(VolumeNormalization, "Volume normalization", "Balance volume between files."),
-        new FeatureDefinition(DynamicCompressorLimiter, "Compressor/limiter", "Improve the clarity of quiet dialogue."),
+        new FeatureDefinition(VolumeNormalization, "Volume normalization", "Playback normalization is pending verified audio-filter processing. Conversion normalization is available in the converter."),
+        new FeatureDefinition(DynamicCompressorLimiter, "Compressor/limiter", "Pending a verified playback audio-filter chain."),
         new FeatureDefinition(Equalizer31Band, "Equalizer + preamp", "10 ISO bands, preamplifier and 30 presets (E)."),
         new FeatureDefinition(AudioProfilesPerDevice, "Per-device profiles", "Save volume, ten-band EQ, preamp and delay per output from Audio and video tools."),
         new FeatureDefinition(HeadphoneCrossfeed, "Headphone crossfeed", "Reduce stereo headphone listening fatigue."),
@@ -105,6 +105,7 @@ public static class FeatureCatalog
     private static readonly HashSet<string> PlannedKeys = new(StringComparer.OrdinalIgnoreCase)
     {
         HeadphoneCrossfeed, AutoDownloadSubtitles,
+        VolumeNormalization, DynamicCompressorLimiter,
         BilingualSubtitles, BurnedSubtitlesOcr,
         ConfigurableHud, AdvancedTouchGestures, AutoRenderProfileByGpu,
         ChromecastDlnaSender, MobileRemoteWebUi,

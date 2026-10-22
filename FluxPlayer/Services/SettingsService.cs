@@ -108,8 +108,9 @@ public class SettingsService
             if (!AudioOutputProfile.ValidDeviceId(pair.Key) || pair.Value == null || audioProfiles.Count >= AudioOutputProfile.MaximumProfiles) continue;
             try
             {
-                pair.Value.Validate();
-                audioProfiles[pair.Key] = pair.Value with { Bands = (float[])pair.Value.Bands.Clone(), Preset = EqualizerPresets.Normalize(pair.Value.Preset) };
+                var profile = pair.Value with { Preamp = float.IsFinite(pair.Value.Preamp) ? Math.Clamp(pair.Value.Preamp, -12, 12) : pair.Value.Preamp };
+                profile.Validate();
+                audioProfiles[pair.Key] = profile with { Bands = (float[])profile.Bands.Clone(), Preset = EqualizerPresets.Normalize(profile.Preset) };
             }
             catch (ArgumentException) { /* Ignore only the invalid profile, preserving other endpoints. */ }
         }
@@ -163,6 +164,9 @@ public class SettingsService
             Array.Copy(settings.EqualizerBands, normalizedBands,
                 Math.Min(settings.EqualizerBands.Length, normalizedBands.Length));
         settings.EqualizerBands = normalizedBands;
+        for (int i = 0; i < normalizedBands.Length; i++)
+            normalizedBands[i] = float.IsFinite(normalizedBands[i]) ? Math.Clamp(normalizedBands[i], -20, 20) : 0;
+        settings.EqualizerPreamp = float.IsFinite(settings.EqualizerPreamp) ? Math.Clamp(settings.EqualizerPreamp, -12, 12) : 0;
 
         settings.Volume = Math.Clamp(settings.Volume, 0, 200);
         settings.PlaybackRate = Math.Clamp(settings.PlaybackRate, 0.25f, 4f);

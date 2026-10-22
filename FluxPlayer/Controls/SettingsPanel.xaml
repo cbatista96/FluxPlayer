@@ -845,9 +845,9 @@
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                                     <StackPanel>
                                         <TextBlock Text="Normalize volume" Style="{StaticResource OptTitle}" />
-                                        <TextBlock Text="Balance volume between files" Style="{StaticResource OptSub}" />
+                                        <TextBlock Text="Pending verified playback processing. Conversion normalization is available in the converter." TextWrapping="Wrap" Style="{StaticResource OptSub}" />
                                     </StackPanel>
-                                    <CheckBox x:Name="NormalizeVolumeToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                    <CheckBox x:Name="NormalizeVolumeToggle" Grid.Column="1" VerticalAlignment="Center" IsEnabled="False" ToolTip="Playback normalization is not implemented yet." />
                                 </Grid>
                             </Border>
 

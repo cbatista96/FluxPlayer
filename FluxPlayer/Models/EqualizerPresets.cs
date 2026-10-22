@@ -6,6 +6,12 @@ public static class EqualizerPresets
 {
     public const string Custom = "Custom";
     public const string Flat = "Flat";
+    // VLC's equalizer multiplies the dry signal by 0.25. Offset that fixed attenuation
+    // so a flat EQ at a displayed 0 dB retains the bypass level.
+    public static readonly float NativeUnityOffsetDb = 20f * MathF.Log10(4f);
+    public static readonly float MaximumEffectivePreampDb = 20f - NativeUnityOffsetDb;
+    public static float NativePreamp(float requestedDb) =>
+        Math.Clamp(float.IsFinite(requestedDb) ? requestedDb : 0, -20f, MaximumEffectivePreampDb) + NativeUnityOffsetDb;
 
     public static readonly string[] BandLabels = { "31", "62", "125", "250", "500", "1k", "2k", "4k", "8k", "16k" };
 

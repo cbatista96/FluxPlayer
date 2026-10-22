@@ -39,6 +39,8 @@ Right-click the player or a playlist item for context actions, including play ne
 
 Press **E** to open the floating equalizer. It offers ten bands from 31 Hz to 16 kHz, a preamplifier and 30 presets. Peak compensation reduces the preamplifier when boosted bands require additional headroom. It cannot guarantee that every source, output device or downstream effect will avoid clipping.
 
+A flat equalizer at 0 dB preserves the bypass level. The effective preamp shown below the controls includes peak compensation and the native engine's approximately +7.96 dB positive gain limit. The requested slider value can therefore exceed the effective value. Playback normalization and compressor controls remain pending verified signal processing and are disabled; the converter's optional loudness normalization is available.
+
 The audio settings include output device selection, ReplayGain options, audio delay and preferred track language. Tag editing writes supported metadata to the original file; release it from playback before saving. Tag write support depends on its format.
 
 Open **Audio and video tools > Audio output profiles** to save the player's current volume, ten-band equalizer, preamp, peak compensation and audio delay for a selected output. Up to 64 profiles are keyed by output identifier; saving for one device leaves other profiles independent. Saved devices remain listed when disconnected. **Refresh devices** updates availability.

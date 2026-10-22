@@ -157,7 +157,7 @@
                     <Canvas x:Name="GridCanvas" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" IsHitTestVisible="False" />
 
                     <TextBlock x:Name="PreampValue" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center" FontSize="10.5" FontWeight="SemiBold" Text="0.0" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                    <Slider x:Name="PreampSlider" Grid.Row="1" Grid.Column="1" Style="{StaticResource EqSlider}" ToolTip="Preamplifier (double-click: 0 dB)" ValueChanged="PreampSlider_ValueChanged" MouseDoubleClick="PreampSlider_MouseDoubleClick" />
+                    <Slider x:Name="PreampSlider" Grid.Row="1" Grid.Column="1" Style="{StaticResource EqSlider}" ToolTip="Requested preamp (double-click: 0 dB). Effective gain is capped at +7.96 dB by the native engine and may be reduced by peak compensation." ValueChanged="PreampSlider_ValueChanged" MouseDoubleClick="PreampSlider_MouseDoubleClick" />
                     <TextBlock Grid.Row="2" Grid.Column="1" Text="PRE" HorizontalAlignment="Center" VerticalAlignment="Bottom" FontSize="10.5" FontWeight="SemiBold" Foreground="{DynamicResource FxAccentTextBrush}" />
                     <Rectangle Grid.Row="0" Grid.RowSpan="3" Grid.Column="2" Width="1" HorizontalAlignment="Center" Fill="{DynamicResource FxDividerBrush}" />
 

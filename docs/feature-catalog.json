@@ -256,7 +256,7 @@
     "Area": "Audio",
     "Description": "Ten-band equalizer with preamplifier and 30 presets.",
     "Status": "implemented",
-    "Evidence": "MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools"
+    "Evidence": "Native ten-band equalizer, presets and output-profile integration; captured PCM verifies flat bypass level and gain/compensation at 31.25 Hz and 1 kHz."
   },
   {
     "Id": "F0038",
@@ -289,9 +289,9 @@
   {
     "Id": "F0042",
     "Area": "Audio",
-    "Description": "LibVLC normalization and compressor controls.",
-    "Status": "implemented",
-    "Evidence": "MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools"
+    "Description": "Verified playback normalization and compression. The previous option-only controls did not change captured PCM and are disabled.",
+    "Status": "pending",
+    "Evidence": "A native loud-tone acceptance probe found no compression from per-media audio-filter options. Conversion normalization is implemented separately."
   },
   {
     "Id": "F0043",

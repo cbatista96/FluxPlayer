@@ -90,7 +90,9 @@ public partial class MediaService : IDisposable
             "--no-snapshot-preview",
             "--no-osd",
             "--no-lua",
-            "--no-media-library"
+            "--no-media-library",
+            // Match the 31 Hz–16 kHz ISO centers displayed by the equalizer controls.
+            "--no-equalizer-vlcfreqs"
         };
         // The text renderer inherits instance settings; per-media freetype options are ineffective here.
         vlcOptions.AddRange(SubtitleStyle.Normalize(subtitleStyle).NativeOptions().Select(option => "--" + option[1..]));
@@ -215,9 +217,6 @@ public partial class MediaService : IDisposable
             _currentMedia.AddOption($":vout={profile.VideoOutputModule}");
         if (!_resumePlaybackPerFile)
             _currentMedia.AddOption(":start-time=0");
-        var filters = AudioFilterChain;
-        if (!string.IsNullOrWhiteSpace(filters))
-            _currentMedia.AddOption($":audio-filter={filters}");
         MediaPlayer.Play(_currentMedia);
 
         prev?.Dispose();
@@ -402,7 +401,6 @@ public partial class MediaService : IDisposable
 
     public void SetVolume(int volume) => MediaPlayer.Volume = Math.Clamp(volume, 0, 200);
 
-    public string? AudioFilterChain { get; set; }
     public void SetMute(bool mute) => MediaPlayer.Mute = mute;
     public int GetVolume() => MediaPlayer.Volume;
 
@@ -456,7 +454,7 @@ public partial class MediaService : IDisposable
     {
         _equalizer?.Dispose();
         _equalizer = new Equalizer();
-        _equalizer.SetPreamp(preamp);
+        _equalizer.SetPreamp(EqualizerPresets.NativePreamp(preamp));
         for (uint i = 0; i < Math.Min((uint)bands.Length, 10u); i++)
             _equalizer.SetAmp(bands[i], i);
         MediaPlayer.SetEqualizer(_equalizer);
@@ -464,6 +462,8 @@ public partial class MediaService : IDisposable
 
     public void DisableEqualizer()
     {
+        // Avoid native filter reconfiguration when the equalizer is already disabled.
+        if (_equalizer == null) return;
         _equalizer?.Dispose();
         _equalizer = null;
         MediaPlayer.UnsetEqualizer();

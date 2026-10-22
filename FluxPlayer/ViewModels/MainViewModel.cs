@@ -153,7 +153,6 @@ public partial class MainViewModel : ObservableObject
                     _bookmarks[kv.Key] = kv.Value.Distinct().OrderBy(v => v).ToList();
 
         Volume = Math.Clamp(Volume, 0, MaxVolume);
-        _mediaService.AudioFilterChain = BuildAudioFilterChain();
         _mediaService.SetVolume((int)Volume);
 
         _mediaService.TimeChanged += OnTimeChanged;
@@ -628,7 +627,7 @@ public partial class MainViewModel : ObservableObject
                 float peak = Math.Max(0f, EqualizerBands.Max() + pre);
                 pre -= peak;
             }
-            return Math.Clamp(pre, -20f, 20f);
+            return Math.Clamp(pre, -20f, EqualizerPresets.MaximumEffectivePreampDb);
         }
     }
 
@@ -1077,17 +1076,6 @@ public partial class MainViewModel : ObservableObject
         OnPropertyChanged(nameof(VolumeStep));
         OnPropertyChanged(nameof(MaxVolume));
         if (Volume > MaxVolume) Volume = MaxVolume;
-        _mediaService.AudioFilterChain = BuildAudioFilterChain();
-    }
-
-    private string? BuildAudioFilterChain()
-    {
-        var filters = new List<string>(2);
-        if (_settings.NormalizeVolume || FeatureCatalog.IsEnabled(_settings, FeatureCatalog.VolumeNormalization))
-            filters.Add("normvol");
-        if (FeatureCatalog.IsEnabled(_settings, FeatureCatalog.DynamicCompressorLimiter))
-            filters.Add("compressor");
-        return filters.Count == 0 ? null : string.Join(":", filters);
     }
 
     public event EventHandler? SleepTimerFired;

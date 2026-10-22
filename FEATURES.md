@@ -1,12 +1,12 @@
 # Feature checklist
 
-**76 implemented · 25 pending · 101 tracked capabilities.**
+**75 implemented · 26 pending · 101 tracked capabilities.**
 
 Each capability appears exactly once. Completing it moves the same stable ID from Pending to Implemented. A setting or catalog entry alone does not complete a feature. Source references describe the implementation; validation limits are documented in [Testing](docs/TESTING.md).
 
 Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Sync-PublicFeatures.ps1`; CI rejects an outdated checklist.
 
-## Implemented (76)
+## Implemented (75)
 
 ### Workspaces and interface
 
@@ -49,12 +49,11 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [x] **F0034** Metadata editing through LibVLC for formats that support saving tags. — MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools
 - [x] **F0035** Synchronized local LRC lyrics and plain text lyrics. — MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools
 - [x] **F0036** CUE sheet chapters and native chapter navigation. — MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools
-- [x] **F0037** Ten-band equalizer with preamplifier and 30 presets. — MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools
+- [x] **F0037** Ten-band equalizer with preamplifier and 30 presets. — Native ten-band equalizer, presets and output-profile integration; captured PCM verifies flat bypass level and gain/compensation at 31.25 Hz and 1 kHz.
 - [x] **F0038** Equalizer peak compensation to reduce clipping risk from boosted bands. — MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools
 - [x] **F0039** Migration of presets saved by the earlier localized interface. — MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools
 - [x] **F0040** ReplayGain track/album options, preamplification and peak protection. — MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools
 - [x] **F0041** Output device selection, audio tracks, channel options and audio delay. — MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools
-- [x] **F0042** LibVLC normalization and compressor controls. — MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools
 - [x] **F0043** Optional FFmpeg conversion to FLAC, WAV, MP3, Opus, Vorbis, AAC, ALAC and WavPack. — MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools
 - [x] **F0044** Sequential conversion, progress, cancellation and optional loudness normalization. — MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools
 - [x] **F0045** Conversion writes to a temporary file and refuses to overwrite an existing destination. — MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools
@@ -102,7 +101,7 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [x] **F0087** Source-only public repository and Windows build/test CI. — MediaFormats, MediaService, CI and build scripts
 - [x] **F0088** Local self-contained build profile and Inno Setup source. — MediaFormats, MediaService, CI and build scripts
 
-## Pending (25)
+## Pending (26)
 
 ### Workspaces and interface
 
@@ -118,6 +117,7 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 
 ### Audio
 
+- [ ] **F0042** Verified playback normalization and compression. The previous option-only controls did not change captured PCM and are disabled. — A native loud-tone acceptance probe found no compression from per-media audio-filter options. Conversion normalization is implemented separately.
 - [ ] **F0046** Real 20-band and 31-band DSP equalizers. The current engine has ten bands.
 - [ ] **F0048** Headphone crossfeed.
 - [ ] **F0049** Verified gapless transitions and crossfade.

@@ -10,12 +10,14 @@ internal static class Program
 {
     private static readonly List<object> Results = new();
     private static string? TestFilter;
+    private static bool ProbePendingAudioFilters;
     private static readonly string Root = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../session-state/tests"));
 
     [STAThread]
     private static int Main(string[] args)
     {
         TestFilter = args.FirstOrDefault(argument => argument.StartsWith("--filter=", StringComparison.Ordinal))?[9..];
+        ProbePendingAudioFilters = args.Contains("--probe-pending-audio-filters", StringComparer.Ordinal);
         Directory.CreateDirectory(Root);
         var app = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
         int exitCode = 0;
@@ -237,6 +239,9 @@ internal static class Program
             Assert(EqualizerPresets.Normalize("Plano") == EqualizerPresets.Flat, "Legacy flat preset");
             Assert(EqualizerPresets.Normalize("Cine") == "Cinema", "Legacy cinema preset");
             Assert(EqualizerPresets.Normalize("Personalizado") == EqualizerPresets.Custom, "Legacy custom preset");
+            Assert(Math.Abs(EqualizerPresets.NativePreamp(0) - 12.0412f) < 0.001f
+                && EqualizerPresets.NativePreamp(12) == 20
+                && Math.Abs(EqualizerPresets.MaximumEffectivePreampDb - 7.9588f) < 0.001f, "Unity compensation and native positive gain limit");
             return Task.CompletedTask;
         });
 
@@ -433,6 +438,9 @@ internal static class Program
 
         using var engine = new MediaService(hardwareDecoding: false, enableDiagnosticLogging: false);
         using var renderer = new VlcWpfRenderer(engine, new System.Windows.Controls.Image());
+        await Test("Native audio DSP: measured ISO band centers and compensated preamp", () => AudioDspChecks.VerifyIsoBandsAsync(Root));
+        if (ProbePendingAudioFilters)
+            await Test("Pending audio filters: compressor acceptance probe", () => AudioDspChecks.VerifyCompressorAsync(Root));
         await Test("Native output profiles: live application, mute, boost limit, opt-out, startup and failed save", async () =>
         {
             string folder = Path.Combine(Root, "native-output-profiles-" + Guid.NewGuid().ToString("N"));
