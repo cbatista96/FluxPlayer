@@ -43,7 +43,58 @@ public partial class MediaService
         catch { return new[] { new AudioDevice("Default", "System default") }; }
     }
 
-    public void SelectAudioDevice(string id) => MediaPlayer.SetOutputDevice(id == "Default" ? null! : id);
+    public void SelectAudioDevice(string id)
+    {
+        MediaPlayer.SetOutputDevice(id == "Default" ? null! : id);
+        ScheduleAudioChannelRouting();
+    }
+
+    private int _audioRoutingRevision;
+
+    public bool ApplyAudioChannelRouting()
+    {
+        bool applied;
+        lock (_playbackStateLock)
+        {
+            if (_disposed) return false;
+            applied = ApplyAudioChannelRoutingLocked(AudioChannelRouting.NativeValue(PlaybackSettings.AudioChannels));
+        }
+        ScheduleAudioChannelRouting();
+        return applied;
+    }
+
+    private bool ApplyAudioChannelRoutingLocked(int channel)
+    {
+        if ((int)MediaPlayer.Channel == channel) return true;
+        // Mono (7) and Original (0) are present in the pinned native SDK;
+        // LibVLCSharp's older enum omits their names but passes the integer.
+        return MediaPlayer.SetChannel((AudioOutputChannel)channel);
+    }
+
+    private void ScheduleAudioChannelRouting()
+    {
+        if (_disposed) return;
+        int revision = Interlocked.Increment(ref _audioRoutingRevision);
+        long generation = Interlocked.Read(ref _sourceGeneration);
+        int requested = AudioChannelRouting.NativeValue(PlaybackSettings.AudioChannels);
+        // Playing can precede creation of the decoded audio output. A bounded
+        // deferred pass survives that initialization race without an idle poll.
+        _ = Task.Run(async () =>
+        {
+            foreach (int delay in new[] { 100, 250, 650 })
+            {
+                await Task.Delay(delay).ConfigureAwait(false);
+                lock (_playbackStateLock)
+                {
+                    if (_disposed || generation != _sourceGeneration || revision != _audioRoutingRevision) return;
+                    if (MediaPlayer.State is not (VLCState.Playing or VLCState.Paused)) continue;
+                    ApplyAudioChannelRoutingLocked(requested);
+                    // Original may resolve to a source-specific native choice.
+                    if (requested == 0) return;
+                }
+            }
+        });
+    }
 
     public void ApplyPlaybackSettings()
     {
@@ -52,6 +103,7 @@ public partial class MediaService
         MediaPlayer.SetAudioDelay(s.AudioDelay * 1000L);
         MediaPlayer.SetSpuDelay(s.SubtitleDelay * 1000L);
         if (s.AudioOutputDevice != "Default") SelectAudioDevice(s.AudioOutputDevice);
+        ApplyAudioChannelRouting();
         MediaPlayer.SetDeinterlace(s.DeinterlaceEnabled ? s.DeinterlaceMode.ToLowerInvariant() switch
         {
             "auto" => "yadif",

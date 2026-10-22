@@ -1,6 +1,6 @@
 # Feature checklist
 
-**79 implemented · 26 pending · 105 tracked capabilities.**
+**79 implemented · 27 pending · 106 tracked capabilities.**
 
 Each capability appears exactly once. Completing it moves the same stable ID from Pending to Implemented. A setting or catalog entry alone does not complete a feature. Source references describe the implementation; validation limits are documented in [Testing](docs/TESTING.md).
 
@@ -54,7 +54,7 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [x] **F0038** Equalizer gain compensation; extended layouts estimate the combined filter response. — Native combined-response headroom and acknowledged effective preamp; captured PCM at 20 Hz, middle centers and 20 kHz, including 192/384 kHz inputs. This is not a peak limiter.
 - [x] **F0039** Migration of presets saved by the earlier localized interface. — MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools
 - [x] **F0040** ReplayGain track/album options, preamplification and peak protection. — MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools
-- [x] **F0041** Output device selection, audio tracks, channel options and audio delay. — MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools
+- [x] **F0041** Output device selection, audio tracks and delay, with native Original/mono/stereo/swap/left/right channel routing. — MediaService.Audio and SettingsPanel; captured left/right tone components and six-channel PCM downmix, native acknowledgement, startup, paused settings changes, output selection, source changes and persistence. Speaker layouts are tracked separately.
 - [x] **F0043** Optional FFmpeg conversion to FLAC, WAV, MP3, Opus, Vorbis, AAC, ALAC and WavPack. — MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools
 - [x] **F0044** Sequential conversion, progress, cancellation and optional loudness normalization. — MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools
 - [x] **F0045** Conversion writes to a temporary file and refuses to overwrite an existing destination. — MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools
@@ -105,7 +105,7 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [x] **F0087** Source-only public repository and Windows build/test CI. — MediaFormats, MediaService, CI and build scripts
 - [x] **F0088** Local self-contained build profile and Inno Setup source. — MediaFormats, MediaService, CI and build scripts
 
-## Pending (26)
+## Pending (27)
 
 ### Workspaces and interface
 
@@ -128,6 +128,7 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [ ] **F0050** Advanced DSP chain and measured output quality matrix.
 - [ ] **F0051** Online lyric providers and lyric editing.
 - [ ] **F0099** Preserve and edit advanced CUE directives such as CD-TEXT, PREGAP and additional indexes.
+- [ ] **F0106** Explicit 2.1/5.1/7.1 speaker layouts, arbitrary channel matrices, per-channel gain/delay and verified physical surround output. — Earlier speaker-layout choices did not configure native output and now migrate to Original. Basic channel routing and a six-channel PCM-to-stereo downmix are verified separately.
 
 ### Library and playlists
 

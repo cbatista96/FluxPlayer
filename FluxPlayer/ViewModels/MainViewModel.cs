@@ -1087,7 +1087,7 @@ public partial class MainViewModel : ObservableObject
             AudioDelayMs = _settings.AudioDelay;
         }
         finally { _applyingAudioProfile = false; }
-        _mediaService.SetAudioDelay(AudioDelayMs * 1000L); PushEqualizer();
+        _mediaService.SetAudioDelay(AudioDelayMs * 1000L); _mediaService.ApplyAudioChannelRouting(); PushEqualizer();
         OnPropertyChanged(nameof(SeekStepSeconds));
         OnPropertyChanged(nameof(SeekLargeStepSeconds));
         OnPropertyChanged(nameof(VolumeStep));

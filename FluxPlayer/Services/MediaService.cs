@@ -138,6 +138,7 @@ public partial class MediaService : IDisposable
         MediaPlayer.Playing += (s, e) =>
         {
             WriteDiagnostic($"Playing | Profile={GetActivePlaybackProfileName()}");
+            ScheduleAudioChannelRouting();
             Playing?.Invoke(s, EventArgs.Empty);
         };
         MediaPlayer.Paused += (s, e) =>
@@ -523,6 +524,7 @@ public partial class MediaService : IDisposable
                 }
             }
             catch (ObjectDisposedException) { }
+            lines.Add("Channel routing: " + AudioChannelRouting.NativeLabel((int)MediaPlayer.Channel));
         }
         if (_equalizer == null) lines.Add("Equalizer: bypassed");
         else if (!_usingExtendedEqualizer) lines.Add("Equalizer: 10 native bands");

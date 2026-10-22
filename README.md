@@ -26,7 +26,7 @@ An audio workspace with artwork, lyrics and a playlist. A video workspace with s
 | **Audio and video modes** | Automatic selection based on decoded tracks, manual mode selection and separate audio window dimensions. |
 | **Music workspace** | Artwork, metadata, synchronized LRC lyrics, CUE chapters, favorites, playlist controls and a floating equalizer. |
 | **Playback** | Local files and supported network sources, seeking, speed control, repeat, shuffle, A–B looping and frame stepping. |
-| **Audio tools** | 10/15/20/31 native equalizer bands, preamplifier, 30 presets, gain compensation, per-output profiles, ReplayGain options and audio delay. |
+| **Audio tools** | 10/15/20/31 native equalizer bands, preamplifier, presets, gain compensation, per-output profiles, channel routing, ReplayGain options and audio delay. |
 | **Library** | A local index, watched folders, favorites, playback statistics, smart playlists, field queries, backup restore and exact duplicate detection. |
 | **Playlists** | Import and export M3U/M3U8, PLS and XSPF; reorder tracks and queue an item to play next. |
 | **Video tools** | Subtitle loading and timing, subtitle text search, bookmarks, timeline thumbnails, snapshots, ambient light and A–B clip export. |

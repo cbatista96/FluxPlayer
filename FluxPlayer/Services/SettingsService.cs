@@ -92,6 +92,7 @@ public class SettingsService
     {
         // The public source currently ships a single English interface.
         settings.Language = "English";
+        settings.AudioChannels = AudioChannelRouting.Normalize(settings.AudioChannels);
         settings.EqualizerPreset = EqualizerPresets.Normalize(settings.EqualizerPreset);
         SubtitleStyle.Normalize(SubtitleStyle.Capture(settings)).Apply(settings);
         var subtitleProfiles = new Dictionary<string, SubtitleStyle>(StringComparer.OrdinalIgnoreCase);

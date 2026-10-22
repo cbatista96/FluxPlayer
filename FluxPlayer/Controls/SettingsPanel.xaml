@@ -805,15 +805,16 @@
                                 <Grid>
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                                     <StackPanel>
-                                        <TextBlock Text="Audio channels" Style="{StaticResource OptTitle}" />
-                                        <TextBlock Text="Output channel configuration" Style="{StaticResource OptSub}" />
+                                        <TextBlock Text="Channel routing" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Keep, mix, swap or isolate input channels" Style="{StaticResource OptSub}" />
                                     </StackPanel>
-                                    <ComboBox x:Name="AudioChannelsCombo" Grid.Column="1" Width="120" VerticalContentAlignment="Center">
+                                    <ComboBox x:Name="AudioChannelsCombo" Grid.Column="1" Width="170" VerticalContentAlignment="Center" AutomationProperties.Name="Audio channel routing">
+                                        <ComboBoxItem Content="Original" Tag="Original" />
                                         <ComboBoxItem Content="Mono" Tag="Mono" />
                                         <ComboBoxItem Content="Stereo" Tag="Stereo" />
-                                        <ComboBoxItem Content="2.1" Tag="2.1" />
-                                        <ComboBoxItem Content="5.1" Tag="5.1" />
-                                        <ComboBoxItem Content="7.1" Tag="7.1" />
+                                        <ComboBoxItem Content="Reverse stereo" Tag="ReverseStereo" />
+                                        <ComboBoxItem Content="Left only" Tag="Left" />
+                                        <ComboBoxItem Content="Right only" Tag="Right" />
                                     </ComboBox>
                                 </Grid>
                             </Border>

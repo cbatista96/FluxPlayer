@@ -578,8 +578,25 @@ internal static class Program
             return Task.CompletedTask;
         });
 
+        await Test("Channel routing preferences: native mapping, legacy migration and persistence", () =>
+        {
+            string folder = Path.Combine(Root, "channel-routing-" + Guid.NewGuid().ToString("N"));
+            var store = new SettingsService(folder);
+            foreach (var (mode, native) in new[] { ("Original", 0), ("Stereo", 1), ("ReverseStereo", 2), ("Left", 3), ("Right", 4), ("Mono", 7) })
+            {
+                Assert(AudioChannelRouting.NativeValue(mode) == native, "Pinned native channel value");
+                Assert(store.Save(new AppSettings { AudioChannels = mode }) && store.Load().AudioChannels == mode, "Persist routing choice");
+            }
+            foreach (string legacy in new[] { "2.1", "5.1", "7.1" })
+                Assert(store.Save(new AppSettings { AudioChannels = legacy }) && store.Load().AudioChannels == "Original", "Unimplemented legacy speaker layouts become output default");
+            Assert(AudioChannelRouting.Normalize(null) == "Stereo" && AudioChannelRouting.Normalize("invalid") == "Stereo", "Invalid preference fallback");
+            return Task.CompletedTask;
+        });
+
         // CI verifies managed services without requiring an interactive audio device.
         if (managedOnly) return;
+
+        await Test("Native channel routing: actual stereo, swap, mono, isolated channels and six-channel downmix", () => AudioRoutingChecks.VerifyAsync(Root));
 
         using var engine = new MediaService(hardwareDecoding: false, enableDiagnosticLogging: false);
         using var renderer = new VlcWpfRenderer(engine, new System.Windows.Controls.Image());

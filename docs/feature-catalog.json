@@ -282,9 +282,9 @@
   {
     "Id": "F0041",
     "Area": "Audio",
-    "Description": "Output device selection, audio tracks, channel options and audio delay.",
+    "Description": "Output device selection, audio tracks and delay, with native Original/mono/stereo/swap/left/right channel routing.",
     "Status": "implemented",
-    "Evidence": "MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools"
+    "Evidence": "MediaService.Audio and SettingsPanel; captured left/right tone components and six-channel PCM downmix, native acknowledgement, startup, paused settings changes, output selection, source changes and persistence. Speaker layouts are tracked separately."
   },
   {
     "Id": "F0042",
@@ -733,5 +733,12 @@
     "Description": "Independent native 15-band ISO graphic EQ from 25 Hz to 16 kHz, with factory presets and complete output-profile persistence.",
     "Status": "implemented",
     "Evidence": "Native multiband module and EqualizerLayout; measured PCM at 25 Hz, 1 kHz and 16 kHz, flat/gain/headroom checks, live layout round trip, persisted 15-band profiles and visual review of all controls."
+  },
+  {
+    "Id": "F0106",
+    "Area": "Audio",
+    "Description": "Explicit 2.1/5.1/7.1 speaker layouts, arbitrary channel matrices, per-channel gain/delay and verified physical surround output.",
+    "Status": "pending",
+    "Evidence": "Earlier speaker-layout choices did not configure native output and now migrate to Original. Basic channel routing and a six-channel PCM-to-stereo downmix are verified separately."
   }
 ]
