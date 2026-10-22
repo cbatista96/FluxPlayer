@@ -792,6 +792,7 @@
                                     <ComboBox x:Name="SnapshotFormatCombo" Grid.Column="1" Width="100" VerticalContentAlignment="Center">
                                         <ComboBoxItem Content="PNG" Tag="PNG" />
                                         <ComboBoxItem Content="JPG" Tag="JPG" />
+                                        <ComboBoxItem Content="BMP" Tag="BMP" />
                                     </ComboBox>
                                 </Grid>
                             </Border>

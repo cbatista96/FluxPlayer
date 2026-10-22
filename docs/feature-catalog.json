@@ -431,7 +431,7 @@
     "Area": "Library and playlists",
     "Description": "Playlist reorder, clear, play-next queue and persistence.",
     "Status": "implemented",
-    "Evidence": "LibraryService, LibraryQuery, PlaylistService and LibraryWindow"
+    "Evidence": "MainViewModel / playlist services; restored selection skips missing files and Play starts the saved queue; native regression coverage."
   },
   {
     "Id": "F0063",
@@ -527,9 +527,9 @@
   {
     "Id": "F0076",
     "Area": "Video and subtitles",
-    "Description": "Video snapshots.",
+    "Description": "Native video snapshots with actual PNG/JPEG/BMP encoding, unique names and overwrite protection.",
     "Status": "implemented",
-    "Evidence": "MediaService, MainWindow.Features, SubtitleDocument and ThumbnailService"
+    "Evidence": "MediaService.Snapshots; native file signature, cancellation and temporary cleanup tests."
   },
   {
     "Id": "F0077",
@@ -583,9 +583,9 @@
   {
     "Id": "F0084",
     "Area": "Video and subtitles",
-    "Description": "Scheduled snapshots.",
-    "Status": "pending",
-    "Evidence": ""
+    "Description": "Explicit scheduled snapshot jobs with interval, image limit, format, folder, progress and stop.",
+    "Status": "implemented",
+    "Evidence": "SnapshotSchedule / SnapshotScheduleWindow; sequential/cancellation tests, native capture and manual two-image completion review."
   },
   {
     "Id": "F0085",
@@ -677,5 +677,19 @@
     "Description": "Remove selected records from the library without deleting media files.",
     "Status": "implemented",
     "Evidence": "LibraryService.RemoveEntriesAsync / Library tools / duplicate results; media preservation and reopened-index tests."
+  },
+  {
+    "Id": "F0098",
+    "Area": "Audio",
+    "Description": "Create and edit CUE sheets with track titles, artists, sources, ordering and 75-fps start positions.",
+    "Status": "implemented",
+    "Evidence": "CueSheet.Write / CueSheetEditorWindow; frame and multi-file regression tests, plus manual edit/save verification with original preservation."
+  },
+  {
+    "Id": "F0099",
+    "Area": "Audio",
+    "Description": "Preserve and edit advanced CUE directives such as CD-TEXT, PREGAP and additional indexes.",
+    "Status": "pending",
+    "Evidence": ""
   }
 ]

@@ -43,6 +43,10 @@ The audio settings include output device selection, ReplayGain options, audio de
 
 For local lyrics, place an LRC or text file beside the media with the same base name. An LRC file displays synchronized lines. A matching CUE sheet provides track chapters where supported.
 
+**Audio and video tools > Create or edit CUE sheet** opens the track editor. Add source files, add the current playback position, or load an existing sheet. Edit titles, artists, source paths and `minutes:seconds:frames` start positions in the table; use Move up/down to arrange tracks. There are 75 frames per second and a maximum of 99 tracks. Play selected track opens its source at the indicated position.
+
+Save as suggests an edited copy. The writer uses relative source paths, checks increasing positions within each source and rejects invalid text or an accidental overwrite. This editor writes audio `FILE`, `TRACK`, `TITLE`, `PERFORMER` and `INDEX 01` entries. Advanced directives such as CD-TEXT, PREGAP and other indexes are not retained, so keep the original when editing a more complex sheet.
+
 ## Library and smart playlists
 
 Open the library from the title bar. Add a media folder to scan its files and watch for changes. Select an entry to play it, mark favorites and save searches as smart playlists. Library data can be exported to and imported from a JSON backup.
@@ -58,6 +62,8 @@ favorite:true plays:>=3 added:>=2026-01-01
 Fields include `title`, `artist`, `album`, `genre`, `format`, `folder`, `duration`, `plays`, `size`, `added` and `favorite`. Duration uses seconds or `minutes:seconds`; size uses MiB; dates use `yyyy-MM-dd`. Existing saved queries using legacy localized aliases remain readable.
 
 Playlists can be imported or exported as M3U/M3U8, PLS and XSPF. Relative file entries are resolved against the playlist folder.
+
+When playlist persistence is enabled, reopening FluxPlayer restores its queue and selected item without starting playback. Play then starts the restored selection; unavailable files are skipped when restoring.
 
 **Library tools > Restore backup (merge)** validates a FluxPlayer JSON backup before merging it. Existing favorites, higher play counts and analyzed metadata are retained. Folder monitoring is restored only if you select that option and the folders are available. Unsupported or invalid backup records are rejected before the merge starts.
 
@@ -83,6 +89,10 @@ The Settings page shows the current profile's settings path. Its Open configurat
 Load external subtitles or choose an embedded track from the video controls. Adjust subtitle and audio delay when timing differs from the picture. External subtitle text search supports SRT, VTT and ASS and lets you jump to a matching cue. Automatic subtitle downloads, OCR and bilingual subtitles remain planned.
 
 Bookmarks, snapshots and A–B clip export are available through the video tools and context menu. Copy-based clip export depends on container and keyframe boundaries; transcoding takes additional time.
+
+**F12** saves a native video frame in the selected PNG, JPEG or BMP format. Captures use unique names and refuse to replace an existing image. Image encoding and file I/O run outside the UI dispatcher. Capturing adds processing and storage work while the request runs.
+
+**Audio and video tools > Scheduled snapshots** starts an explicit capture job. Choose an interval, image limit, format and folder, then select Start capture job. It captures only while video is playing, skips paused/audio-only/busy intervals, and stops at the image limit. Stop or close the window to cancel; completed images remain available. No capture job runs merely because the tool is installed or its window is opened.
 
 ## Convert audio
 

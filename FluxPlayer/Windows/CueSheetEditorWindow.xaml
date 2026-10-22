@@ -1,0 +1,53 @@
+<ui:FluentWindow x:Class="FluxPlayer.Windows.CueSheetEditorWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    Title="CUE sheet editor · FluxPlayer" Width="1080" Height="660" MinWidth="820" MinHeight="500"
+    WindowStartupLocation="CenterOwner" ExtendsContentIntoTitleBar="True">
+    <Grid Margin="24,20,24,20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <StackPanel Margin="0,0,0,18">
+            <TextBlock Text="CUE sheet editor" FontSize="25" FontWeight="SemiBold"/>
+            <TextBlock Text="Create and edit audio tracks. Times use minutes:seconds:frames at 75 frames per second."
+                Margin="0,6,0,0" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+        </StackPanel>
+        <WrapPanel Grid.Row="1" Margin="0,0,0,10">
+            <Button Content="Add files…" Click="AddFiles_Click" Padding="14,8" Margin="0,0,8,8"/>
+            <Button Content="Add current position" Click="AddCurrent_Click" Padding="14,8" Margin="0,0,8,8"/>
+            <Button Content="Move up" Click="MoveUp_Click" Padding="14,8" Margin="0,0,8,8"/>
+            <Button Content="Move down" Click="MoveDown_Click" Padding="14,8" Margin="0,0,8,8"/>
+            <Button Content="Remove row" Click="Remove_Click" Padding="14,8" Margin="0,0,8,8"/>
+        </WrapPanel>
+        <DataGrid x:Name="TracksGrid" Grid.Row="2" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
+            CanUserSortColumns="False" CanUserReorderColumns="False" SelectionMode="Single" SelectionUnit="FullRow"
+            RowHeight="40" HeadersVisibility="Column" GridLinesVisibility="None"
+            EnableRowVirtualization="True" EnableColumnVirtualization="True" AutomationProperties.Name="CUE tracks">
+            <DataGrid.Resources>
+                <Style TargetType="TextBlock">
+                    <Setter Property="Margin" Value="6,0"/>
+                    <Setter Property="VerticalAlignment" Value="Center"/>
+                    <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                </Style>
+            </DataGrid.Resources>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="#" Binding="{Binding Number}" IsReadOnly="True" Width="44"/>
+                <DataGridTextColumn Header="Start (mm:ss:ff)" Binding="{Binding Timestamp, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" Width="130"/>
+                <DataGridTextColumn Header="Title" Binding="{Binding Title, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" Width="2*" MinWidth="140"/>
+                <DataGridTextColumn Header="Artist" Binding="{Binding Artist, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" Width="*" MinWidth="100"/>
+                <DataGridTextColumn Header="Source file" Binding="{Binding Source, UpdateSourceTrigger=LostFocus, ValidatesOnDataErrors=True}" Width="3*" MinWidth="180"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <StackPanel Grid.Row="3" Margin="0,16,0,0">
+            <WrapPanel>
+                <Button Content="Load CUE…" Click="Load_Click" Padding="16,8" Margin="0,0,8,8"/>
+                <Button Content="Play selected track" Click="Play_Click" Padding="16,8" Margin="0,0,8,8"/>
+                <Button Content="Save as…" Click="Save_Click" Padding="20,8" Margin="0,0,0,8"/>
+            </WrapPanel>
+            <TextBlock Text="Saves audio FILE, TRACK, TITLE, PERFORMER and INDEX 01 entries. Other CUE directives are not retained; save an edited copy to keep the original."
+                TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+            <TextBlock x:Name="StatusText" Text="Add local files or load a CUE sheet. Up to 99 tracks." TextWrapping="Wrap" Margin="0,8,0,0"/>
+        </StackPanel>
+    </Grid>
+</ui:FluentWindow>

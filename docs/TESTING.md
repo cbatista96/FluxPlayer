@@ -22,6 +22,8 @@ The managed suite covers:
 9. Backup restoration, repeated merge behavior, preserved statistics, opt-in folder monitoring, invalid input rejection and index-only removal.
 10. Duplicate hashing, stale indexed sizes, equal-size different content, missing files, cancellation and preservation of originals.
 11. Portable/named profile parsing, isolated settings, option validation and persistence of unset window geometry.
+12. CUE creation/editing, all 75 frame positions, multiple sources, Unicode, relative paths, invalid output rejection and overwrite protection.
+13. Bounded snapshot scheduling, skipped intervals, non-overlap and cancellation before capture.
 
 GitHub Actions builds on Windows and runs these checks without publishing artifacts or creating releases. Its test invocation deliberately avoids native playback, which requires an interactive output environment.
 
@@ -34,6 +36,12 @@ dotnet run --project FluxPlayer.Tests/FluxPlayer.Tests.csproj -c Release
 Run in a Windows desktop session. The full suite also checks decoded-track detection independent of file extension, transport behavior and real native playback. When FFmpeg is found, it additionally checks canceled job cleanup and converts eight profiles, then reads metadata and plays the outputs with LibVLC. Tag saving, artwork and lyric sidecar paths are exercised with synthetic inputs.
 
 FFmpeg-dependent checks are conditional. A passing run without FFmpeg does not validate conversion. A managed-only run does not validate the native renderer or audio output. Results are written locally to `session-state/tests/results.json` and are not checked into Git.
+
+## Native transport coverage
+
+The native transport scenario also verifies actual PNG/JPEG/BMP file signatures, snapshot overwrite refusal and temporary cleanup, two scheduled native frames, audio/subtitle offset values and persistence, and playback from a restored queue with missing files removed. Frame stepping compares sampled pixels while playback remains paused; LibVLC's reported time is not guaranteed to advance on every single frame.
+
+Rapid source switching or teardown can emit native diagnostics on stderr about unsupported on-top behavior or prevented buffer deadlocks even when assertions pass. A passing regression run is not a complete decoder stress test or hardware/performance certification.
 
 ## Manual UI verification
 

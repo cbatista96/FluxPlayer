@@ -1,0 +1,48 @@
+<ui:FluentWindow x:Class="FluxPlayer.Windows.SnapshotScheduleWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    Title="Scheduled snapshots · FluxPlayer" Width="700" Height="510" MinWidth="620" MinHeight="480"
+    WindowStartupLocation="CenterOwner" ExtendsContentIntoTitleBar="True">
+    <Grid Margin="24,20,24,20">
+        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+        <StackPanel Margin="0,0,0,22">
+            <TextBlock Text="Scheduled snapshots" FontSize="25" FontWeight="SemiBold"/>
+            <TextBlock Text="Capture native video frames while video is playing. The job stops at the selected limit or when you close this window."
+                TextWrapping="Wrap" Margin="0,6,0,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+        </StackPanel>
+        <StackPanel x:Name="OptionsPanel" Grid.Row="1">
+            <Grid Margin="0,0,0,18">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                <StackPanel Margin="0,0,16,0">
+                    <TextBlock Text="Interval (seconds)" Margin="0,0,0,7"/>
+                    <TextBox x:Name="IntervalBox" Text="30" MaxLength="4" Padding="10,7" AutomationProperties.Name="Capture interval in seconds"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Margin="0,0,16,0">
+                    <TextBlock Text="Maximum images" Margin="0,0,0,7"/>
+                    <TextBox x:Name="MaximumBox" Text="100" MaxLength="5" Padding="10,7" AutomationProperties.Name="Maximum image count"/>
+                </StackPanel>
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="Format" Margin="0,0,0,7"/>
+                    <ComboBox x:Name="FormatCombo" SelectedIndex="0" Padding="10,7" AutomationProperties.Name="Snapshot image format">
+                        <ComboBoxItem Content="PNG" Tag="png"/><ComboBoxItem Content="JPEG" Tag="jpg"/><ComboBoxItem Content="BMP" Tag="bmp"/>
+                    </ComboBox>
+                </StackPanel>
+            </Grid>
+            <TextBlock Text="Save folder" Margin="0,0,0,7"/>
+            <Grid>
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                <TextBox x:Name="FolderBox" Padding="10,7" AutomationProperties.Name="Snapshot save folder"/>
+                <Button Grid.Column="1" Content="Browse…" Click="Browse_Click" Padding="16,8" Margin="10,0,0,0"/>
+            </Grid>
+        </StackPanel>
+        <StackPanel Grid.Row="3" Margin="0,20,0,0">
+            <ProgressBar x:Name="CaptureProgress" Height="5" Margin="0,0,0,14"/>
+            <StackPanel Orientation="Horizontal">
+                <Button x:Name="StartButton" Content="Start capture job" Click="Start_Click" Padding="20,9"/>
+                <Button x:Name="StopButton" Content="Stop" Click="Stop_Click" IsEnabled="False" Padding="20,9" Margin="10,0,0,0"/>
+            </StackPanel>
+            <TextBlock x:Name="StatusText" Text="Ready. No capture job is running." TextWrapping="Wrap" Margin="0,12,0,0"/>
+        </StackPanel>
+    </Grid>
+</ui:FluentWindow>

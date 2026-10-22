@@ -95,6 +95,49 @@ internal static class Program
             var tracks = CueSheet.Read(cue); Assert(tracks.Length == 2 && tracks[1].StartMs == 3493 && tracks[1].Artist == "Artist", "CUE"); return Task.CompletedTask;
         });
 
+        await Test("CUE writing: frame round trips, multiple sources, editing, validation and original preservation", () =>
+        {
+            string folder = Path.Combine(Root, "cue-editor-" + Guid.NewGuid().ToString("N")); Directory.CreateDirectory(folder);
+            string secondSource = Path.Combine(folder, "second ñ.wav"); File.Copy(wav, secondSource);
+            var tracks = new[]
+            {
+                new CueTrack(wav, 1, "Opening ñ", "Artist", 0),
+                new CueTrack(wav, 2, "Second", "Artist", 3493),
+                new CueTrack(secondSource, 3, "Another file", "Artist", 0)
+            };
+            string path = Path.Combine(folder, "edited.cue"); CueSheet.Write(path, tracks);
+            var reopened = CueSheet.Read(path);
+            Assert(reopened.SequenceEqual(tracks), "Unicode and multi-file round trip");
+            Assert(!File.ReadAllText(path).Contains(wav, StringComparison.Ordinal), "Relative source paths");
+            bool refused = false; try { CueSheet.Write(path, tracks); } catch (IOException) { refused = true; }
+            Assert(refused && CueSheet.Read(path).SequenceEqual(tracks), "Refuse accidental overwrite");
+            var edited = tracks.Select(t => t with { Title = "Edited " + t.Title }).ToArray();
+            CueSheet.Write(path, edited, true); Assert(CueSheet.Read(path).SequenceEqual(edited), "Explicit replacement");
+            foreach (int frame in Enumerable.Range(0, 75))
+            {
+                string timestamp = $"02:03:{frame:00}";
+                Assert(CueSheet.TryParseTimestamp(timestamp, out long ms) && CueSheet.FormatTimestamp(ms) == timestamp, "Frame precision");
+            }
+            foreach (string timestamp in new[] { "00:60:00", "00:00:75", "-1:00:00", "x:00:00", "00:00" })
+                Assert(!CueSheet.TryParseTimestamp(timestamp, out _), "Invalid timestamp: " + timestamp);
+            foreach (var invalid in new[]
+            {
+                new[] { tracks[0], tracks[1] with { StartMs = 1 } },
+                new[] { tracks[0], tracks[1] with { StartMs = 0 } },
+                new[] { tracks[0] with { Title = "Injected\nTRACK 99 AUDIO" } },
+                new[] { tracks[0] with { Title = "Unescaped \" quote" } }
+            })
+            {
+                refused = false; try { CueSheet.Write(Path.Combine(folder, "invalid.cue"), invalid); } catch (InvalidDataException) { refused = true; }
+                Assert(refused && !File.Exists(Path.Combine(folder, "invalid.cue")), "Reject invalid output before writing");
+            }
+            string missing = Path.Combine(folder, "missing.cue");
+            File.WriteAllText(missing, "FILE \"missing.wav\" WAVE\nTRACK 01 AUDIO\nTITLE \"Repair me\"\nINDEX 01 00:00:00");
+            Assert(CueSheet.Read(missing).Length == 0 && CueSheet.Read(missing, false).Single().Title == "Repair me", "Editor retains unavailable references");
+            Assert(File.Exists(wav) && File.Exists(secondSource), "Audio sources preserved");
+            return Task.CompletedTask;
+        });
+
         await Test("Library queries: fields, phrases, exclusions, duration, size and dates", () =>
         {
             var item = new LibraryEntry
@@ -244,6 +287,30 @@ internal static class Program
             return Task.CompletedTask;
         });
 
+        await Test("Scheduled capture: limit, skipped intervals, non-overlap and cancellation", async () =>
+        {
+            int active = 0, maximumActive = 0, attempts = 0;
+            var reports = new List<SnapshotScheduleProgress>();
+            int count = await SnapshotSchedule.RunAsync(TimeSpan.FromMilliseconds(10), 3, async token =>
+            {
+                int running = Interlocked.Increment(ref active); maximumActive = Math.Max(maximumActive, running);
+                try
+                {
+                    await Task.Delay(25, token);
+                    int attempt = ++attempts; return attempt == 1 ? null : "frame-" + attempt + ".png";
+                }
+                finally { Interlocked.Decrement(ref active); }
+            }, new InlineProgress<SnapshotScheduleProgress>(reports.Add));
+            Assert(count == 3 && attempts == 4 && maximumActive == 1, "Bounded sequential capture");
+            Assert(reports.Last() is { Captured: 3, Maximum: 3, Skipped: 1 }, "Skipped intervals do not consume the image limit");
+            using var cancellation = new CancellationTokenSource();
+            int calls = 0;
+            var job = SnapshotSchedule.RunAsync(TimeSpan.FromSeconds(5), 1, _ => { calls++; return Task.FromResult<string?>("unused"); }, token: cancellation.Token);
+            cancellation.Cancel(); bool canceled = false;
+            try { await job; } catch (OperationCanceledException) { canceled = true; }
+            Assert(canceled && calls == 0, "Cancel waiting job without capture");
+        });
+
         // CI verifies managed services without requiring an interactive audio device.
         if (managedOnly) return;
 
@@ -309,6 +376,49 @@ internal static class Program
                 var vm = new MainViewModel(engine, new SettingsService(Path.Combine(Root, "vm-settings")), new AppSettings { Volume = 0, AutoPlay = true, FileOpenBehavior = "OpenOnlyOne", RememberPlaylist = false }, library);
                 vm.AddFilesToPlaylist(new[] { video }, true);
                 await Until(() => Task.FromResult(vm.IsPlaying && vm.ActiveMode == PlayerMode.Video), 8000);
+                await Until(() => Task.FromResult(renderer.CurrentBitmap != null && engine.MediaPlayer.VoutCount > 0 && engine.GetTime() > 50), 5000);
+                string captureFolder = Path.Combine(Root, "snapshots-" + Guid.NewGuid().ToString("N"));
+                foreach (string extension in new[] { ".png", ".jpg", ".bmp" })
+                {
+                    string snapshot = Path.Combine(captureFolder, "video" + extension);
+                    await engine.CaptureSnapshotAsync(snapshot);
+                    var signature = File.ReadAllBytes(snapshot).Take(8).ToArray();
+                    Assert(extension switch
+                    {
+                        ".png" => signature.SequenceEqual(new byte[] { 137, 80, 78, 71, 13, 10, 26, 10 }),
+                        ".jpg" => signature[0] == 255 && signature[1] == 216 && signature[2] == 255,
+                        _ => signature[0] == 'B' && signature[1] == 'M'
+                    }, "Real snapshot encoding " + extension);
+                    bool refused = false; try { await engine.CaptureSnapshotAsync(snapshot); } catch (IOException) { refused = true; }
+                    Assert(refused, "Snapshot overwrite protection");
+                }
+                using (var canceledSnapshot = new CancellationTokenSource())
+                {
+                    canceledSnapshot.Cancel(); bool canceled = false;
+                    try { await engine.CaptureSnapshotAsync(Path.Combine(captureFolder, "canceled.png"), canceledSnapshot.Token); }
+                    catch (OperationCanceledException) { canceled = true; }
+                    Assert(canceled && !File.Exists(Path.Combine(captureFolder, "canceled.png")), "Snapshot cancellation");
+                }
+                Assert(!Directory.EnumerateFiles(captureFolder).Any(path => Path.GetFileName(path).StartsWith(".flux-", StringComparison.Ordinal)), "Snapshot temporary cleanup");
+                int scheduledIndex = 0;
+                int scheduledCount = await SnapshotSchedule.RunAsync(TimeSpan.FromMilliseconds(100), 2,
+                    async token => await engine.CaptureSnapshotAsync(Path.Combine(captureFolder, $"scheduled-{++scheduledIndex}.png"), token));
+                Assert(scheduledCount == 2 && File.Exists(Path.Combine(captureFolder, "scheduled-2.png")), "Scheduled native frames");
+                vm.AudioDelayMs = 150; vm.SubtitleDelayMs = -250;
+                Assert(engine.GetAudioDelay() == 150_000 && engine.MediaPlayer.SpuDelay == -250_000, "Native A/V offsets");
+                vm.SaveSettings();
+                var persistedOffsets = new SettingsService(Path.Combine(Root, "vm-settings")).Load();
+                Assert(persistedOffsets.AudioDelay == 150 && persistedOffsets.SubtitleDelay == -250, "A/V offsets persisted");
+                Assert(engine.PlaybackSettings.AudioDelay == 150 && engine.PlaybackSettings.SubtitleDelay == -250, "Live settings updated after save");
+                vm.ResetAudioDelayCommand.Execute(null); vm.ResetSubtitleDelayCommand.Execute(null);
+                vm.PlayPauseCommand.Execute(null); await Until(() => Task.FromResult(!vm.IsPlaying), 2000);
+                await Task.Delay(100);
+                var beforeFrame = new byte[48 * 27 * 3]; var afterFrame = new byte[beforeFrame.Length];
+                Assert(renderer.TrySampleFrame(beforeFrame, 48, 27), "Readable paused frame");
+                vm.FrameForwardCommand.Execute(null);
+                await Until(() => Task.FromResult(renderer.TrySampleFrame(afterFrame, 48, 27) && !beforeFrame.SequenceEqual(afterFrame)), 2000);
+                Assert(!engine.IsPlaying, "Frame stepping remains paused");
+                vm.PlayPauseCommand.Execute(null); await Until(() => Task.FromResult(vm.IsPlaying), 2000);
                 vm.AddFilesToPlaylist(new[] { wav }, true);
                 await Until(() => Task.FromResult(vm.IsPlaying && vm.ActiveMode == PlayerMode.Audio), 8000);
                 await Task.Delay(700); Assert(!vm.IsBuffering, "Audio must not wait for video output");
@@ -332,6 +442,17 @@ internal static class Program
                 vm.SeekToMs(5000); await Until(() => Task.FromResult(engine.GetTime() > 4500), 3000);
                 vm.ToggleAbLoopCommand.Execute(null); Assert(vm.AbLoopStage == 2 && vm.LoopB > vm.LoopA, "Loop B");
                 vm.ToggleAbLoopCommand.Execute(null); Assert(vm.AbLoopStage == 0, "Clear loop");
+                vm.ClearPlaylistCommand.Execute(null);
+                var restoredSettings = new SettingsService(Path.Combine(Root, "vm-settings")).Load();
+                restoredSettings.RememberPlaylist = true;
+                restoredSettings.SavedPlaylist = new() { Path.Combine(Root, "missing-previous.wav"), video, wav };
+                restoredSettings.SavedPlaylistIndex = 2;
+                new SettingsService(Path.Combine(Root, "vm-settings")).Save(restoredSettings);
+                vm.ReloadSettingsFromDisk();
+                vm.RestorePlaylist();
+                Assert(!vm.HasMedia && vm.Playlist.Count == 2 && vm.CurrentIndex == 1, "Restored selection skips missing entries");
+                vm.PlayPauseCommand.Execute(null);
+                await Until(() => Task.FromResult(vm.IsPlaying && vm.CurrentItem?.FilePath == wav), 5000);
                 vm.StopCommand.Execute(null); await vm.ShutdownAsync();
             });
         }
@@ -341,6 +462,11 @@ internal static class Program
     {
         var watch = Stopwatch.StartNew();
         while (!await predicate()) { if (watch.ElapsedMilliseconds > timeoutMs) throw new TimeoutException(); await Task.Delay(80); }
+    }
+
+    private sealed class InlineProgress<T>(Action<T> report) : IProgress<T>
+    {
+        public void Report(T value) => report(value);
     }
 
     private static void WriteWave(string path, int seconds)

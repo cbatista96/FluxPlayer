@@ -240,7 +240,13 @@ public partial class MainViewModel
         if (!_settings.RememberPlaylist || Playlist.Count > 0) return;
 
         var paths = _settings.SavedPlaylist.Where(p => File.Exists(p) || MediaFormats.IsNetwork(p)).ToArray();
-        if (paths.Length > 0) AddFilesToPlaylist(paths);
+        if (paths.Length > 0)
+        {
+            string? selected = _settings.SavedPlaylist.ElementAtOrDefault(_settings.SavedPlaylistIndex);
+            AddFilesToPlaylist(paths);
+            int index = Array.FindIndex(paths, path => string.Equals(path, selected, StringComparison.OrdinalIgnoreCase));
+            CurrentIndex = Math.Max(0, index);
+        }
     }
 
     public async Task ShutdownAsync()

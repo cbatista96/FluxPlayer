@@ -1594,6 +1594,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         _vm.Volume = settings.Volume;
 
         _vm.AudioDelayMs = settings.AudioDelay;
+        _vm.SubtitleDelayMs = settings.SubtitleDelay;
 
         _vm.PlaybackRate = settings.PlaybackRate;
         SelectSpeedInCombo(settings.PlaybackRate);

@@ -12,6 +12,8 @@ namespace FluxPlayer;
 public partial class MainWindow
 {
     private LibraryWindow? _libraryWindow;
+    private CueSheetEditorWindow? _cueEditorWindow;
+    private SnapshotScheduleWindow? _snapshotScheduleWindow;
     private bool _audioLayoutApplied;
     private Size _videoModeSize = new(1280, 760);
     private int _videoRotation;
@@ -156,6 +158,20 @@ public partial class MainWindow
         new ConverterWindow(this, _vm, _vm.Playlist.Select(p => p.FilePath).ToArray()).Show();
     private void SearchSubtitlesButton_Click(object sender, RoutedEventArgs e) => MediaToolsWindows.ShowSubtitleSearch(this, _vm);
     private void OpenCueButton_Click(object sender, RoutedEventArgs e) => MediaToolsWindows.ShowCueSheet(this, _vm);
+    private void EditCueButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_cueEditorWindow != null) { _cueEditorWindow.Activate(); return; }
+        _cueEditorWindow = new CueSheetEditorWindow(this, _vm);
+        _cueEditorWindow.Closed += (_, _) => _cueEditorWindow = null;
+        _cueEditorWindow.Show();
+    }
+    private void ScheduledSnapshots_Click(object sender, RoutedEventArgs e)
+    {
+        if (_snapshotScheduleWindow != null) { _snapshotScheduleWindow.Activate(); return; }
+        _snapshotScheduleWindow = new SnapshotScheduleWindow(this, _vm);
+        _snapshotScheduleWindow.Closed += (_, _) => _snapshotScheduleWindow = null;
+        _snapshotScheduleWindow.Show();
+    }
     private void RotateVideo_Click(object sender, RoutedEventArgs e) { _videoRotation = (_videoRotation + 90) % 360; ApplyImageOrientation(); }
     private void MirrorVideo_Click(object sender, RoutedEventArgs e) { _videoMirrored = !_videoMirrored; ApplyImageOrientation(); }
     private void ResetOrientation_Click(object sender, RoutedEventArgs e) { _videoRotation = 0; _videoMirrored = false; ApplyImageOrientation(); }

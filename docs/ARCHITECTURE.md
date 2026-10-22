@@ -42,6 +42,12 @@ This presentation path avoids full-frame managed copies on the UI dispatcher. It
 
 These are implementation choices, not a guarantee of zero performance cost. Compare representative workloads before and after changes: cold/warm startup, time to first audio/frame, idle CPU, playback CPU, memory, seek responsiveness and large-library interaction. Record the machine and media details with measurements.
 
+## Snapshot jobs
+
+Capture requests are serialized and run outside the UI dispatcher. LibVLC 3 forces native snapshots to PNG, so JPEG/BMP output is explicitly encoded after the native completion event; changing a filename extension alone is insufficient. See the [upstream implementation](https://github.com/videolan/vlc/blob/3.0.21/lib/video.c#L136). Completion continuations run asynchronously, temporary files are cleaned up, and publication refuses to replace an existing image. Engine disposal cancels pending work before releasing native objects.
+
+Scheduled captures are explicit bounded jobs. Each attempt completes before another delay starts, so slow encoding cannot accumulate queued requests. Paused, audio-only and busy playback are skipped. A schedule has no timer until the user starts it and ends when its image limit is reached or its window closes.
+
 ## Data and compatibility
 
 Settings and library files belong to the current Windows user. Write changes through the service layer and preserve migration paths. Legacy preset names and query aliases remain accepted as compatibility data even though the public interface and documentation are English.

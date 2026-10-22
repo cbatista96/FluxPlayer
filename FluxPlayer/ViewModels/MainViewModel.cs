@@ -135,6 +135,7 @@ public partial class MainViewModel : ObservableObject
         PlaybackRate = _settings.PlaybackRate;
         IsPlaylistVisible = _settings.ShowPlaylist;
         AudioDelayMs = _settings.AudioDelay;
+        SubtitleDelayMs = _settings.SubtitleDelay;
         if (!string.IsNullOrEmpty(_settings.AspectRatio))
             AspectRatio = _settings.AspectRatio;
         if (_settings.ResumePositions != null)
@@ -188,7 +189,7 @@ public partial class MainViewModel : ObservableObject
             InitialDirectory = GetInitialOpenDirectory()
         };
 
-        if (dialog.ShowDialog() == true)
+        if (ShowFileDialog(dialog) == true)
         {
             _settings.LastDirectory = Path.GetDirectoryName(dialog.FileName) ?? "";
 
@@ -333,7 +334,12 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void PlayPause()
     {
-        if (!HasMedia) { OpenFile(); return; }
+        if (!HasMedia)
+        {
+            if (Playlist.Count > 0) PlayAt(Math.Clamp(CurrentIndex, 0, Playlist.Count - 1));
+            else OpenFile();
+            return;
+        }
         _mediaService.TogglePlayPause();
     }
 
@@ -598,7 +604,7 @@ public partial class MainViewModel : ObservableObject
             Title = "Load external subtitle",
             Filter = "Subtitles|*.srt;*.ass;*.ssa;*.vtt;*.sub|All files|*.*"
         };
-        if (dialog.ShowDialog() == true)
+        if (ShowFileDialog(dialog) == true)
             _mediaService.LoadSubtitle(dialog.FileName);
     }
 
@@ -681,20 +687,20 @@ public partial class MainViewModel : ObservableObject
     public event EventHandler<AppTheme>? ThemeChangeRequested;
 
     [RelayCommand]
-    private void TakeSnapshot()
+    private async Task TakeSnapshot()
     {
-        if (!HasMedia) return;
+        if (!HasMedia || IsAudioMode || _mediaService.IsSnapshotBusy) return;
         var folder = string.IsNullOrEmpty(_settings.SnapshotFolder)
             ? Environment.GetFolderPath(Environment.SpecialFolder.MyPictures)
             : _settings.SnapshotFolder;
         var ext = _settings.SnapshotFormat?.ToLowerInvariant() ?? "png";
-        var filename = $"FluxPlayer_{DateTime.Now:yyyyMMdd_HHmmss}.{ext}";
+        var filename = $"FluxPlayer_{DateTime.Now:yyyyMMdd_HHmmss_fff}_{Guid.NewGuid().ToString("N")[..8]}.{ext}";
         var fullPath = Path.Combine(folder, filename);
         bool ok;
         try
         {
-            Directory.CreateDirectory(folder);
-            ok = _mediaService.TakeSnapshot(fullPath);
+            await _mediaService.CaptureSnapshotAsync(fullPath);
+            ok = true;
         }
         catch
         {
@@ -1041,12 +1047,14 @@ public partial class MainViewModel : ObservableObject
         _settings.Shuffle = Shuffle;
         _settings.PlaybackRate = PlaybackRate;
         _settings.AudioDelay = (int)AudioDelayMs;
+        _settings.SubtitleDelay = (int)SubtitleDelayMs;
         _settings.ShowPlaylist = IsPlaylistVisible;
         _settings.AspectRatio = AspectRatio;
         _settings.RecentFiles = RecentFilesList.Take(_settings.MaxRecentFiles).ToList();
         _settings.PlayerModePreference = ModePreference;
         _settings.SavedPlaylist = _settings.RememberPlaylist ? Playlist.Select(p => p.FilePath).Take(PlaylistService.MaxEntries).ToList() : new();
         _settings.SavedPlaylistIndex = CurrentIndex;
+        _mediaService.PlaybackSettings = _settings;
         _settingsService.Save(_settings);
     }
 
@@ -1156,7 +1164,7 @@ public partial class MainViewModel : ObservableObject
             Title = "Open playlist",
             Filter = "Playlists|*.m3u;*.m3u8;*.pls;*.xspf|All files|*.*"
         };
-        if (dialog.ShowDialog() == true)
+        if (ShowFileDialog(dialog) == true)
             LoadPlaylistFromFile(dialog.FileName);
     }
 
@@ -1180,7 +1188,7 @@ public partial class MainViewModel : ObservableObject
             Filter = "UTF-8 playlist|*.m3u8|M3U playlist|*.m3u|PLS playlist|*.pls|XSPF playlist|*.xspf",
             FileName = "FluxPlayer.m3u8"
         };
-        if (dialog.ShowDialog() == true)
+        if (ShowFileDialog(dialog) == true)
         {
             try { PlaylistService.Write(dialog.FileName, Playlist); }
             catch (Exception e) when (e is IOException or UnauthorizedAccessException)
@@ -1237,6 +1245,9 @@ public partial class MainViewModel : ObservableObject
     public bool TryRecoverVideoOutput() => _mediaService.TryRecoverVideoOutput();
 
     public event EventHandler<string>? ErrorOccurred;
+
+    private static bool? ShowFileDialog(CommonDialog dialog) => Application.Current?.MainWindow is Window owner
+        ? dialog.ShowDialog(owner) : dialog.ShowDialog();
 
     private void OnEncounteredError(object? sender, EventArgs e)
     {

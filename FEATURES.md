@@ -1,12 +1,12 @@
 # Feature checklist
 
-**70 implemented · 27 pending · 97 tracked capabilities.**
+**72 implemented · 27 pending · 99 tracked capabilities.**
 
 Each capability appears exactly once. Completing it moves the same stable ID from Pending to Implemented. A setting or catalog entry alone does not complete a feature. Source references describe the implementation; validation limits are documented in [Testing](docs/TESTING.md).
 
 Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Sync-PublicFeatures.ps1`; CI rejects an outdated checklist.
 
-## Implemented (70)
+## Implemented (72)
 
 ### Workspaces and interface
 
@@ -58,6 +58,7 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [x] **F0043** Optional FFmpeg conversion to FLAC, WAV, MP3, Opus, Vorbis, AAC, ALAC and WavPack. — MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools
 - [x] **F0044** Sequential conversion, progress, cancellation and optional loudness normalization. — MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools
 - [x] **F0045** Conversion writes to a temporary file and refuses to overwrite an existing destination. — MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools
+- [x] **F0098** Create and edit CUE sheets with track titles, artists, sources, ordering and 75-fps start positions. — CueSheet.Write / CueSheetEditorWindow; frame and multi-file regression tests, plus manual edit/save verification with original preservation.
 
 ### Library and playlists
 
@@ -71,7 +72,7 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [x] **F0059** Library JSON backup export and import. — LibraryService.ImportBackupAsync / Library tools: validated merge, preserved state and opt-in folder monitoring; regression tests and manual restore flow.
 - [x] **F0060** M3U/M3U8, PLS and XSPF import/export. — LibraryService, LibraryQuery, PlaylistService and LibraryWindow
 - [x] **F0061** Unicode paths and relative playlist entries. — LibraryService, LibraryQuery, PlaylistService and LibraryWindow
-- [x] **F0062** Playlist reorder, clear, play-next queue and persistence. — LibraryService, LibraryQuery, PlaylistService and LibraryWindow
+- [x] **F0062** Playlist reorder, clear, play-next queue and persistence. — MainViewModel / playlist services; restored selection skips missing files and Play starts the saved queue; native regression coverage.
 - [x] **F0063** Bounded initial duration parsing rather than decoding the full library at startup. — LibraryService, LibraryQuery, PlaylistService and LibraryWindow
 - [x] **F0064** On-demand exact duplicate detection using actual size and SHA-256, with progress and cancellation. — DuplicateFinder / DuplicateFilesWindow; automated content/cancellation tests and manual UI review.
 - [x] **F0097** Remove selected records from the library without deleting media files. — LibraryService.RemoveEntriesAsync / Library tools / duplicate results; media preservation and reopened-index tests.
@@ -86,9 +87,10 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [x] **F0073** Timeline thumbnail previews generated on demand. — MediaService, MainWindow.Features, SubtitleDocument and ThumbnailService
 - [x] **F0074** Aspect ratio and video adjustment controls. — MediaService, MainWindow.Features, SubtitleDocument and ThumbnailService
 - [x] **F0075** Deinterlacing options. — MediaService, MainWindow.Features, SubtitleDocument and ThumbnailService
-- [x] **F0076** Video snapshots. — MediaService, MainWindow.Features, SubtitleDocument and ThumbnailService
+- [x] **F0076** Native video snapshots with actual PNG/JPEG/BMP encoding, unique names and overwrite protection. — MediaService.Snapshots; native file signature, cancellation and temporary cleanup tests.
 - [x] **F0077** Ambient light sampled from the displayed frame. — MediaService, MainWindow.Features, SubtitleDocument and ThumbnailService
 - [x] **F0078** A–B clip export through LibVLC, with copy and transcode paths. — MediaService, MainWindow.Features, SubtitleDocument and ThumbnailService
+- [x] **F0084** Explicit scheduled snapshot jobs with interval, image limit, format, folder, progress and stop. — SnapshotSchedule / SnapshotScheduleWindow; sequential/cancellation tests, native capture and manual two-image completion review.
 
 ### Network and distribution
 
@@ -118,6 +120,7 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [ ] **F0049** Verified gapless transitions and crossfade.
 - [ ] **F0050** Advanced DSP chain and measured output quality matrix.
 - [ ] **F0051** Online lyric providers and lyric editing.
+- [ ] **F0099** Preserve and edit advanced CUE directives such as CD-TEXT, PREGAP and additional indexes.
 
 ### Library and playlists
 
@@ -133,7 +136,6 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [ ] **F0081** Saved subtitle style profiles.
 - [ ] **F0082** Bilingual subtitle display.
 - [ ] **F0083** OCR of burned-in subtitles.
-- [ ] **F0084** Scheduled snapshots.
 - [ ] **F0085** Complete HDR/color management validation.
 
 ### Network and distribution

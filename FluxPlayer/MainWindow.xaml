@@ -353,6 +353,8 @@
                             <MenuItem Header="Edit tags for the current file…" Click="EditTagsButton_Click" />
                             <MenuItem Header="Search external subtitles…" Click="SearchSubtitlesButton_Click" />
                             <MenuItem Header="Open CUE sheet…" Click="OpenCueButton_Click" />
+                            <MenuItem Header="Create or edit CUE sheet…" Click="EditCueButton_Click" />
+                            <MenuItem Header="Scheduled snapshots…" Click="ScheduledSnapshots_Click" />
                             <Separator />
                             <MenuItem Header="Rotate picture 90°" Click="RotateVideo_Click" />
                             <MenuItem Header="Mirror picture" Click="MirrorVideo_Click" />

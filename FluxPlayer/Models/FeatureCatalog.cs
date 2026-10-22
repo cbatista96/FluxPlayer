@@ -88,7 +88,7 @@ public static class FeatureCatalog
         new FeatureDefinition(PlaylistImportExport, "Import/export playlists", "M3U, M3U8, PLS and XSPF support.", true),
         new FeatureDefinition(ChromecastDlnaSender, "Chromecast/DLNA", "Send playback to network devices."),
         new FeatureDefinition(MobileRemoteWebUi, "Mobile remote control", "Control the player through a local web interface."),
-        new FeatureDefinition(ScheduledSnapshots, "Scheduled snapshots", "Take snapshots automatically at an interval."),
+        new FeatureDefinition(ScheduledSnapshots, "Scheduled snapshots", "Start a bounded capture job from Audio and video tools > Scheduled snapshots."),
         new FeatureDefinition(ClipRecordingAb, "Export A-B clip", "Save the A-B range as an exact MP4 clip or a fast lossless copy (context menu > Playback)."),
         new FeatureDefinition(PluginsExtensions, "Plugins/extensions", "Enable an extensible architecture."),
     };
@@ -99,6 +99,7 @@ public static class FeatureCatalog
         PlayNextQueue, PresentationLockControls, Equalizer31Band, ClipRecordingAb,
         MediaLibrary, WatchedFolders, FavoritesCollections, SubtitleTextSearch,
         LibraryAdvancedFilters, SmartPlaylists,
+        ScheduledSnapshots,
     };
 
     private static readonly HashSet<string> PlannedKeys = new(StringComparer.OrdinalIgnoreCase)
@@ -106,7 +107,7 @@ public static class FeatureCatalog
         AudioProfilesPerDevice, HeadphoneCrossfeed, AutoDownloadSubtitles, LiveSubtitleSyncEditor,
         SubtitleStyleProfiles, BilingualSubtitles, BurnedSubtitlesOcr,
         ConfigurableHud, AdvancedTouchGestures, AutoRenderProfileByGpu,
-        ChromecastDlnaSender, MobileRemoteWebUi, ScheduledSnapshots,
+        ChromecastDlnaSender, MobileRemoteWebUi,
         PluginsExtensions,
     };
 

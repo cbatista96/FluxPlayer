@@ -24,6 +24,7 @@ public partial class MediaService : IDisposable
     private Media? _currentMedia;
     private Equalizer? _equalizer;
     private volatile bool _disposed;
+    private int _disposeStarted;
     public AppSettings PlaybackSettings { get; set; } = new();
 
     public MediaPlayer MediaPlayer { get; }
@@ -434,7 +435,7 @@ public partial class MediaService : IDisposable
         MediaPlayer.UnsetEqualizer();
     }
 
-    public bool TakeSnapshot(string outputPath)
+    private bool RequestNativePngSnapshot(string outputPath)
     {
         return MediaPlayer.TakeSnapshot(0, outputPath, 0, 0);
     }
@@ -521,13 +522,17 @@ public partial class MediaService : IDisposable
 
     public void Dispose()
     {
+        if (Interlocked.Exchange(ref _disposeStarted, 1) != 0) return;
         _disposed = true;
+        StopSnapshotOperations();
         // No native media parse may outlive the LibVLC instance it belongs to.
         _durationParseGate.Wait();
         try { MediaPlayer.Stop(); } catch { }
         _currentMedia?.Dispose();
         _equalizer?.Dispose();
         MediaPlayer.Dispose();
+        CleanupSnapshotTemporaryFiles();
+        _snapshotLifetime.Dispose();
         if (_enableDiagnosticLogging)
             _libVLC.Log -= OnLibVlcLog;
         lock (_diagnosticLock)
