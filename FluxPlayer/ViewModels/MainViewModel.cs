@@ -132,7 +132,7 @@ public partial class MainViewModel : ObservableObject
         EqualizerPreamp = _settings.EqualizerPreamp;
         EqualizerAntiClip = _settings.EqualizerAntiClip;
         EqualizerPreset = EqualizerPresets.Normalize(_settings.EqualizerPreset);
-        IsEqualizerEnabled = _settings.EqualizerEnabled;
+        IsEqualizerEnabled = _settings.EqualizerEnabled && (EqualizerBands.Length == 10 || _mediaService.SupportsExtendedEqualizer);
         RepeatMode = _settings.RepeatMode;
         Shuffle = _settings.Shuffle;
         PlaybackRate = _settings.PlaybackRate;
@@ -621,27 +621,31 @@ public partial class MainViewModel : ObservableObject
     {
         get
         {
+            if (EqualizerBandCount > 10 && _mediaService.ExtendedEqualizerStatus is { Active: true, CurrentSettingsApplied: true } status)
+                return status.EffectivePreamp;
             float pre = EqualizerPreamp;
             if (EqualizerAntiClip)
             {
                 float peak = Math.Max(0f, EqualizerBands.Max() + pre);
                 pre -= peak;
             }
-            return Math.Clamp(pre, -20f, EqualizerPresets.MaximumEffectivePreampDb);
+            return Math.Clamp(pre, -20f, EqualizerBandCount > 10 ? 20 : EqualizerPresets.MaximumEffectivePreampDb);
         }
     }
 
     private void PushEqualizer()
     {
         if (_mediaService == null || _applyingAudioProfile) return;
-        if (IsEqualizerEnabled) _mediaService.ApplyEqualizer(EqualizerBands, EffectiveEqualizerPreamp);
+        if (IsEqualizerEnabled) _mediaService.ApplyEqualizer(EqualizerBands, EqualizerBandCount > 10 ? EqualizerPreamp : EffectiveEqualizerPreamp, EqualizerAntiClip);
         else _mediaService.DisableEqualizer();
         OnPropertyChanged(nameof(EffectiveEqualizerPreamp));
+        ScheduleEqualizerStatusRefresh();
     }
 
     public void SetEqualizerBand(int bandIndex, float value)
     {
         if (bandIndex < 0 || bandIndex >= EqualizerBands.Length) return;
+        value = float.IsFinite(value) ? Math.Clamp(value, -20, 20) : 0;
         if (Math.Abs(EqualizerBands[bandIndex] - value) < 0.001f) return;
         EqualizerBands[bandIndex] = value;
         EqualizerPreset = EqualizerPresets.Custom;
@@ -650,7 +654,7 @@ public partial class MainViewModel : ObservableObject
 
     public void SetEqualizerPreamp(float value)
     {
-        value = Math.Clamp(value, -12f, 12f);
+        value = float.IsFinite(value) ? Math.Clamp(value, -20f, 20f) : 0;
         if (Math.Abs(EqualizerPreamp - value) < 0.001f) return;
         EqualizerPreamp = value;
         EqualizerPreset = EqualizerPresets.Custom;
@@ -662,7 +666,7 @@ public partial class MainViewModel : ObservableObject
     {
         preset = EqualizerPresets.Normalize(preset);
         EqualizerPreset = preset;
-        var p = EqualizerPresets.Find(preset);
+        var p = EqualizerPresets.ForBandCount(preset, EqualizerBandCount);
         if (p == null) return;
         EqualizerPreamp = p.Preamp;
         EqualizerBands = (float[])p.Bands.Clone();
@@ -1039,8 +1043,9 @@ public partial class MainViewModel : ObservableObject
     public void SaveSettings()
     {
         RememberResumePosition();
-
+        double? equalizerLeft = _settings.EqualizerWindowLeft, equalizerTop = _settings.EqualizerWindowTop;
         _settings = _settingsService.Load();
+        _settings.EqualizerWindowLeft = equalizerLeft; _settings.EqualizerWindowTop = equalizerTop;
 
         _settings.ResumePositions = new Dictionary<string, long>(_resumePositions);
         _settings.Bookmarks = _bookmarks.Where(kv => kv.Value.Count > 0)
@@ -1071,6 +1076,18 @@ public partial class MainViewModel : ObservableObject
     {
         _settings = _settingsService.Load();
         _mediaService.PlaybackSettings = _settings;
+        _applyingAudioProfile = true;
+        try
+        {
+            var preset = _settings.EqualizerPreset != EqualizerPreset ? EqualizerPresets.ForBandCount(_settings.EqualizerPreset, _settings.EqualizerBands.Length) : null;
+            EqualizerBands = (float[])(preset?.Bands ?? _settings.EqualizerBands).Clone();
+            EqualizerPreamp = preset?.Preamp ?? _settings.EqualizerPreamp;
+            EqualizerPreset = _settings.EqualizerPreset; EqualizerAntiClip = _settings.EqualizerAntiClip;
+            IsEqualizerEnabled = _settings.EqualizerEnabled && (EqualizerBandCount == 10 || SupportsExtendedEqualizer);
+            AudioDelayMs = _settings.AudioDelay;
+        }
+        finally { _applyingAudioProfile = false; }
+        _mediaService.SetAudioDelay(AudioDelayMs * 1000L); PushEqualizer();
         OnPropertyChanged(nameof(SeekStepSeconds));
         OnPropertyChanged(nameof(SeekLargeStepSeconds));
         OnPropertyChanged(nameof(VolumeStep));

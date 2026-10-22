@@ -50,7 +50,7 @@ public partial class AudioOutputProfilesWindow : FluentWindow
         bool saved = _vm.AudioOutputProfiles.TryGetValue(choice.Device.Id, out var profile);
         ApplyButton.IsEnabled = choice.Available && saved; RemoveButton.IsEnabled = saved;
         ProfileDetails.Text = profile == null ? "No profile saved for this output. Saving captures the player's current audio settings."
-            : string.Create(CultureInfo.InvariantCulture, $"Volume: {profile.Volume:0.#}%\nEqualizer: {(profile.EqualizerEnabled ? "On" : "Off")} · {profile.Preset} · preamp {profile.Preamp:+0.#;-0.#;0} dB\nBands (31 Hz → 16 kHz): {string.Join(" / ", profile.Bands.Select(value => value.ToString("+0.#;-0.#;0", CultureInfo.InvariantCulture)))} dB\nPeak compensation: {(profile.AntiClip ? "On" : "Off")}\nAudio delay: {profile.AudioDelayMs:+0;-0;0} ms");
+            : string.Create(CultureInfo.InvariantCulture, $"Volume: {profile.Volume:0.#}%\nEqualizer: {(profile.EqualizerEnabled ? "On" : "Off")} · {profile.Bands.Length} bands · {profile.Preset} · preamp {profile.Preamp:+0.#;-0.#;0} dB\nBand gains: {string.Join(" / ", profile.Bands.Select(value => value.ToString("+0.#;-0.#;0", CultureInfo.InvariantCulture)))} dB\nPeak compensation: {(profile.AntiClip ? "On" : "Off")}\nAudio delay: {profile.AudioDelayMs:+0;-0;0} ms");
     }
 
     private void Device_Changed(object sender, SelectionChangedEventArgs e) { if (!_refreshing) ShowDetails(); }

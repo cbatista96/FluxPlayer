@@ -5,10 +5,11 @@ namespace FluxPlayer.ViewModels;
 public partial class MainViewModel
 {
     private bool _applyingAudioProfile;
+    private string? _audioOutputProfileError;
     public IReadOnlyDictionary<string, AudioOutputProfile> AudioOutputProfiles => _settings.AudioOutputProfiles;
     public bool AutomaticallyApplyAudioOutputProfiles => _settings.AutomaticallyApplyAudioOutputProfiles;
     public string SelectedOutputDeviceId => _settings.AudioOutputDevice;
-    public string? AudioOutputProfileSaveError => _settingsService.LastError;
+    public string? AudioOutputProfileSaveError => _audioOutputProfileError ?? _settingsService.LastError;
 
     public AudioOutputProfile CaptureAudioOutputProfile(string name) => new()
     {
@@ -24,6 +25,7 @@ public partial class MainViewModel
 
     public bool SaveAudioOutputProfile(AudioDevice device)
     {
+        _audioOutputProfileError = null;
         if (!AudioOutputProfile.ValidDeviceId(device.Id)) throw new ArgumentException("Choose a valid output device.");
         var profile = CaptureAudioOutputProfile(device.Name); profile.Validate();
         var saved = _settingsService.Load();
@@ -37,6 +39,7 @@ public partial class MainViewModel
 
     public bool RemoveAudioOutputProfile(string deviceId)
     {
+        _audioOutputProfileError = null;
         var saved = _settingsService.Load();
         if (!saved.AudioOutputProfiles.Remove(deviceId) || !_settingsService.Save(saved)) return false;
         _settings.AudioOutputProfiles = saved.AudioOutputProfiles;
@@ -45,6 +48,7 @@ public partial class MainViewModel
 
     public bool SetAutomaticAudioOutputProfiles(bool enabled)
     {
+        _audioOutputProfileError = null;
         var saved = _settingsService.Load(); saved.AutomaticallyApplyAudioOutputProfiles = enabled;
         if (!_settingsService.Save(saved)) return false;
         _settings.AutomaticallyApplyAudioOutputProfiles = enabled;
@@ -53,12 +57,15 @@ public partial class MainViewModel
 
     public bool SelectOutputDevice(AudioDevice device, bool applySavedProfile = false)
     {
+        _audioOutputProfileError = null;
         if (!AudioOutputProfile.ValidDeviceId(device.Id)) throw new ArgumentException("Choose a valid output device.");
         var saved = _settingsService.Load();
         var adjustment = CaptureAudioOutputProfile(device.Name);
         bool apply = (applySavedProfile || saved.AutomaticallyApplyAudioOutputProfiles)
             && saved.AudioOutputProfiles.TryGetValue(device.Id, out var profile);
         if (apply) adjustment = saved.AudioOutputProfiles[device.Id];
+        if (adjustment.EqualizerEnabled && adjustment.Bands.Length > 10 && !SupportsExtendedEqualizer)
+        { _audioOutputProfileError = "Build the native DSP module before applying a 20/31-band output profile."; return false; }
         adjustment.Apply(saved);
         saved.Volume = Math.Min(saved.Volume, MaxVolume);
         saved.AudioOutputDevice = device.Id;

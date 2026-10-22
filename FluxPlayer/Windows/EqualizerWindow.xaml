@@ -22,8 +22,8 @@
 
         <Style x:Key="EqSlider" TargetType="Slider">
             <Setter Property="Orientation" Value="Vertical" />
-            <Setter Property="Minimum" Value="-12" />
-            <Setter Property="Maximum" Value="12" />
+            <Setter Property="Minimum" Value="-20" />
+            <Setter Property="Maximum" Value="20" />
             <Setter Property="SmallChange" Value="0.5" />
             <Setter Property="LargeChange" Value="1" />
             <Setter Property="IsMoveToPointEnabled" Value="True" />
@@ -102,7 +102,7 @@
             <StackPanel Orientation="Horizontal" Margin="16,0,0,0" VerticalAlignment="Center">
                 <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="15" Foreground="{DynamicResource FxAccentTextBrush}" VerticalAlignment="Center" Margin="0,0,10,0" />
                 <TextBlock Text="Equalizer" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                <TextBlock Text="  ·  10 bands + preamplifier" FontSize="12" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                <TextBlock Text="{Binding EqualizerBandCount, StringFormat= · {0} bands + preamplifier}" FontSize="12" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <ui:ToggleSwitch x:Name="EnableSwitch" VerticalAlignment="Center" Margin="0,0,10,0" OnContent="Enabled" OffContent="Off" Checked="EnableSwitch_Changed" Unchecked="EnableSwitch_Changed" />
@@ -111,6 +111,12 @@
         </Grid>
 
         <StackPanel Grid.Row="1" Margin="20,4,20,18">
+
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                <TextBlock Text="Layout" FontSize="12" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                <ComboBox x:Name="LayoutCombo" Width="190" Height="32" VerticalContentAlignment="Center" SelectionChanged="LayoutCombo_SelectionChanged" AutomationProperties.Name="Equalizer band layout" />
+                <TextBlock Text="Independent native filters" FontSize="11.5" Margin="12,0,0,0" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+            </StackPanel>
 
             <Grid Margin="0,0,0,14">
                 <Grid.ColumnDefinitions>
@@ -129,7 +135,7 @@
                     </Button>
                 </StackPanel>
                 <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                    <CheckBox x:Name="AntiClipCheck" Content="Compensate gain" FontSize="12" MinWidth="0" VerticalAlignment="Center" Margin="0,0,10,0" ToolTip="Reduce the preamplifier by the largest band boost. This is not a peak limiter." Checked="AntiClip_Changed" Unchecked="AntiClip_Changed" />
+                    <CheckBox x:Name="AntiClipCheck" Content="Compensate gain" FontSize="12" MinWidth="0" VerticalAlignment="Center" Margin="0,0,10,0" ToolTip="Leave headroom for boosted bands. Extended layouts estimate the combined filter response. This is not a peak limiter." Checked="AntiClip_Changed" Unchecked="AntiClip_Changed" />
                     <Button Style="{StaticResource EqChip}" ToolTip="Reset to flat" Click="Reset_Click">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="12" VerticalAlignment="Center" Margin="0,0,7,0" />
@@ -140,7 +146,8 @@
             </Grid>
 
             <Border CornerRadius="10" Padding="12,12,14,8" Background="{DynamicResource FxCardBrush}" BorderBrush="{DynamicResource FxCardBorderBrush}" BorderThickness="1">
-                <Grid>
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" CanContentScroll="False">
+                <Grid x:Name="EqualizerPlot">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="34" />
                         <ColumnDefinition Width="46" />
@@ -157,7 +164,7 @@
                     <Canvas x:Name="GridCanvas" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" IsHitTestVisible="False" />
 
                     <TextBlock x:Name="PreampValue" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center" FontSize="10.5" FontWeight="SemiBold" Text="0.0" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                    <Slider x:Name="PreampSlider" Grid.Row="1" Grid.Column="1" Style="{StaticResource EqSlider}" ToolTip="Requested preamp (double-click: 0 dB). Effective gain is capped at +7.96 dB by the native engine and may be reduced by peak compensation." ValueChanged="PreampSlider_ValueChanged" MouseDoubleClick="PreampSlider_MouseDoubleClick" />
+                    <Slider x:Name="PreampSlider" Grid.Row="1" Grid.Column="1" Style="{StaticResource EqSlider}" ToolTip="Requested preamp (double-click: 0 dB). The ten-band engine caps effective gain at +7.96 dB. Gain compensation can reduce it further." ValueChanged="PreampSlider_ValueChanged" MouseDoubleClick="PreampSlider_MouseDoubleClick" />
                     <TextBlock Grid.Row="2" Grid.Column="1" Text="PRE" HorizontalAlignment="Center" VerticalAlignment="Bottom" FontSize="10.5" FontWeight="SemiBold" Foreground="{DynamicResource FxAccentTextBrush}" />
                     <Rectangle Grid.Row="0" Grid.RowSpan="3" Grid.Column="2" Width="1" HorizontalAlignment="Center" Fill="{DynamicResource FxDividerBrush}" />
 
@@ -177,12 +184,13 @@
                     <UniformGrid x:Name="BandSliders" Grid.Row="1" Grid.Column="3" Rows="1" Columns="10" />
                     <UniformGrid x:Name="BandLabels" Grid.Row="2" Grid.Column="3" Rows="1" Columns="10" />
                 </Grid>
+                </ScrollViewer>
             </Border>
 
-            <Grid Margin="2,10,2,0">
-                <TextBlock x:Name="StatusText" FontSize="11.5" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
-                <TextBlock HorizontalAlignment="Right" FontSize="11.5" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Text="Double-click a band: 0 dB  ·  Arrow keys: ±0.5 dB" />
-            </Grid>
+            <StackPanel Margin="2,10,2,0">
+                <TextBlock x:Name="StatusText" FontSize="11.5" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                <TextBlock FontSize="11.5" Margin="0,5,0,0" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Text="Double-click a band: 0 dB  ·  Arrow keys: ±0.5 dB" />
+            </StackPanel>
         </StackPanel>
     </Grid>
 </ui:FluentWindow>

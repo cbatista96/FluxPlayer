@@ -1554,6 +1554,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
 
     private void OpenSettingsWindow()
     {
+        _vm.SaveSettings();
         if (_settingsWindow != null)
         {
             _settingsWindow.Activate();

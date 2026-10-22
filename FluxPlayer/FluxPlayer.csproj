@@ -53,5 +53,14 @@
 
   <ItemGroup>
     <Resource Include="Assets\logo.png" />
+    <Content Include="..\Native\FluxDsp\bin\x64\$(Configuration)\libfluxdsp_plugin.dll"
+             Link="libvlc\win-x64\plugins\audio_filter\libfluxdsp_plugin.dll" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest"
+             Condition="'$(SkipNativeDsp)' != 'true'" />
   </ItemGroup>
+
+  <Target Name="BuildNativeDsp" BeforeTargets="PrepareForBuild" Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipNativeDsp)' != 'true'"
+          Inputs="$(MSBuildThisFileDirectory)..\Native\FluxDsp\fluxdsp.c;$(MSBuildThisFileDirectory)..\tools\Build-NativeDsp.ps1"
+          Outputs="$(MSBuildThisFileDirectory)..\Native\FluxDsp\bin\x64\$(Configuration)\libfluxdsp_plugin.dll">
+    <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildThisFileDirectory)..\tools\Build-NativeDsp.ps1&quot; -NuGetRoot &quot;$(NuGetPackageRoot).&quot; -OutputPath &quot;$(MSBuildThisFileDirectory)..\Native\FluxDsp\bin\x64\$(Configuration)\libfluxdsp_plugin.dll&quot;" />
+  </Target>
 </Project>

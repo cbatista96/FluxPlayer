@@ -23,6 +23,11 @@ public partial class MediaService : IDisposable
     private string? _currentSourcePath;
     private Media? _currentMedia;
     private Equalizer? _equalizer;
+    private readonly NativeDspBridge? _nativeDsp;
+    private bool _usingExtendedEqualizer;
+    private int _equalizerBandCount = 10;
+    public bool SupportsExtendedEqualizer => _nativeDsp != null;
+    public NativeDspStatus? ExtendedEqualizerStatus => _nativeDsp?.Status;
     private volatile bool _disposed;
     public bool IsDisposed => _disposed;
     private int _disposeStarted;
@@ -96,12 +101,18 @@ public partial class MediaService : IDisposable
         };
         // The text renderer inherits instance settings; per-media freetype options are ineffective here.
         vlcOptions.AddRange(SubtitleStyle.Normalize(subtitleStyle).NativeOptions().Select(option => "--" + option[1..]));
+        if (libVlcRuntimeDir != null && File.Exists(Path.Combine(libVlcRuntimeDir, "plugins", "audio_filter", "libfluxdsp_plugin.dll")))
+        {
+            _nativeDsp = new NativeDspBridge();
+            vlcOptions.Add("--fluxdsp-map=" + _nativeDsp.Name);
+        }
 
         // Generate a missing cache only in a writable plugin directory.
         if (ShouldBuildPluginCache(pluginDir))
             vlcOptions.Add("--reset-plugins-cache");
 
-        _libVLC = new LibVLC(enableDebugLogs: _enableDiagnosticLogging, vlcOptions.ToArray());
+        try { _libVLC = new LibVLC(enableDebugLogs: _enableDiagnosticLogging, vlcOptions.ToArray()); }
+        catch { _nativeDsp?.Dispose(); throw; }
         if (_enableDiagnosticLogging)
         {
             ConfigureLogging();
@@ -450,13 +461,20 @@ public partial class MediaService : IDisposable
         }
     }
 
-    public void ApplyEqualizer(float[] bands, float preamp = 0f)
+    public void ApplyEqualizer(float[] bands, float preamp = 0f, bool antiClip = false)
     {
+        bool extended = bands.Length is 20 or 31;
+        if (!EqualizerLayout.IsSupported(bands.Length)) throw new ArgumentException("Choose 10, 20 or 31 bands.");
+        if (extended && _nativeDsp == null) throw new InvalidOperationException("Build the native DSP module to use 20/31 bands.");
+        _nativeDsp?.Publish(bands, preamp, true, antiClip);
+        _equalizerBandCount = bands.Length;
+        if (extended && _usingExtendedEqualizer && _equalizer != null) return;
+        if (_equalizer != null && extended != _usingExtendedEqualizer) MediaPlayer.UnsetEqualizer();
+        _usingExtendedEqualizer = extended;
         _equalizer?.Dispose();
         _equalizer = new Equalizer();
-        _equalizer.SetPreamp(EqualizerPresets.NativePreamp(preamp));
-        for (uint i = 0; i < Math.Min((uint)bands.Length, 10u); i++)
-            _equalizer.SetAmp(bands[i], i);
+        _equalizer.SetPreamp(EqualizerPresets.NativePreamp(extended ? 0 : preamp));
+        if (!extended) for (uint i = 0; i < 10u; i++) _equalizer.SetAmp(bands[i], i);
         MediaPlayer.SetEqualizer(_equalizer);
     }
 
@@ -464,6 +482,7 @@ public partial class MediaService : IDisposable
     {
         // Avoid native filter reconfiguration when the equalizer is already disabled.
         if (_equalizer == null) return;
+        _nativeDsp?.Publish(new float[10], 0, false, true); _usingExtendedEqualizer = false;
         _equalizer?.Dispose();
         _equalizer = null;
         MediaPlayer.UnsetEqualizer();
@@ -477,14 +496,12 @@ public partial class MediaService : IDisposable
     public string GetMediaInfo()
     {
         var lines = new List<string>();
-
-        try
+        lock (_playbackStateLock)
         {
-            if (MediaPlayer.Media != null)
+            if (_disposed) return "";
+            try
             {
-                var media = MediaPlayer.Media;
-
-                foreach (var track in media.Tracks)
+                if (_currentMedia != null) foreach (var track in _currentMedia.Tracks)
                 {
                     if (track.TrackType == TrackType.Video)
                     {
@@ -505,12 +522,17 @@ public partial class MediaService : IDisposable
                     }
                 }
             }
+            catch (ObjectDisposedException) { }
         }
-        catch
+        if (_equalizer == null) lines.Add("Equalizer: bypassed");
+        else if (!_usingExtendedEqualizer) lines.Add("Equalizer: 10 native bands");
+        else
         {
-
+            var status = _nativeDsp?.Status;
+            bool active = status is { Active: true, CurrentSettingsApplied: true, Error: 0 };
+            lines.Add($"Equalizer: {_equalizerBandCount} independent native bands ({(active ? "active" : "awaiting processing")})");
+            if (active) lines.Add($"DSP: {status!.SampleRate} Hz · {status.Channels} channels · effective preamp {status.EffectivePreamp:0.##} dB");
         }
-
         return string.Join("\n", lines);
     }
 
@@ -586,6 +608,7 @@ public partial class MediaService : IDisposable
             _diagnosticWriter = null;
         }
         _libVLC.Dispose();
+        _nativeDsp?.Dispose();
         _subtitleCompositionLifetime.Dispose();
         _subtitleCompositionGate.Release();
         _durationParseGate.Release();

@@ -20,10 +20,10 @@ public sealed record AudioOutputProfile
     {
         if (string.IsNullOrWhiteSpace(DeviceName) || DeviceName.Length > 512 || DeviceName.Any(char.IsControl))
             throw new ArgumentException("The output device name must contain 1–512 printable characters.");
-        if (!double.IsFinite(Volume) || Volume is < 0 or > 200 || !float.IsFinite(Preamp) || Preamp is < -12 or > 12
-            || Bands is not { Length: 10 } || Bands.Any(value => !float.IsFinite(value) || value is < -20 or > 20)
+        if (!double.IsFinite(Volume) || Volume is < 0 or > 200 || !float.IsFinite(Preamp) || Preamp is < -20 or > 20
+            || Bands == null || !EqualizerLayout.IsSupported(Bands.Length) || Bands.Any(value => !float.IsFinite(value) || value is < -20 or > 20)
             || AudioDelayMs is < -86_400_000 or > 86_400_000)
-            throw new ArgumentException("Use ten finite bands within ±20 dB, requested preamp within ±12 dB, volume 0–200%, and audio delay within 24 hours.");
+            throw new ArgumentException("Use 10, 20 or 31 finite bands and requested preamp within ±20 dB, volume 0–200%, and audio delay within 24 hours.");
     }
 
     public static AudioOutputProfile Capture(AppSettings settings, string deviceName) => new()

@@ -43,7 +43,7 @@ foreach ($status in @('implemented', 'pending')) {
 $lines.Add('')
 $lines.Add('## Compatibility notes')
 $lines.Add('')
-$lines.Add('Playback depends on the selected LibVLC runtime, plugins, input and hardware. Universal format support, native DSD, bit-perfect output and a complete hardware matrix are not claimed. Legacy feature identifiers may retain historical names for settings compatibility: `equalizer-31-band-preamp` currently identifies the ten-band equalizer. UI labels describe its actual capability.')
+$lines.Add('Playback depends on the selected LibVLC runtime, plugins, input and hardware. Universal format support, native DSD, bit-perfect output and a complete hardware matrix are not claimed. The 20/31-band equalizer requires the native DSP module built from source; a legacy-only build retains ten-band processing. UI status identifies actual native acknowledgement.')
 $content = ($lines -join "`n") + "`n"
 if ($Verify) {
     if (-not (Test-Path -LiteralPath $outputPath)) { throw 'FEATURES.md is missing.' }

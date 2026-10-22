@@ -27,6 +27,10 @@ The managed suite covers:
 14. Metadata patch validation and the distinction between omitted fields and explicit clearing.
 15. Subtitle offset/drift correction, anchor validation, clipping before zero, long timestamps, Unicode SRT export, cancellation, overwrite refusal and rejection of excessive cue counts instead of silent truncation.
 16. Named subtitle styles, strict color validation, settings normalization, case-insensitive persistence, native option mapping and the 32-profile bound.
+17. Per-output audio settings, independent band-array copies, invalid profile rejection, persistence and the 64-profile limit.
+18. Personal-label transactions, queries, backup merging, cancellation and rollback.
+19. OGM/XML chapters, format bounds, encoding, duration validation and safe copy export.
+20. Multiband centers, preset interpolation, detached arrays and persistence of 10/20/31-band layouts.
 
 GitHub Actions builds on Windows and runs these checks without publishing artifacts or creating releases. Its test invocation deliberately avoids native playback, which requires an interactive output environment.
 
@@ -47,6 +51,8 @@ With FFmpeg available, tag saves and subsequent LibVLC playback are checked for 
 Output-profile coverage checks detached band arrays, independent endpoints, invalid records, case-insensitive persistence and the 64-profile limit. A native session verifies delay and volume, equalizer headroom, mute preservation, the global boost cap, automatic opt-out, explicit recall, startup restoration and failed-save isolation. Device volume reporting can settle asynchronously; the test waits for the native reported value. Manual UI review saved a profile for an enumerated headphone endpoint, applied it and independently checked the isolated settings file. Pending metadata and track refreshes also avoid a disposed engine during teardown.
 
 Native DSP checks capture processed signed 16-bit PCM in memory, without using the speakers. Synthetic 31.25 Hz and 1 kHz tones check a flat EQ against bypass, approximately +12 dB band gain and −12 dB compensation. These are targeted response checks, not a complete frequency-response or distortion certification.
+
+Extended native checks measure the first, middle and last centers of both 20/31-band layouts, including 20 Hz and 20 kHz. They check flat unity, +6 dB gain, compensated headroom, a −20 dB cut and a +20 dB preamp, plus low-frequency response at 192/384 kHz. The native module must acknowledge the actual rate, channel count and applied settings. Live layout/profile/settings tests verify full band arrays and continued playback. See [Native DSP measurements](NATIVE_DSP.md) for the capture boundary, manual visual scope and filter-only cost probe.
 
 Playback normalization/compression is explicitly pending. The previous per-media filter-option path failed a loud-tone acceptance probe and was removed from the active controls. To reproduce that known failure for future implementation, run `dotnet run --project FluxPlayer.Tests/FluxPlayer.Tests.csproj -c Release --no-build -- --probe-pending-audio-filters --filter="Pending audio filters"`. This optional acceptance probe is expected to fail until processing is implemented; it is separate from the regression suite for implemented features. Conversion loudness normalization is unaffected.
 

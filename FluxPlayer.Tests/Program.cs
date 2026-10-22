@@ -537,7 +537,7 @@ internal static class Program
             var reopened = store.Load();
             Assert(!reopened.AutomaticallyApplyAudioOutputProfiles && reopened.AudioOutputProfiles["HEADPHONES-ID"].Bands[0] == 6
                 && reopened.AudioOutputProfiles["speakers-id"].Volume == 51 && reopened.AudioOutputProfiles.Count == 2, "Independent endpoints and automatic setting round trip");
-            foreach (var invalid in new[] { first with { Bands = new float[31] }, first with { Bands = new[] { float.NaN }.Concat(new float[9]).ToArray() },
+            foreach (var invalid in new[] { first with { Bands = new float[30] }, first with { Bands = new[] { float.NaN }.Concat(new float[9]).ToArray() },
                 first with { Preamp = float.PositiveInfinity }, first with { Volume = -1 }, first with { DeviceName = "bad\0name" }, first with { AudioDelayMs = 86_400_001 } })
             {
                 bool refused = false; try { invalid.Validate(); } catch (ArgumentException) { refused = true; }
@@ -549,6 +549,30 @@ internal static class Program
             Assert(store.Save(current) && store.Load().AudioOutputProfiles.Count == 2, "Invalid records do not discard healthy endpoints");
             current.AudioOutputProfiles = Enumerable.Range(0, 70).ToDictionary(index => "device-" + index, _ => first);
             Assert(store.Save(current) && store.Load().AudioOutputProfiles.Count == AudioOutputProfile.MaximumProfiles, "Bounded saved endpoints");
+            return Task.CompletedTask;
+        });
+
+        await Test("Multiband layouts: independent preset arrays, native frequency grids and persisted profiles", () =>
+        {
+            foreach (int count in new[] { 10, 20, 31 })
+            {
+                var frequencies = EqualizerLayout.Frequencies(count);
+                Assert(frequencies.Length == count && frequencies.Zip(frequencies.Skip(1)).All(pair => pair.First < pair.Second), "Increasing independent centers");
+                foreach (var name in EqualizerPresets.All.Select(preset => preset.Name))
+                {
+                    var preset = EqualizerPresets.ForBandCount(name, count)!;
+                    Assert(preset.Bands.Length == count && preset.Bands.All(float.IsFinite), "Preset curve size: " + name);
+                }
+                string folder = Path.Combine(Root, "layout-" + count + "-" + Guid.NewGuid().ToString("N"));
+                var store = new SettingsService(folder); var settings = new AppSettings { EqualizerBands = new float[count], EqualizerPreamp = 20 };
+                settings.EqualizerBands[^1] = 7; settings.AudioOutputProfiles["Default"] = AudioOutputProfile.Capture(settings, "Default");
+                Assert(store.Save(settings), "Save independent layout"); var saved = store.Load();
+                Assert(saved.EqualizerBands.Length == count && saved.EqualizerBands[^1] == 7 && saved.EqualizerPreamp == 20
+                    && saved.AudioOutputProfiles["Default"].Bands.Length == count, "Active layout and output profile persist without folding bands");
+            }
+            Assert(EqualizerLayout.Frequencies(31)[17] == 1000 && EqualizerLayout.Frequencies(31)[^1] == 20000, "ISO 31-band grid");
+            var detached = EqualizerPresets.ForBandCount("Rock", 31)!; detached.Bands[17] = 99;
+            Assert(EqualizerPresets.ForBandCount("Rock", 31)!.Bands[17] != 99 && EqualizerPresets.Find("Rock")!.Bands.All(value => value < 99), "Extended preset arrays do not mutate the source preset");
             return Task.CompletedTask;
         });
 
@@ -586,6 +610,39 @@ internal static class Program
             finally { vm.StopCommand.Execute(null); await vm.ShutdownAsync(); }
         });
         await Test("Native audio DSP: measured ISO band centers and compensated preamp", () => AudioDspChecks.VerifyIsoBandsAsync(Root));
+        await Test("Native 20/31-band DSP: independent filters, flat level and measured headroom", () => AudioDspChecks.VerifyExtendedBandsAsync(Root));
+        await Test("Native EQ layouts: live switching, restored curves, output profiles and settings reload", async () =>
+        {
+            string folder = Path.Combine(Root, "native-layouts-" + Guid.NewGuid().ToString("N"));
+            var store = new SettingsService(folder);
+            Assert(store.Save(new AppSettings { Volume = 0, EqualizerEnabled = true, EqualizerBands = new float[31] }), "Initial 31-band settings");
+            using var layoutEngine = new MediaService(hardwareDecoding: false, enableDiagnosticLogging: false);
+            await using var layoutLibrary = new LibraryService(Path.Combine(folder, "library"));
+            var vm = new MainViewModel(layoutEngine, store, library: layoutLibrary);
+            try
+            {
+                Assert(layoutEngine.SupportsExtendedEqualizer && vm.EqualizerBandCount == 31, "Native module is present and the layout is preserved");
+                vm.AddFilesToPlaylist(new[] { wav }, true);
+                await Until(() => Task.FromResult(layoutEngine.IsPlaying && layoutEngine.ExtendedEqualizerStatus is { Active: true, CurrentSettingsApplied: true }), 5000);
+                vm.SetEqualizerBand(17, 6);
+                await Until(() => Task.FromResult(layoutEngine.ExtendedEqualizerStatus is { Active: true, CurrentSettingsApplied: true }), 3000);
+                Assert(vm.EffectiveEqualizerPreamp is < -6 and > -6.6f, "Combined-response headroom is acknowledged by the actual plugin");
+                Assert(vm.SetEqualizerLayout(20) && vm.EqualizerBandCount == 20, "Select independent twenty-band processing"); vm.SetEqualizerBand(10, -4);
+                Assert(vm.SetEqualizerLayout(31) && vm.EqualizerBands[17] == 6, "Switching layouts recalls the session's previous curve");
+                Assert(vm.SaveAudioOutputProfile(new AudioDevice("Default", "Default")), "Save a real multiband output profile");
+                Assert(vm.SetEqualizerLayout(10), "Switch to the legacy processor");
+                await Until(() => Task.FromResult(layoutEngine.ExtendedEqualizerStatus is { Active: false }), 3000);
+                Assert(vm.SelectOutputDevice(new AudioDevice("Default", "Default"), true) && vm.EqualizerBandCount == 31 && vm.EqualizerBands[17] == 6, "Profile recall restores the full native layout");
+                await Until(() => Task.FromResult(layoutEngine.ExtendedEqualizerStatus is { Active: true, CurrentSettingsApplied: true }), 3000);
+                vm.SaveSettings(); var saved = store.Load(); saved.Theme = AppTheme.FullBlack; Assert(store.Save(saved), "Save an unrelated setting");
+                vm.ReloadSettingsFromDisk();
+                Assert(vm.EqualizerBandCount == 31 && vm.EqualizerBands[17] == 6 && layoutEngine.IsPlaying, "Settings reload preserves all bands and playback");
+                vm.IsEqualizerEnabled = false;
+                await Until(() => Task.FromResult(layoutEngine.ExtendedEqualizerStatus is { Active: false }), 3000);
+                Assert(layoutEngine.IsPlaying, "Disabling DSP releases the native filter without stopping the source");
+            }
+            finally { vm.StopCommand.Execute(null); await vm.ShutdownAsync(); }
+        });
         if (ProbePendingAudioFilters)
             await Test("Pending audio filters: compressor acceptance probe", () => AudioDspChecks.VerifyCompressorAsync(Root));
         await Test("Native output profiles: live application, mute, boost limit, opt-out, startup and failed save", async () =>

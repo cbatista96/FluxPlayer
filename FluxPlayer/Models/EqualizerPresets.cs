@@ -13,6 +13,22 @@ public static class EqualizerPresets
     public static float NativePreamp(float requestedDb) =>
         Math.Clamp(float.IsFinite(requestedDb) ? requestedDb : 0, -20f, MaximumEffectivePreampDb) + NativeUnityOffsetDb;
 
+    public static EqPreset? ForBandCount(string name, int count)
+    {
+        var preset = Find(name); if (preset == null) return null;
+        if (count == 10) return preset;
+        var frequencies = EqualizerLayout.Frequencies(count);
+        // Resample the preset curve onto independent native filters, never fold a
+        // 20/31-band layout back into the ten-band processing API.
+        var gains = frequencies.Select(frequency =>
+        {
+            double position = Math.Clamp(Math.Log2(frequency / 31.25), 0, 9);
+            int low = (int)Math.Floor(position), high = Math.Min(low + 1, 9);
+            return (float)(preset.Bands[low] + (preset.Bands[high] - preset.Bands[low]) * (position - low));
+        }).ToArray();
+        return preset with { Bands = gains };
+    }
+
     public static readonly string[] BandLabels = { "31", "62", "125", "250", "500", "1k", "2k", "4k", "8k", "16k" };
 
     public static readonly IReadOnlyList<EqPreset> All = new List<EqPreset>

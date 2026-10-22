@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
+using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using Wpf.Ui.Controls;
@@ -17,23 +18,30 @@ namespace FluxPlayer.Windows;
 public partial class EqualizerWindow : FluentWindow
 {
     private const double KnobRadius = 9;
-    private const double MaxDb = 12;
+    private const double MaxDb = 20;
 
     private readonly MainViewModel _vm;
-    private readonly Slider[] _bands = new Slider[10];
-    private readonly TextBlock[] _values = new TextBlock[10];
+    private Slider[] _bands = Array.Empty<Slider>();
+    private TextBlock[] _values = Array.Empty<TextBlock>();
     private bool _syncing;
+    private bool _syncPending;
     private bool _cloaked;
 
     public EqualizerWindow(MainViewModel vm, AppTheme theme)
     {
         InitializeComponent();
         _vm = vm;
+        DataContext = vm;
+        LayoutCombo.ItemsSource = new[] { new LayoutChoice(10, "10 bands · legacy", true),
+            new LayoutChoice(20, "20 bands · logarithmic", vm.SupportsExtendedEqualizer), new LayoutChoice(31, "31 bands · ISO", vm.SupportsExtendedEqualizer) };
+        LayoutCombo.ItemContainerStyle = new Style(typeof(ComboBoxItem), TryFindResource(typeof(ComboBoxItem)) as Style)
+        { Setters = { new Setter(IsEnabledProperty, new Binding(nameof(LayoutChoice.Available))) } };
 
         SourceInitialized += (_, _) =>
         {
             SetCloak(true);
             ThemeService.Apply(theme, this);
+            ResizeForLayout();
         };
         ContentRendered += async (_, _) =>
         {
@@ -54,13 +62,34 @@ public partial class EqualizerWindow : FluentWindow
 
     public void SyncTheme(AppTheme theme) => ThemeService.Apply(theme, this);
 
+    private sealed record LayoutChoice(int Count, string Label, bool Available)
+    { public override string ToString() => Label; }
+
+    private void ResizeForLayout()
+    {
+        var reference = Owner ?? this;
+        var area = System.Windows.Forms.Screen.FromHandle(new WindowInteropHelper(reference).Handle).WorkingArea;
+        var dpi = VisualTreeHelper.GetDpi(reference);
+        double workWidth = area.Width / dpi.DpiScaleX;
+        Width = Math.Min(_vm.EqualizerBandCount switch { 20 => 960, 31 => 1220, _ => 660 }, Math.Max(600, workWidth - 32));
+        if (IsLoaded && !double.IsNaN(Left))
+            Left = Math.Clamp(Left, area.Left / dpi.DpiScaleX + 8, Math.Max(area.Left / dpi.DpiScaleX + 8, area.Right / dpi.DpiScaleX - Width - 8));
+    }
+
     private void BuildBands()
     {
+        int count = _vm.EqualizerBandCount;
+        BandSliders.Children.Clear(); BandValues.Children.Clear(); BandLabels.Children.Clear();
+        _bands = new Slider[count]; _values = new TextBlock[count];
+        BandSliders.Columns = BandValues.Columns = BandLabels.Columns = count;
+        EqualizerPlot.MinWidth = count * 31 + 94;
+        ResizeForLayout();
         var style = (Style)FindResource("EqSlider");
-        for (int i = 0; i < 10; i++)
+        double[] frequencies = EqualizerLayout.Frequencies(count);
+        for (int i = 0; i < count; i++)
         {
             int band = i;
-            string freq = EqualizerPresets.BandLabels[i];
+            string freq = EqualizerLayout.Label(frequencies[i]);
 
             var value = new TextBlock
             {
@@ -73,7 +102,8 @@ public partial class EqualizerWindow : FluentWindow
             _values[i] = value;
             BandValues.Children.Add(value);
 
-            var slider = new Slider { Style = style, ToolTip = $"{freq}Hz  (double-click: 0 dB)" };
+            var slider = new Slider { Style = style, ToolTip = $"{frequencies[i]:0.###} Hz (double-click: 0 dB)" };
+            System.Windows.Automation.AutomationProperties.SetName(slider, $"Equalizer {frequencies[i]:0.###} Hz");
             slider.ValueChanged += (_, e) =>
             {
                 UpdateValueText(_values[band], e.NewValue);
@@ -112,7 +142,13 @@ public partial class EqualizerWindow : FluentWindow
             case nameof(MainViewModel.IsEqualizerEnabled):
             case nameof(MainViewModel.EqualizerAntiClip):
             case nameof(MainViewModel.EffectiveEqualizerPreamp):
-                Dispatcher.BeginInvoke(SyncFromVm);
+            case nameof(MainViewModel.EqualizerBackendStatus):
+            case nameof(MainViewModel.EqualizerBandCount):
+                if (!_syncPending)
+                {
+                    _syncPending = true;
+                    Dispatcher.BeginInvoke(() => { _syncPending = false; SyncFromVm(); });
+                }
                 break;
         }
     }
@@ -122,14 +158,17 @@ public partial class EqualizerWindow : FluentWindow
         _syncing = true;
         try
         {
+            if (_bands.Length != _vm.EqualizerBandCount) BuildBands();
+            LayoutCombo.SelectedItem = LayoutCombo.Items.Cast<LayoutChoice>().First(choice => choice.Count == _vm.EqualizerBandCount);
             EnableSwitch.IsChecked = _vm.IsEqualizerEnabled;
+            EnableSwitch.IsEnabled = _vm.EqualizerBandCount == 10 || _vm.SupportsExtendedEqualizer;
             AntiClipCheck.IsChecked = _vm.EqualizerAntiClip;
             if (!Equals(PresetCombo.SelectedItem, _vm.EqualizerPreset))
                 PresetCombo.SelectedItem = _vm.EqualizerPreset;
             if (Math.Abs(PreampSlider.Value - _vm.EqualizerPreamp) > 0.001)
                 PreampSlider.Value = _vm.EqualizerPreamp;
             UpdateValueText(PreampValue, PreampSlider.Value);
-            for (int i = 0; i < 10 && i < _vm.EqualizerBands.Length; i++)
+            for (int i = 0; i < _bands.Length; i++)
             {
                 if (Math.Abs(_bands[i].Value - _vm.EqualizerBands[i]) > 0.001)
                     _bands[i].Value = _vm.EqualizerBands[i];
@@ -147,9 +186,7 @@ public partial class EqualizerWindow : FluentWindow
         bool on = _vm.IsEqualizerEnabled;
         CurveLine.Opacity = on ? 0.95 : 0.35;
         CurveFill.Opacity = on ? 0.22 : 0.08;
-        StatusText.Text = on
-            ? $"Effective input gain: {_vm.EffectiveEqualizerPreamp:+0.0;-0.0;0.0} dB"
-            : "Off: enable the equalizer to hear changes";
+        StatusText.Text = (on ? $"Effective input gain: {_vm.EffectiveEqualizerPreamp:+0.0;-0.0;0.0} dB · " : "Off · ") + _vm.EqualizerBackendStatus;
     }
 
     private double DbToY(double db, double h)
@@ -162,7 +199,7 @@ public partial class EqualizerWindow : FluentWindow
         double w = GridCanvas.ActualWidth, h = GridCanvas.ActualHeight;
         if (w <= 0 || h <= 0) return;
 
-        foreach (double db in new[] { 12.0, 6.0, 0.0, -6.0, -12.0 })
+        foreach (double db in new[] { 20.0, 10.0, 0.0, -10.0, -20.0 })
         {
             double y = Math.Round(DbToY(db, h)) + 0.5;
             var line = new Line
@@ -198,12 +235,13 @@ public partial class EqualizerWindow : FluentWindow
         double w = CurveCanvas.ActualWidth, h = CurveCanvas.ActualHeight;
         if (w <= 0 || h <= 0) return;
 
-        var pts = new List<Point>(12);
-        double step = w / 10.0;
+        if (_bands.Length == 0) return;
+        var pts = new List<Point>(_bands.Length + 2);
+        double step = w / _bands.Length;
         pts.Add(new Point(0, DbToY(_bands[0].Value, h)));
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < _bands.Length; i++)
             pts.Add(new Point((i + 0.5) * step, DbToY(_bands[i].Value, h)));
-        pts.Add(new Point(w, DbToY(_bands[9].Value, h)));
+        pts.Add(new Point(w, DbToY(_bands[^1].Value, h)));
 
         var line = new StreamGeometry();
         var fill = new StreamGeometry();
@@ -275,6 +313,12 @@ public partial class EqualizerWindow : FluentWindow
 
     private void PrevPreset_Click(object sender, RoutedEventArgs e) => StepPreset(-1);
     private void NextPreset_Click(object sender, RoutedEventArgs e) => StepPreset(1);
+
+    private void LayoutCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_syncing || LayoutCombo.SelectedItem is not LayoutChoice choice) return;
+        if (!_vm.SetEqualizerLayout(choice.Count)) StatusText.Text = "Build the native DSP module to enable this layout.";
+    }
 
     private void Reset_Click(object sender, RoutedEventArgs e) => _vm.ResetEqualizerCommand.Execute(null);
 

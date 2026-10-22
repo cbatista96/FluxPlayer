@@ -58,7 +58,7 @@ public static class FeatureCatalog
         new FeatureDefinition(PresentationLockControls, "Control lock", "Lock the keyboard and mouse for presentations (Ctrl+L or context menu)."),
         new FeatureDefinition(VolumeNormalization, "Volume normalization", "Playback normalization is pending verified audio-filter processing. Conversion normalization is available in the converter."),
         new FeatureDefinition(DynamicCompressorLimiter, "Compressor/limiter", "Pending a verified playback audio-filter chain."),
-        new FeatureDefinition(Equalizer31Band, "Equalizer + preamp", "10 ISO bands, preamplifier and 30 presets (E)."),
+        new FeatureDefinition(Equalizer31Band, "Equalizer + preamp", "10, 20 or 31 independent native bands, preamplifier and 30 presets (E). Extended layouts require the native DSP module."),
         new FeatureDefinition(AudioProfilesPerDevice, "Per-device profiles", "Save volume, ten-band EQ, preamp and delay per output from Audio and video tools."),
         new FeatureDefinition(HeadphoneCrossfeed, "Headphone crossfeed", "Reduce stereo headphone listening fatigue."),
         new FeatureDefinition(AvSyncOverlayControls, "Overlay A/V adjustment", "Quick synchronization controls."),

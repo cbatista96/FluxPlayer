@@ -1,12 +1,12 @@
 # Feature checklist
 
-**77 implemented · 27 pending · 104 tracked capabilities.**
+**78 implemented · 26 pending · 104 tracked capabilities.**
 
 Each capability appears exactly once. Completing it moves the same stable ID from Pending to Implemented. A setting or catalog entry alone does not complete a feature. Source references describe the implementation; validation limits are documented in [Testing](docs/TESTING.md).
 
 Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Sync-PublicFeatures.ps1`; CI rejects an outdated checklist.
 
-## Implemented (77)
+## Implemented (78)
 
 ### Workspaces and interface
 
@@ -50,15 +50,16 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [x] **F0034** Metadata editing through LibVLC for formats that support saving tags. — MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools
 - [x] **F0035** Synchronized local LRC lyrics and plain text lyrics. — MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools
 - [x] **F0036** CUE sheet chapters and native chapter navigation. — MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools
-- [x] **F0037** Ten-band equalizer with preamplifier and 30 presets. — Native ten-band equalizer, presets and output-profile integration; captured PCM verifies flat bypass level and gain/compensation at 31.25 Hz and 1 kHz.
-- [x] **F0038** Equalizer peak compensation to reduce clipping risk from boosted bands. — MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools
+- [x] **F0037** Native ten-band equalizer with preamplifier and 30 presets, alongside optional extended layouts. — Native ten-band equalizer, presets and output-profile integration; captured PCM verifies flat bypass level and gain/compensation at 31.25 Hz and 1 kHz.
+- [x] **F0038** Equalizer gain compensation; extended layouts estimate the combined filter response. — Native combined-response headroom and acknowledged effective preamp; captured PCM at 20 Hz, middle centers and 20 kHz, including 192/384 kHz inputs. This is not a peak limiter.
 - [x] **F0039** Migration of presets saved by the earlier localized interface. — MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools
 - [x] **F0040** ReplayGain track/album options, preamplification and peak protection. — MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools
 - [x] **F0041** Output device selection, audio tracks, channel options and audio delay. — MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools
 - [x] **F0043** Optional FFmpeg conversion to FLAC, WAV, MP3, Opus, Vorbis, AAC, ALAC and WavPack. — MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools
 - [x] **F0044** Sequential conversion, progress, cancellation and optional loudness normalization. — MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools
 - [x] **F0045** Conversion writes to a temporary file and refuses to overwrite an existing destination. — MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools
-- [x] **F0047** Saved volume, ten-band EQ, preamp, peak compensation and audio delay per output, with recall when selecting an output or starting the player. — AudioOutputProfile / MainViewModel.AudioProfiles / AudioOutputProfilesWindow; independent endpoint persistence, live native delay/volume, mute, boost limit, opt-out, startup, failure isolation and manual headphone-profile review.
+- [x] **F0046** Independent native 20-band logarithmic and 31-band ISO graphic equalizers, with requested gains and preamp within ±20 dB. — Native/FluxDsp, NativeDspBridge and dynamic EqualizerWindow; measured processed PCM, high-rate precision, live layout switching, persistence and visual panel review. Filter-only measurements: docs/NATIVE_DSP.md.
+- [x] **F0047** Saved volume, full 10/20/31-band EQ layout, preamp, gain compensation and audio delay per output, with recall when selecting an output or starting the player. — AudioOutputProfile / MainViewModel.AudioProfiles / AudioOutputProfilesWindow; independent endpoint persistence, live native delay/volume, mute, boost limit, opt-out, startup, failure isolation and manual headphone-profile review. Full native layout/profile recall and unrelated-settings reload are covered by the multiband scenario.
 - [x] **F0098** Create and edit CUE sheets with track titles, artists, sources, ordering and 75-fps start positions. — CueSheet.Write / CueSheetEditorWindow; frame and multi-file regression tests, plus manual edit/save verification with original preservation.
 
 ### Library and playlists
@@ -103,7 +104,7 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [x] **F0087** Source-only public repository and Windows build/test CI. — MediaFormats, MediaService, CI and build scripts
 - [x] **F0088** Local self-contained build profile and Inno Setup source. — MediaFormats, MediaService, CI and build scripts
 
-## Pending (27)
+## Pending (26)
 
 ### Workspaces and interface
 
@@ -121,7 +122,6 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 ### Audio
 
 - [ ] **F0042** Verified playback normalization and compression. The previous option-only controls did not change captured PCM and are disabled. — A native loud-tone acceptance probe found no compression from per-media audio-filter options. Conversion normalization is implemented separately.
-- [ ] **F0046** Real 20-band and 31-band DSP equalizers. The current engine has ten bands.
 - [ ] **F0048** Headphone crossfeed.
 - [ ] **F0049** Verified gapless transitions and crossfade.
 - [ ] **F0050** Advanced DSP chain and measured output quality matrix.
@@ -152,4 +152,4 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 
 ## Compatibility notes
 
-Playback depends on the selected LibVLC runtime, plugins, input and hardware. Universal format support, native DSD, bit-perfect output and a complete hardware matrix are not claimed. Legacy feature identifiers may retain historical names for settings compatibility: `equalizer-31-band-preamp` currently identifies the ten-band equalizer. UI labels describe its actual capability.
+Playback depends on the selected LibVLC runtime, plugins, input and hardware. Universal format support, native DSD, bit-perfect output and a complete hardware matrix are not claimed. The 20/31-band equalizer requires the native DSP module built from source; a legacy-only build retains ten-band processing. UI status identifies actual native acknowledgement.
