@@ -1,0 +1,57 @@
+<ui:FluentWindow x:Class="FluxPlayer.Windows.SubtitleStyleWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    Title="Subtitle styles · FluxPlayer" Width="800" Height="670" MinWidth="760" MinHeight="640"
+    WindowStartupLocation="CenterOwner" ExtendsContentIntoTitleBar="True">
+    <Grid Margin="24,18,24,20">
+        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+        <StackPanel Margin="0,0,0,20">
+            <TextBlock Text="Subtitle style profiles" FontSize="25" FontWeight="SemiBold"/>
+            <TextBlock Text="Save default text-subtitle styles for different viewing conditions. Restart FluxPlayer to apply a changed style. Embedded styling and bitmap subtitles can override these defaults."
+                TextWrapping="Wrap" Margin="0,6,0,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+        </StackPanel>
+        <Grid Grid.Row="1" Margin="0,0,0,20">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+            <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+            <TextBlock Text="Profile name" Grid.ColumnSpan="3" Margin="0,0,0,7"/>
+            <ComboBox x:Name="ProfileBox" Grid.Row="1" IsEditable="True" SelectionChanged="Profile_Changed" MinHeight="36" AutomationProperties.Name="Subtitle profile name"/>
+            <Button Content="Save profile" Grid.Row="1" Click="SaveProfile_Click" Padding="16,8" Margin="8,0,0,0" Grid.Column="1"/>
+            <Button Content="Remove profile" Grid.Row="1" Click="RemoveProfile_Click" Padding="14,8" Margin="8,0,0,0" Grid.Column="2"/>
+        </Grid>
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+            <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+            <StackPanel Margin="0,0,12,16">
+                <TextBlock Text="Font family" Margin="0,0,0,7"/>
+                <TextBox x:Name="FontBox" MaxLength="120" Padding="10,8" AutomationProperties.Name="Subtitle font family"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Margin="0,0,0,16">
+                <TextBlock Text="Font size in video pixels (0 = automatic)" Margin="0,0,0,7"/>
+                <TextBox x:Name="SizeBox" Padding="10,8" AutomationProperties.Name="Subtitle font size"/>
+            </StackPanel>
+            <StackPanel Grid.Row="1" Margin="0,0,12,16">
+                <TextBlock Text="Text color (#RRGGBB)" Margin="0,0,0,7"/>
+                <TextBox x:Name="ColorBox" MaxLength="7" Padding="10,8" AutomationProperties.Name="Subtitle text color"/>
+            </StackPanel>
+            <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,0,16">
+                <TextBlock Text="Outline color (#RRGGBB)" Margin="0,0,0,7"/>
+                <TextBox x:Name="OutlineColorBox" MaxLength="7" Padding="10,8" AutomationProperties.Name="Subtitle outline color"/>
+            </StackPanel>
+            <StackPanel Grid.Row="2" Margin="0,0,12,16">
+                <TextBlock Text="Outline thickness (0–10% of font size)" Margin="0,0,0,7"/>
+                <TextBox x:Name="OutlineBox" Padding="10,8" AutomationProperties.Name="Subtitle outline thickness"/>
+            </StackPanel>
+            <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,0,0,16">
+                <TextBlock Text="Bottom margin in video pixels (0–500)" Margin="0,0,0,7"/>
+                <TextBox x:Name="MarginBox" Padding="10,8" AutomationProperties.Name="Subtitle bottom margin"/>
+            </StackPanel>
+            <CheckBox x:Name="BoldBox" Grid.Row="3" Content="Prefer bold text" Margin="0,4,0,0"/>
+            <CheckBox x:Name="ShadowBox" Grid.Row="3" Grid.Column="1" Content="Text shadow" Margin="0,4,0,0"/>
+        </Grid>
+        <StackPanel Grid.Row="3" Margin="0,18,0,0">
+            <Button Content="Use this style" Click="Apply_Click" Padding="20,9" HorizontalAlignment="Left"/>
+            <TextBlock x:Name="StatusText" Text="Choose a saved profile or enter a name to save a new one. Up to 32 profiles." TextWrapping="Wrap" Margin="0,12,0,0"/>
+        </StackPanel>
+    </Grid>
+</ui:FluentWindow>

@@ -9,17 +9,23 @@ using System.Windows;
 internal static class Program
 {
     private static readonly List<object> Results = new();
+    private static string? TestFilter;
     private static readonly string Root = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../session-state/tests"));
 
     [STAThread]
     private static int Main(string[] args)
     {
+        TestFilter = args.FirstOrDefault(argument => argument.StartsWith("--filter=", StringComparison.Ordinal))?[9..];
         Directory.CreateDirectory(Root);
         var app = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
         int exitCode = 0;
         app.Dispatcher.InvokeAsync(async () =>
         {
-            try { await RunAsync(args.Contains("--managed-only", StringComparer.Ordinal)); }
+            try
+            {
+                await RunAsync(args.Contains("--managed-only", StringComparer.Ordinal));
+                if (Results.Count == 0) throw new ArgumentException("No test groups ran. Check the filter and optional dependencies.");
+            }
             catch (Exception e) { Console.Error.WriteLine(e); exitCode = 1; }
             finally
             {
@@ -35,6 +41,7 @@ internal static class Program
 
     private static async Task Test(string name, Func<Task> body)
     {
+        if (TestFilter != null && !name.Contains(TestFilter, StringComparison.OrdinalIgnoreCase)) return;
         var watch = Stopwatch.StartNew();
         try { await body(); Results.Add(new { name, passed = true, ms = watch.ElapsedMilliseconds }); Console.WriteLine($"PASS {name} ({watch.ElapsedMilliseconds} ms)"); }
         catch (Exception e) { Results.Add(new { name, passed = false, error = e.ToString() }); throw; }
@@ -362,11 +369,37 @@ internal static class Program
             return Task.CompletedTask;
         });
 
+        await Test("Subtitle style profiles: validation, normalized settings, case-insensitive persistence and limits", () =>
+        {
+            Assert(MediaService.SubtitleLanguages(new AppSettings { PreferredSubtitleLanguage = " en, ES " }) == "en,es,any", "Preferred languages with an unknown-language fallback");
+            Assert(MediaService.SubtitleLanguages(new AppSettings { PreferredSubtitleLanguage = "en,none" }) == "en,none", "Explicit language stop preserved");
+            Assert(MediaService.SubtitleLanguages(new AppSettings { ShowSubtitlesByDefault = false }) == "none", "Subtitles disabled by default");
+            var style = new SubtitleStyle("Segoe UI", 28, "#ffcc00", "#102030", 3, true, false, 40); style.Validate();
+            var settings = new AppSettings(); style.Apply(settings);
+            string folder = Path.Combine(Root, "subtitle-styles-" + Guid.NewGuid().ToString("N"));
+            var store = new SettingsService(folder); settings.SubtitleStyleProfiles["Cinema"] = style;
+            Assert(store.Save(settings), "Save style settings");
+            var reopened = store.Load();
+            Assert(reopened.SubtitleStyleProfiles.ContainsKey("cinema") && reopened.SubtitleColor == "#FFCC00"
+                && SubtitleStyle.Capture(reopened) == style with { Color = "#FFCC00" }, "Style persistence and canonical color");
+            Assert(reopened.SubtitleStyleProfiles["CINEMA"].NativeOptions().Contains(":freetype-color=16763904"), "RGB color passed as a numeric native option");
+            foreach (var invalid in new[] { new SubtitleStyle(Font: "bad\nfont"), new SubtitleStyle(Color: "red"), new SubtitleStyle(Color: "#FFFFF "), new SubtitleStyle(FontSize: 145), new SubtitleStyle(VerticalMargin: -1), new SubtitleStyle(OutlineColor: "#1234567") })
+            {
+                bool rejected = false; try { invalid.Validate(); } catch (ArgumentException) { rejected = true; }
+                Assert(rejected, "Invalid style rejected");
+            }
+            settings.SubtitleStyleProfiles = Enumerable.Range(0, 40).ToDictionary(index => "Profile " + index, _ => style);
+            settings.SubtitleFont = ""; settings.SubtitleColor = "invalid"; settings.SubtitleFontSize = -100;
+            Assert(store.Save(settings) && store.Load().SubtitleStyleProfiles.Count == 32 && settings.SubtitleFontSize == 0
+                && settings.SubtitleColor == "#FFFFFF" && settings.SubtitleFont == "Segoe UI", "Bounded profiles and malformed settings normalization");
+            return Task.CompletedTask;
+        });
+
         // CI verifies managed services without requiring an interactive audio device.
         if (managedOnly) return;
 
         using var engine = new MediaService(hardwareDecoding: false, enableDiagnosticLogging: false);
-        using var renderer = new VlcWpfRenderer(engine.MediaPlayer, new System.Windows.Controls.Image());
+        using var renderer = new VlcWpfRenderer(engine, new System.Windows.Controls.Image());
         await Test("Native engine: PCM detection and duration independent of file extension", async () =>
         {
             Assert(engine.GetAudioDevices().Any(device => device.Id == "Default"), "Selectable output device");
@@ -484,6 +517,67 @@ internal static class Program
                     && (await engine.ReadMetadataAsync(second))?.Artist == "Batch artist ñ", "Completed changes retained; next file untouched");
             });
 
+            await Test("Native subtitle styles: actual text color, font size and margin in displayed frames", async () =>
+            {
+                string folder = Path.Combine(Root, "native-subtitle-style-" + Guid.NewGuid().ToString("N")); Directory.CreateDirectory(folder);
+                string subtitles = Path.Combine(folder, "text.srt"), video = Path.Combine(folder, "black.mkv");
+                SubtitleEditingService.WriteSrt(subtitles, new[] { new SubtitleCue(0, 4000, "STYLE TEST") });
+                var start = new ProcessStartInfo(ConversionService.FindExecutable()!) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardError = true };
+                foreach (string value in new[] { "-nostdin", "-hide_banner", "-loglevel", "error", "-n", "-f", "lavfi", "-i", "color=c=black:size=320x180:rate=25", "-i", subtitles, "-t", "4", "-c:v", "libx264", "-preset", "ultrafast", "-c:s", "srt", video }) start.ArgumentList.Add(value);
+                using var ffmpeg = Process.Start(start)!; var errors = ffmpeg.StandardError.ReadToEndAsync(); await ffmpeg.WaitForExitAsync(); Assert(ffmpeg.ExitCode == 0, await errors);
+                var samples = new List<(int Pixels, double MeanY, int Width)>(); int index = 0;
+                foreach (var style in new[] { new SubtitleStyle(FontSize: 24, Color: "#FF0000", Shadow: false, VerticalMargin: 5), new SubtitleStyle(FontSize: 18, Color: "#00FF00", Shadow: false, VerticalMargin: 40), new SubtitleStyle(Font: "Consolas", FontSize: 24, Color: "#FF0000", Shadow: false, VerticalMargin: 5) })
+                {
+                    using var styledEngine = new MediaService(hardwareDecoding: true, ultraFastStartup: true, enableDiagnosticLogging: false, subtitleStyle: style);
+                    using var styledRenderer = new VlcWpfRenderer(styledEngine, new System.Windows.Controls.Image());
+                    styledEngine.PlaybackSettings = new AppSettings { AutoLoadSubtitles = false, PreferredSubtitleLanguage = "" };
+                    styledEngine.PlayFile(video);
+                    await Until(() => Task.FromResult(styledEngine.IsPlaying && styledEngine.GetTime() > 600 && styledEngine.MediaPlayer.Spu >= 0), 5000);
+                    bool opaque = styledEngine.HasOpaqueVideoSurface;
+                    Assert(await styledEngine.EnsureSubtitleCompositionAsync() == opaque && styledEngine.UsesSubtitleSoftwareFallback == opaque, "Only an actual opaque surface triggers subtitle composition fallback");
+                    styledEngine.SeekTo(0);
+                    await Until(() => Task.FromResult(styledEngine.GetTime() > 500), 3000);
+                    await Task.Delay(150);
+                    bool red = index != 1;
+                    var sample = CountSubtitlePixels(styledRenderer, red); index++;
+                    Assert(sample.Pixels > 20, $"Styled text rendered with the requested color: {style.Color}, colored pixels {sample.Pixels}");
+                    string snapshot = Path.Combine(folder, $"subtitle-{index}.png"); await styledEngine.CaptureSnapshotAsync(snapshot);
+                    using (var imageFile = File.OpenRead(snapshot))
+                    {
+                        var image = new System.Windows.Media.Imaging.FormatConvertedBitmap(System.Windows.Media.Imaging.BitmapFrame.Create(imageFile,
+                            System.Windows.Media.Imaging.BitmapCreateOptions.PreservePixelFormat, System.Windows.Media.Imaging.BitmapCacheOption.OnLoad), System.Windows.Media.PixelFormats.Bgr24, null, 0);
+                        var bytes = new byte[image.PixelWidth * image.PixelHeight * 3]; image.CopyPixels(bytes, image.PixelWidth * 3, 0);
+                        Assert(CountSubtitlePixels(bytes, image.PixelWidth, image.PixelHeight, red).Pixels > 20, "Native snapshot includes the rendered subtitles");
+                    }
+                    samples.Add(sample); styledEngine.Stop();
+                    styledEngine.PlaybackSettings.ShowSubtitlesByDefault = false; styledEngine.PlayFile(video);
+                    await Until(() => Task.FromResult(styledEngine.IsPlaying && styledEngine.GetTime() > 500 && styledEngine.GetSubtitleTracks().Any(track => track.Id >= 0)), 5000);
+                    Assert(styledEngine.MediaPlayer.Spu == -1, "Show subtitles by default false actually disables the native track");
+                    styledEngine.Pause();
+                    long pausedAt = styledEngine.GetTime();
+                    Assert(styledEngine.LoadSubtitle(subtitles), "Attach external subtitles while hardware playback is paused");
+                    await Until(() => Task.FromResult(styledEngine.MediaPlayer.Spu >= 0), 3000);
+                    opaque = styledEngine.HasOpaqueVideoSurface;
+                    Assert(await styledEngine.EnsureSubtitleCompositionAsync() == opaque, "Paused external subtitle composition handles the actual decoder surface");
+                    await Until(() => Task.FromResult(styledEngine.MediaPlayer.State == LibVLCSharp.Shared.VLCState.Paused), 3000);
+                    Assert(styledEngine.GetSubtitleTracks().Count(track => track.Id >= 0) >= 2 && styledEngine.MediaPlayer.Spu >= 0
+                        && Math.Abs(styledEngine.GetTime() - pausedAt) < 1000, "External subtitles, selected track, position and pause survive the decoder change");
+                    styledEngine.Stop();
+                    if (index == 3)
+                    {
+                        styledEngine.PlayFile(video);
+                        await Until(() => Task.FromResult(styledEngine.IsPlaying && styledEngine.GetTime() > 300), 4000);
+                        Assert(styledEngine.LoadSubtitle(subtitles), "Prepare stop during decoder transition");
+                        await Until(() => Task.FromResult(styledEngine.MediaPlayer.Spu >= 0), 3000);
+                        var pending = styledEngine.EnsureSubtitleCompositionAsync(); styledEngine.Stop(); await pending;
+                        Assert(styledEngine.MediaPlayer.State == LibVLCSharp.Shared.VLCState.Stopped, "Stop cancels pending subtitle restoration without restarting playback");
+                    }
+                }
+                Assert(samples[1].Pixels < samples[0].Pixels && samples[1].MeanY < samples[0].MeanY - 10, "Smaller text and increased bottom margin affect the actual image");
+                if (System.Windows.Media.Fonts.SystemFontFamilies.Any(font => font.Source == "Consolas"))
+                    Assert(samples[2].Width != samples[0].Width, "Changing the installed font family changes the glyph geometry");
+            });
+
             await Test("Real video: H.264/AAC, MKV, classification and automatic mode switching", async () =>
             {
                 string video = Path.Combine(Root, "video-test.mkv");
@@ -499,6 +593,7 @@ internal static class Program
                 await Until(() => Task.FromResult(vm.IsPlaying && vm.ActiveMode == PlayerMode.Video), 8000);
                 await Until(() => Task.FromResult(renderer.CurrentBitmap != null && engine.MediaPlayer.VoutCount > 0 && engine.GetTime() > 50), 5000);
                 await Until(() => Task.FromResult(vm.SubtitleTracks.Count(track => track.Id >= 0) == 1), 3000);
+                Assert(vm.SelectedSubtitleTrack?.Id >= 0, "Default language preference falls back to the unlabeled embedded track");
                 Assert(vm.SubtitleTracks.Count(track => track.Id == -1) == 1, "One disabled subtitle entry");
                 vm.SelectedSubtitleTrack = vm.SubtitleTracks.Single(track => track.Id == -1);
                 await Task.Delay(250);
@@ -587,6 +682,29 @@ internal static class Program
                 vm.StopCommand.Execute(null); await vm.ShutdownAsync();
             });
         }
+    }
+
+    private static (int Pixels, double MeanY, int Width) CountSubtitlePixels(VlcWpfRenderer renderer, bool red)
+    {
+        const int width = 320, height = 180, stride = width * 3;
+        var pixels = new byte[stride * height]; Assert(renderer.TrySampleFrame(pixels, width, height), "Displayed frame is readable");
+        var frame = System.Windows.Media.Imaging.BitmapSource.Create(width, height, 96, 96, System.Windows.Media.PixelFormats.Bgr24, null, pixels, stride);
+        var encoder = new System.Windows.Media.Imaging.PngBitmapEncoder(); encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(frame));
+        using (var output = File.Create(Path.Combine(Root, "displayed-subtitle-style-" + (red ? "red" : "green") + ".png"))) encoder.Save(output);
+        return CountSubtitlePixels(pixels, width, height, red);
+    }
+
+    private static (int Pixels, double MeanY, int Width) CountSubtitlePixels(byte[] pixels, int width, int height, bool red)
+    {
+        int stride = width * 3, count = 0, firstX = width, lastX = -1; long ySum = 0;
+        for (int y = 0; y < height; y++)
+            for (int x = 0; x < width; x++)
+            {
+                int pixel = y * stride + x * 3;
+                if (pixels[pixel] < 90 && (red ? pixels[pixel + 2] > 160 && pixels[pixel + 1] < 90 : pixels[pixel + 1] > 160 && pixels[pixel + 2] < 90))
+                { count++; ySum += y; firstX = Math.Min(firstX, x); lastX = Math.Max(lastX, x); }
+            }
+        return (count, count == 0 ? 0 : (double)ySum / count, Math.Max(0, lastX - firstX + 1));
     }
 
     private static async Task Until(Func<Task<bool>> predicate, int timeoutMs)

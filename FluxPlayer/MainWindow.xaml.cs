@@ -68,7 +68,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         _runtimeSettings = _vm.CurrentSettings;
 
         if (_vm.MediaPlayer != null)
-            _videoRenderer = new VlcWpfRenderer(_vm.MediaPlayer, VideoImage);
+            _videoRenderer = new VlcWpfRenderer(_vm.Engine, VideoImage);
 
         _vm.ThemeChangeRequested += (_, theme) =>
         {
@@ -1277,7 +1277,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
     {
         _vm.SeekToPercent(targetPercent);
         _vm.SeekPosition = targetPercent;
-        ShowActionOsd("\uE102", $"Search {targetPercent:0}%");
+        ShowActionOsd("\uE102", $"Seek {targetPercent:0}%");
         _isSeekDragging = false;
         int token = ++_seekRequestToken;
         _ = Task.Run(async () =>

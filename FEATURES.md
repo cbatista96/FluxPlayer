@@ -1,12 +1,12 @@
 # Feature checklist
 
-**74 implemented · 26 pending · 100 tracked capabilities.**
+**75 implemented · 26 pending · 101 tracked capabilities.**
 
 Each capability appears exactly once. Completing it moves the same stable ID from Pending to Implemented. A setting or catalog entry alone does not complete a feature. Source references describe the implementation; validation limits are documented in [Testing](docs/TESTING.md).
 
 Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Sync-PublicFeatures.ps1`; CI rejects an outdated checklist.
 
-## Implemented (74)
+## Implemented (75)
 
 ### Workspaces and interface
 
@@ -82,7 +82,7 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 
 - [x] **F0068** Embedded and external subtitles supported by LibVLC. — MediaService and coalesced ES track refresh; native embedded SubRip/external SRT selection tests, Disabled preservation and file URI handling for Unicode/spaces/#.
 - [x] **F0069** Subtitle track selection, auto loading, language preference and timing offset. — MediaService and coalesced ES track refresh; native embedded SubRip/external SRT selection tests, Disabled preservation and file URI handling for Unicode/spaces/#.
-- [x] **F0070** Subtitle display options exposed through the current renderer. — MediaService, MainWindow.Features, SubtitleDocument and ThumbnailService
+- [x] **F0070** Default text-subtitle font, size, colors, outline, shadow, bold text and bottom margin settings. — Validated native instance options with restart semantics. Installed font, size, color and margin effects verified in actual displayed frames; italic/top/center overrides remain pending.
 - [x] **F0071** Text search in external SRT, VTT and ASS subtitle files with seek-to-result. — MediaService, MainWindow.Features, SubtitleDocument and ThumbnailService
 - [x] **F0072** Bookmarks and chapter navigation. — MediaService, MainWindow.Features, SubtitleDocument and ThumbnailService
 - [x] **F0073** Timeline thumbnail previews generated on demand. — MediaService, MainWindow.Features, SubtitleDocument and ThumbnailService
@@ -92,6 +92,7 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [x] **F0077** Ambient light sampled from the displayed frame. — MediaService, MainWindow.Features, SubtitleDocument and ThumbnailService
 - [x] **F0078** A–B clip export through LibVLC, with copy and transcode paths. — MediaService, MainWindow.Features, SubtitleDocument and ThumbnailService
 - [x] **F0080** Live subtitle delay controls, cue navigation, two-anchor drift correction and corrected SRT copy export. — SubtitleTiming / SubtitleEditingService / SubtitleTimingWindow; anchor, clipping, limits, cancellation and export tests, native offsets and manual save/load verification.
+- [x] **F0081** Up to 32 named default text-subtitle style profiles, applied when the player restarts. — SubtitleStyle / SubtitleStyleWindow / startup options; persistence, limits, rendered color/size/margin/font geometry, snapshot content and saved-profile restart UI checks.
 - [x] **F0084** Explicit scheduled snapshot jobs with interval, image limit, format, folder, progress and stop. — SnapshotSchedule / SnapshotScheduleWindow; sequential/cancellation tests, native capture and manual two-image completion review.
 
 ### Network and distribution
@@ -134,10 +135,10 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 ### Video and subtitles
 
 - [ ] **F0079** Automatic subtitle provider downloads.
-- [ ] **F0081** Saved subtitle style profiles.
 - [ ] **F0082** Bilingual subtitle display.
 - [ ] **F0083** OCR of burned-in subtitles.
 - [ ] **F0085** Complete HDR/color management validation.
+- [ ] **F0101** Accelerated subtitle composition on the WPF memory-video surface without a software decoder fallback.
 
 ### Network and distribution
 

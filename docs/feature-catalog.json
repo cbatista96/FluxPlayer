@@ -485,9 +485,9 @@
   {
     "Id": "F0070",
     "Area": "Video and subtitles",
-    "Description": "Subtitle display options exposed through the current renderer.",
+    "Description": "Default text-subtitle font, size, colors, outline, shadow, bold text and bottom margin settings.",
     "Status": "implemented",
-    "Evidence": "MediaService, MainWindow.Features, SubtitleDocument and ThumbnailService"
+    "Evidence": "Validated native instance options with restart semantics. Installed font, size, color and margin effects verified in actual displayed frames; italic/top/center overrides remain pending."
   },
   {
     "Id": "F0071",
@@ -562,9 +562,9 @@
   {
     "Id": "F0081",
     "Area": "Video and subtitles",
-    "Description": "Saved subtitle style profiles.",
-    "Status": "pending",
-    "Evidence": ""
+    "Description": "Up to 32 named default text-subtitle style profiles, applied when the player restarts.",
+    "Status": "implemented",
+    "Evidence": "SubtitleStyle / SubtitleStyleWindow / startup options; persistence, limits, rendered color/size/margin/font geometry, snapshot content and saved-profile restart UI checks."
   },
   {
     "Id": "F0082",
@@ -698,5 +698,12 @@
     "Description": "Batch editing of selected title, artist, album and genre tags, with explicit clearing, per-file results, progress and cancellation.",
     "Status": "implemented",
     "Evidence": "BatchTagService / BatchTagEditorWindow / TagLibSharp; eight-format tag/playback checks, preserved artwork and custom metadata, library refresh, cancellation and a two-file manual UI review."
+  },
+  {
+    "Id": "F0101",
+    "Area": "Video and subtitles",
+    "Description": "Accelerated subtitle composition on the WPF memory-video surface without a software decoder fallback.",
+    "Status": "pending",
+    "Evidence": ""
   }
 ]

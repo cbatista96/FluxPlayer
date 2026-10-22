@@ -93,6 +93,15 @@ public class SettingsService
         // The public source currently ships a single English interface.
         settings.Language = "English";
         settings.EqualizerPreset = EqualizerPresets.Normalize(settings.EqualizerPreset);
+        SubtitleStyle.Normalize(SubtitleStyle.Capture(settings)).Apply(settings);
+        var subtitleProfiles = new Dictionary<string, SubtitleStyle>(StringComparer.OrdinalIgnoreCase);
+        foreach (var pair in settings.SubtitleStyleProfiles ?? new())
+        {
+            string name = pair.Key.Trim();
+            if (name.Length is < 1 or > 80 || name.Any(char.IsControl) || subtitleProfiles.Count >= 32) continue;
+            subtitleProfiles[name] = SubtitleStyle.Normalize(pair.Value);
+        }
+        settings.SubtitleStyleProfiles = subtitleProfiles;
         var featureFlags = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
         if (settings.FeatureFlags != null)
         {

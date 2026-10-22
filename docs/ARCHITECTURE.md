@@ -31,6 +31,8 @@ Display notifications are coalesced so at most one WPF invalidation is queued. R
 
 This presentation path avoids full-frame managed copies on the UI dispatcher. Its actual cost still depends on resolution, decoding, memory bandwidth, WPF composition and hardware. Hardware decoding is requested where configured; the complete display path is not claimed to be a universal GPU zero-copy pipeline.
 
+The format callback reports the original source FourCC before requesting RV32. VLC 3 can attempt to blend YUVA subtitles into an opaque DX11 surface before conversion, which fails. Only a detected Windows opaque surface with an active subtitle triggers the bounded software-decoder transition. Sources that already deliver CPU-compatible frames do not restart. The transition retains position, pause and up to 16 explicitly loaded subtitle sources; Stop and a new source cancel pending restoration. Disposal cancels and drains the operation before native objects are released. Recovery does not reintroduce a hardware profile on that source after subtitle compatibility fallback. A GPU-composed presentation path remains unimplemented.
+
 ## Startup and background work
 
 - Load library state lazily. File enumeration and batch construction run outside the dispatcher.
@@ -52,6 +54,8 @@ Scheduled captures are explicit bounded jobs. Each attempt completes before anot
 ## Data and compatibility
 
 Subtitle track additions, removals and selection events only enqueue a coalesced dispatcher refresh; native callbacks never query the player directly. Collection replacement suppresses selection write-back, preserving the actual native selection and a single Disabled entry. External subtitle paths are converted to absolute file URIs before `AddSlave`, which requires a scheme.
+
+Native default text styles are applied to the LibVLC instance at startup, matching the renderer's variable inheritance. Applying freetype options to individual media objects was verified to leave the default rendering unchanged in this pipeline. Style changes are therefore persisted for the next player start. Named styles are validated and bounded to 32 entries. No additional text renderer, per-frame managed styling or profile polling is introduced. See the [upstream FreeType options](https://github.com/videolan/vlc/blob/3.0.21/modules/text_renderer/freetype/freetype.c#L141) and [VLC 3 composition order](https://github.com/videolan/vlc/blob/3.0.21/src/video_output/video_output.c#L930).
 
 The subtitle timing editor transforms text cues on demand using decimal scale/offset arithmetic. Parsing and SRT output are bounded to 16 MB and 100,000 cues. Exports finish in a temporary file before publication, and the editor requires a different path from the original. Live native delay and exported timing are independent; loading an exported copy clears live delay. This tool does not introduce a per-frame scan or idle timer.
 

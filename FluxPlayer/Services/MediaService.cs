@@ -48,7 +48,8 @@ public partial class MediaService : IDisposable
         bool adaptiveCacheBySource = true,
         bool ultraFastStartup = false,
         bool enableDiagnosticLogging = true,
-        bool resumePlaybackPerFile = false)
+        bool resumePlaybackPerFile = false,
+        SubtitleStyle? subtitleStyle = null)
     {
         _hardwareDecoding = hardwareDecoding;
         _videoOutputModule = string.IsNullOrWhiteSpace(videoOutputModule)
@@ -90,6 +91,8 @@ public partial class MediaService : IDisposable
             "--no-lua",
             "--no-media-library"
         };
+        // The text renderer inherits instance settings; per-media freetype options are ineffective here.
+        vlcOptions.AddRange(SubtitleStyle.Normalize(subtitleStyle).NativeOptions().Select(option => "--" + option[1..]));
 
         // Generate a missing cache only in a writable plugin directory.
         if (ShouldBuildPluginCache(pluginDir))
@@ -153,21 +156,27 @@ public partial class MediaService : IDisposable
 
     public void PlayFile(string path)
     {
-        Interlocked.Exchange(ref _recoveringProfile, 0);
-        try
+        lock (_playbackStateLock)
         {
-            if (MediaPlayer.Media != null || MediaPlayer.IsPlaying)
-                MediaPlayer.Stop();
-        }
-        catch
-        {
+            if (_disposed) return;
+            _sourceGeneration++; UsesSubtitleSoftwareFallback = false; _opaqueVideoSurface = false; _externalSubtitleSources.Clear();
+            _subtitleTransition?.Cancel();
+            Interlocked.Exchange(ref _recoveringProfile, 0);
+            try
+            {
+                if (MediaPlayer.Media != null || MediaPlayer.IsPlaying)
+                    MediaPlayer.Stop();
+            }
+            catch
+            {
 
-        }
+            }
 
-        _currentSourcePath = path;
-        _activePlaybackProfileIndex = 0;
-        WriteDiagnostic($"PlayFile | Source={path}");
-        PlayWithActiveProfile(path);
+            _currentSourcePath = path;
+            _activePlaybackProfileIndex = 0;
+            WriteDiagnostic($"PlayFile | Source={path}");
+            PlayWithActiveProfile(path);
+        }
     }
 
     private void PlayWithActiveProfile(string path)
@@ -182,6 +191,10 @@ public partial class MediaService : IDisposable
             : new Uri(path, UriKind.Absolute);
 
         _currentMedia = new Media(_libVLC, uri);
+        for (int index = 0; index < _externalSubtitleSources.Count; index++)
+            if (File.Exists(_externalSubtitleSources[index]))
+                _currentMedia.AddSlave(MediaSlaveType.Subtitle, index == _externalSubtitleSources.Count - 1 ? 4u : 2u,
+                    new Uri(_externalSubtitleSources[index]));
         ApplyMediaOptions(_currentMedia);
         MediaPlayer.EnableHardwareDecoding = profile.HardwareDecoding;
         _currentMedia.AddOption(profile.HardwareDecoding ? ":avcodec-hw=any" : ":avcodec-hw=none");
@@ -223,6 +236,7 @@ public partial class MediaService : IDisposable
         try
         {
             var nextIndex = _activePlaybackProfileIndex + 1;
+            while (nextIndex < _playbackProfiles.Count && UsesSubtitleSoftwareFallback && _playbackProfiles[nextIndex].HardwareDecoding) nextIndex++;
             if (nextIndex >= _playbackProfiles.Count)
             {
                 WriteDiagnostic("TryRecoverVideoOutput | No more profiles");
@@ -303,8 +317,14 @@ public partial class MediaService : IDisposable
 
     public void Stop()
     {
-        if (!_disposed && MediaPlayer.Media != null)
-            MediaPlayer.Stop();
+        lock (_playbackStateLock)
+        {
+            _sourceGeneration++;
+            _subtitleTransition?.Cancel();
+            Interlocked.Exchange(ref _recoveringProfile, 0);
+            if (!_disposed && MediaPlayer.Media != null)
+                MediaPlayer.Stop();
+        }
     }
 
     public bool IsPlaying => MediaPlayer.IsPlaying;
@@ -418,9 +438,17 @@ public partial class MediaService : IDisposable
 
     public bool LoadSubtitle(string path)
     {
-        if (_disposed || MediaPlayer.Media == null || MediaFormats.IsNetwork(path) || !File.Exists(path)) return false;
-        // AddSlave expects an MRL with a scheme, including for Windows paths and Unicode filenames.
-        return MediaPlayer.AddSlave(MediaSlaveType.Subtitle, new Uri(Path.GetFullPath(path)).AbsoluteUri, true);
+        lock (_playbackStateLock)
+        {
+            if (_disposed || MediaPlayer.Media == null || MediaFormats.IsNetwork(path) || !File.Exists(path)) return false;
+            // AddSlave expects an MRL with a scheme, including for Windows paths and Unicode filenames.
+            path = Path.GetFullPath(path);
+            bool exists = _externalSubtitleSources.Contains(path, StringComparer.OrdinalIgnoreCase);
+            if (!exists && _externalSubtitleSources.Count >= 16) return false;
+            if (!MediaPlayer.AddSlave(MediaSlaveType.Subtitle, new Uri(path).AbsoluteUri, true)) return false;
+            _externalSubtitleSources.RemoveAll(source => string.Equals(source, path, StringComparison.OrdinalIgnoreCase));
+            _externalSubtitleSources.Add(path); return true;
+        }
     }
 
     public void ApplyEqualizer(float[] bands, float preamp = 0f)
@@ -529,6 +557,8 @@ public partial class MediaService : IDisposable
     {
         if (Interlocked.Exchange(ref _disposeStarted, 1) != 0) return;
         _disposed = true;
+        _subtitleCompositionLifetime.Cancel();
+        _subtitleCompositionGate.Wait();
         StopSnapshotOperations();
         // No native media parse may outlive the LibVLC instance it belongs to.
         _durationParseGate.Wait();
@@ -551,6 +581,8 @@ public partial class MediaService : IDisposable
             _diagnosticWriter = null;
         }
         _libVLC.Dispose();
+        _subtitleCompositionLifetime.Dispose();
+        _subtitleCompositionGate.Release();
         _durationParseGate.Release();
 
     }

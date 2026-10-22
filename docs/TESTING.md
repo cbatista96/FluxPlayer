@@ -6,7 +6,7 @@ The regression suite is an executable Windows/WPF harness. A failed assertion re
 
 ```powershell
 dotnet build FluxPlayer.sln -c Release -p:Platform=x64 -warnaserror
-dotnet run --project FluxPlayer.Tests/FluxPlayer.Tests.csproj -c Release -- --managed-only
+dotnet run --project FluxPlayer.Tests/FluxPlayer.Tests.csproj -c Release --no-build -- --managed-only
 ```
 
 The managed suite covers:
@@ -26,13 +26,14 @@ The managed suite covers:
 13. Bounded snapshot scheduling, skipped intervals, non-overlap and cancellation before capture.
 14. Metadata patch validation and the distinction between omitted fields and explicit clearing.
 15. Subtitle offset/drift correction, anchor validation, clipping before zero, long timestamps, Unicode SRT export, cancellation, overwrite refusal and rejection of excessive cue counts instead of silent truncation.
+16. Named subtitle styles, strict color validation, settings normalization, case-insensitive persistence, native option mapping and the 32-profile bound.
 
 GitHub Actions builds on Windows and runs these checks without publishing artifacts or creating releases. Its test invocation deliberately avoids native playback, which requires an interactive output environment.
 
 ## Full local suite
 
 ```powershell
-dotnet run --project FluxPlayer.Tests/FluxPlayer.Tests.csproj -c Release
+dotnet run --project FluxPlayer.Tests/FluxPlayer.Tests.csproj -c Release --no-build
 ```
 
 Run in a Windows desktop session. The full suite also checks decoded-track detection independent of file extension, transport behavior and real native playback. When FFmpeg is found, it additionally checks canceled job cleanup and converts eight profiles, then reads metadata and plays the outputs with LibVLC. Tag saving, artwork and lyric sidecar paths are exercised with synthetic inputs.
@@ -46,6 +47,12 @@ With FFmpeg available, tag saves and subsequent LibVLC playback are checked for 
 The native transport scenario also verifies actual PNG/JPEG/BMP file signatures, snapshot overwrite refusal and temporary cleanup, two scheduled native frames, audio/subtitle offset values and persistence, and playback from a restored queue with missing files removed. Frame stepping compares sampled pixels while playback remains paused; LibVLC's reported time is not guaranteed to advance on every single frame.
 
 The generated MKV contains an internal SubRip track. The test disables that track and checks that a subsequent track refresh preserves the choice, then attaches a second SRT with Unicode, spaces and `#` in its filename. It checks the new track and selected ID in the bound list after playback's initial parsing has finished. Manual UI verification exported two corrected cues at 110% scale plus 500 ms, checked the file contents and original hash, applied a live delay, and loaded the saved copy with live delay reset.
+
+The style scenario measures colored text pixels in the actual WPF display buffer on a black synthetic video. It checks different colors, sizes, bottom margins and installed font geometry, then confirms the native snapshot includes the subtitles. It requests hardware decoding and checks that only an actual opaque surface triggers compatibility fallback. A paused external subtitle, selected track and position survive the switch; Stop cancels pending restoration. Disabling subtitle defaults is checked natively. Manual UI review saved a red profile, restarted FluxPlayer and confirmed visible styled text in the main window.
+
+On hardware capable of reproducing the VLC 3 DX11 blending problem, that scenario intentionally encounters native YUVA/DX11 diagnostics before switching to the compatible path. This is separate from a claim that the hardware path itself supports accelerated subtitle composition.
+
+To rerun a focused group after a relevant change, append `-- --filter="Native subtitle styles"` to the test command. A filter that runs no groups fails instead of reporting an empty success.
 
 Rapid source switching or teardown can emit native diagnostics on stderr about unsupported on-top behavior or prevented buffer deadlocks even when assertions pass. A passing regression run is not a complete decoder stress test or hardware/performance certification.
 

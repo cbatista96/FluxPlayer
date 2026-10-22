@@ -5,6 +5,7 @@ namespace FluxPlayer.ViewModels;
 public partial class MainViewModel
 {
     private int _trackRefreshScheduled;
+    private int _trackRefreshDirty;
     private volatile bool _shuttingDown;
     public string? LoadedSubtitlePath { get; private set; }
 
@@ -16,7 +17,9 @@ public partial class MainViewModel
 
     private void OnTracksChanged(object? sender, EventArgs e)
     {
-        if (_shuttingDown || Interlocked.Exchange(ref _trackRefreshScheduled, 1) != 0) return;
+        if (_shuttingDown) return;
+        Interlocked.Exchange(ref _trackRefreshDirty, 1);
+        if (Interlocked.Exchange(ref _trackRefreshScheduled, 1) != 0) return;
         _ = RefreshChangedTracksAsync(_mediaChangeToken);
     }
 
@@ -26,14 +29,20 @@ public partial class MainViewModel
         {
             // A short, coalesced refresh leaves the native ES callback before querying the player.
             await Task.Delay(150).ConfigureAwait(false);
+            Interlocked.Exchange(ref _trackRefreshDirty, 0);
             var dispatcher = Application.Current?.Dispatcher;
             if (_shuttingDown || dispatcher == null || dispatcher.HasShutdownStarted) return;
+            await _mediaService.EnsureSubtitleCompositionAsync().ConfigureAwait(false);
             await dispatcher.InvokeAsync(() =>
             {
                 if (!_shuttingDown && sourceToken == _mediaChangeToken) RefreshTracks();
             });
         }
         catch (InvalidOperationException) { }
-        finally { Interlocked.Exchange(ref _trackRefreshScheduled, 0); }
+        finally
+        {
+            Interlocked.Exchange(ref _trackRefreshScheduled, 0);
+            if (!_shuttingDown && Volatile.Read(ref _trackRefreshDirty) != 0) OnTracksChanged(null, EventArgs.Empty);
+        }
     }
 }

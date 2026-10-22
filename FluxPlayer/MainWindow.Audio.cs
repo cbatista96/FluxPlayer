@@ -16,6 +16,7 @@ public partial class MainWindow
     private SnapshotScheduleWindow? _snapshotScheduleWindow;
     private BatchTagEditorWindow? _batchTagWindow;
     private SubtitleTimingWindow? _subtitleTimingWindow;
+    private SubtitleStyleWindow? _subtitleStyleWindow;
     private bool _audioLayoutApplied;
     private Size _videoModeSize = new(1280, 760);
     private int _videoRotation;
@@ -173,6 +174,13 @@ public partial class MainWindow
         _subtitleTimingWindow.Closed += (_, _) => _subtitleTimingWindow = null;
         _subtitleTimingWindow.Show();
     }
+    private void SubtitleStyles_Click(object sender, RoutedEventArgs e)
+    {
+        if (_subtitleStyleWindow != null) { _subtitleStyleWindow.Activate(); return; }
+        _subtitleStyleWindow = new SubtitleStyleWindow(this, _vm);
+        _subtitleStyleWindow.Closed += (_, _) => _subtitleStyleWindow = null;
+        _subtitleStyleWindow.Show();
+    }
     private void OpenCueButton_Click(object sender, RoutedEventArgs e) => MediaToolsWindows.ShowCueSheet(this, _vm);
     private void EditCueButton_Click(object sender, RoutedEventArgs e)
     {
@@ -202,6 +210,8 @@ public partial class MainWindow
         string dsp = _vm.IsEqualizerEnabled ? $"Equalizer (10 bands), preamp {_vm.EffectiveEqualizerPreamp:0.0} dB" : "Equalizer disabled";
         MediaToolsWindows.ShowText(this, "Signal path", _vm.GetMediaInfo() +
             $"\n\nDecoder: LibVLC {_vm.LibVLC?.Version}\n{dsp}\nReplayGain: {_vm.CurrentSettings.ReplayGainMode}" +
+            $"\nPlayback profile: {_vm.Engine.GetActivePlaybackProfileName()}" +
+            (_vm.Engine.UsesSubtitleSoftwareFallback ? " (software subtitle composition)" : "") +
             $"\nOutput: {_vm.CurrentSettings.AudioOutputDevice}\nVolume: {_vm.Volume:0}% · Speed: {_vm.PlaybackRate:0.##}×" +
             "\n\nWindows shared output may resample the signal. This path does not guarantee bit-perfect playback or native DSD.");
     }

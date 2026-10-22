@@ -70,7 +70,8 @@ public partial class App : Application
             adaptiveCacheBySource: adaptiveCache,
             ultraFastStartup: ultraFastStartup,
             enableDiagnosticLogging: localTelemetry,
-            resumePlaybackPerFile: resumePerFile));
+            resumePlaybackPerFile: resumePerFile,
+            subtitleStyle: SubtitleStyle.Capture(startupSettings)));
         services.AddSingleton<MainViewModel>(sp => new MainViewModel(
             sp.GetRequiredService<MediaService>(),
             sp.GetRequiredService<SettingsService>(),

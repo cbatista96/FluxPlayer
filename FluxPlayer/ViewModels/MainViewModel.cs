@@ -161,6 +161,7 @@ public partial class MainViewModel : ObservableObject
         _mediaService.EncounteredError += OnEncounteredError;
         _mediaService.VoutChanged += OnVoutChanged;
         _mediaService.TracksChanged += OnTracksChanged;
+        _mediaService.VideoSurfaceChanged += OnTracksChanged;
         _mediaService.Playing += (_, _) => RunOnUi(() =>
         {
             IsPlaying = true;

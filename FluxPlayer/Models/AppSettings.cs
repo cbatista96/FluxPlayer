@@ -104,6 +104,7 @@ public class AppSettings
     public string PreferredSubtitleLanguage { get; set; } = "en";
     public int SubtitleDelayStepMs { get; set; } = 100;
     public bool ApplyShadowToSubtitle { get; set; } = true;
+    public Dictionary<string, SubtitleStyle> SubtitleStyleProfiles { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
     public Dictionary<string, string> Keybindings { get; set; } = DefaultKeybindings();
 

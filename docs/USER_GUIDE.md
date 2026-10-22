@@ -51,6 +51,14 @@ Export correction is separate from live delay. Set an offset and time scale, the
 
 **Save corrected SRT copy** preserves the original. Text ending before zero is omitted; a partially visible cue is clipped to zero. The copy is plain text: ASS/VTT styling is not retained. **Load saved copy in player** selects it and resets live delay to zero, preventing a second timing adjustment. External subtitle tracks appear in the selector as they are discovered; choosing Disabled remains respected.
 
+## Subtitle styles
+
+Open **Audio and video tools > Subtitle style profiles** to set a default font family, font size, text/outline colors, outline thickness, bold text, shadow and bottom margin. A size of 0 uses automatic sizing; other sizes and margins are in video pixels. Outline thickness is a percentage of the font size. Choose **Use this style**, or enter a name and **Save profile**. Up to 32 profiles are stored in the active data profile. A saved profile can be selected, edited or removed; removing it keeps the current default style.
+
+Restart FluxPlayer to apply a changed style. Embedded text styling and bitmap subtitles may override these defaults. Global italic and top/center placement overrides remain pending. Subtitles prefer the requested languages and then accept an unlabeled track; include `none` in the language list to stop that fallback. Disabling **Show subtitles by default** selects no subtitle track until you explicitly load or select one.
+
+With the current WPF memory surface, an active subtitle on an opaque Windows hardware-decoder surface switches that source to software decoding so the text is visible. Position, pause and externally loaded subtitles are preserved. **Signal path and information** identifies this profile. This compatibility path can increase CPU usage; accelerated subtitle composition in this surface remains pending.
+
 For local lyrics, place an LRC or text file beside the media with the same base name. An LRC file displays synchronized lines. A matching CUE sheet provides track chapters where supported.
 
 **Audio and video tools > Create or edit CUE sheet** opens the track editor. Add source files, add the current playback position, or load an existing sheet. Edit titles, artists, source paths and `minutes:seconds:frames` start positions in the table; use Move up/down to arrange tracks. There are 75 frames per second and a maximum of 99 tracks. Play selected track opens its source at the indicated position.

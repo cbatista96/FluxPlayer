@@ -255,6 +255,7 @@ public partial class MainViewModel
     {
         _shuttingDown = true;
         _mediaService.TracksChanged -= OnTracksChanged;
+        _mediaService.VideoSurfaceChanged -= OnTracksChanged;
         Interlocked.Increment(ref _durationParseToken);
         Interlocked.Increment(ref _mediaChangeToken);
         Interlocked.Increment(ref _artworkGeneration);

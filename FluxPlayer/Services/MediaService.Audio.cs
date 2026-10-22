@@ -14,10 +14,21 @@ public partial class MediaService
         media.AddOption($":audio-replay-gain-preamp={s.ReplayGainPreamp.ToString(CultureInfo.InvariantCulture)}");
         media.AddOption(s.ReplayGainPeakProtection ? ":audio-replay-gain-peak-protection" : ":no-audio-replay-gain-peak-protection");
         if (!string.IsNullOrWhiteSpace(s.PreferredAudioLanguage)) media.AddOption($":audio-language={s.PreferredAudioLanguage}");
-        if (!string.IsNullOrWhiteSpace(s.PreferredSubtitleLanguage)) media.AddOption($":sub-language={s.PreferredSubtitleLanguage}");
+        media.AddOption(":sub-language=" + SubtitleLanguages(s));
         if (!s.AutoLoadSubtitles) media.AddOption(":no-sub-autodetect-file");
-        if (!s.ShowSubtitlesByDefault) media.AddOption(":sub-track=-1");
         if (s.DeinterlaceEnabled) media.AddOption($":deinterlace=1");
+    }
+
+    public static string SubtitleLanguages(AppSettings settings)
+    {
+        if (!settings.ShowSubtitlesByDefault) return "none";
+        var languages = (settings.PreferredSubtitleLanguage ?? "").Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+            .Where(language => language.Length <= 80 && !language.Any(char.IsControl))
+            .Select(language => language.ToLowerInvariant()).Distinct().Take(16).ToList();
+        // Prefer the requested languages, then allow a track without language metadata.
+        // An explicit 'none' remains a deliberate stop condition in VLC's language list.
+        if (!languages.Contains("any") && !languages.Contains("none")) languages.Add("any");
+        return string.Join(',', languages);
     }
 
     public AudioDevice[] GetAudioDevices()

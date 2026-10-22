@@ -949,6 +949,7 @@
                             </Border>
 
                             <TextBlock Text="Font style" Style="{StaticResource SubsectionHdr}" />
+                            <TextBlock Text="Default text style changes apply after restarting FluxPlayer. Subtitle-file styling can override defaults." Style="{StaticResource OptSub}" TextWrapping="Wrap" Margin="0,0,0,12" />
 
                             <Border Style="{StaticResource OptionCard}">
                                 <Grid>
@@ -998,7 +999,7 @@
                                 <Grid>
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                                     <StackPanel>
-                                        <TextBlock Text="Outline thickness (px)" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Outline thickness (%)" Style="{StaticResource OptTitle}" />
                                         <TextBlock Text="Outline thickness" Style="{StaticResource OptSub}" />
                                     </StackPanel>
                                     <TextBox x:Name="SubOutlineThicknessBox" Grid.Column="1" Width="80" Height="32" VerticalContentAlignment="Center" Text="2" />
@@ -1021,7 +1022,7 @@
                                     <StackPanel>
                                         <TextBlock Text="Italic" Style="{StaticResource OptTitle}" />
                                     </StackPanel>
-                                    <CheckBox x:Name="SubItalicToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                    <CheckBox x:Name="SubItalicToggle" Grid.Column="1" VerticalAlignment="Center" IsEnabled="False" ToolTip="Italic is defined by the subtitle file. A global override is pending." />
                                 </Grid>
                             </Border>
 
@@ -1045,7 +1046,7 @@
                                         <TextBlock Text="Vertical position" Style="{StaticResource OptTitle}" />
                                         <TextBlock Text="Subtitle placement" Style="{StaticResource OptSub}" />
                                     </StackPanel>
-                                    <ComboBox x:Name="SubPositionCombo" Grid.Column="1" Width="120" VerticalContentAlignment="Center">
+                                    <ComboBox x:Name="SubPositionCombo" Grid.Column="1" Width="120" VerticalContentAlignment="Center" IsEnabled="False" ToolTip="Placement is defined by the subtitle file. A global override is pending.">
                                         <ComboBoxItem Content="Top" Tag="Top" />
                                         <ComboBoxItem Content="Center" Tag="Center" />
                                         <ComboBoxItem Content="Bottom" Tag="Bottom" />

@@ -46,6 +46,7 @@ public sealed class VlcWpfRenderer : IDisposable
     private volatile bool _disposed;
     private int _displayPending;
     private int _formatGeneration;
+    private readonly Action<uint>? _sourceFormatChanged;
 
     private sealed class FrameSection
     {
@@ -92,10 +93,13 @@ public sealed class VlcWpfRenderer : IDisposable
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern bool CloseHandle(IntPtr hObject);
 
-    public VlcWpfRenderer(LibVLCSharp.Shared.MediaPlayer mp, Image image)
+    public VlcWpfRenderer(MediaService engine, Image image) : this(engine.MediaPlayer, image, engine.ReportVideoSurfaceChroma) { }
+
+    public VlcWpfRenderer(LibVLCSharp.Shared.MediaPlayer mp, Image image, Action<uint>? sourceFormatChanged = null)
     {
         _mp = mp;
         _image = image;
+        _sourceFormatChanged = sourceFormatChanged;
 
         _formatCb = OnFormat;
         _cleanupCb = OnCleanup;
@@ -111,6 +115,8 @@ public sealed class VlcWpfRenderer : IDisposable
     {
         if (_disposed || width == 0 || height == 0)
             return 0;
+
+        _sourceFormatChanged?.Invoke(unchecked((uint)Marshal.ReadInt32(chroma)));
 
         Marshal.WriteByte(chroma, 0, (byte)'R');
         Marshal.WriteByte(chroma, 1, (byte)'V');

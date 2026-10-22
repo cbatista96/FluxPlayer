@@ -354,6 +354,7 @@
                             <MenuItem Header="Batch tag editor…" Click="BatchTagsButton_Click" />
                             <MenuItem Header="Search external subtitles…" Click="SearchSubtitlesButton_Click" />
                             <MenuItem Header="Subtitle timing editor…" Click="SubtitleTiming_Click" />
+                            <MenuItem Header="Subtitle style profiles…" Click="SubtitleStyles_Click" />
                             <MenuItem Header="Open CUE sheet…" Click="OpenCueButton_Click" />
                             <MenuItem Header="Create or edit CUE sheet…" Click="EditCueButton_Click" />
                             <MenuItem Header="Scheduled snapshots…" Click="ScheduledSnapshots_Click" />
