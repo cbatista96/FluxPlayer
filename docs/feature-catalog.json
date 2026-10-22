@@ -691,5 +691,12 @@
     "Description": "Preserve and edit advanced CUE directives such as CD-TEXT, PREGAP and additional indexes.",
     "Status": "pending",
     "Evidence": ""
+  },
+  {
+    "Id": "F0100",
+    "Area": "Library and playlists",
+    "Description": "Batch editing of selected title, artist, album and genre tags, with explicit clearing, per-file results, progress and cancellation.",
+    "Status": "implemented",
+    "Evidence": "BatchTagService / BatchTagEditorWindow / TagLibSharp; eight-format tag/playback checks, preserved artwork and custom metadata, library refresh, cancellation and a two-file manual UI review."
   }
 ]

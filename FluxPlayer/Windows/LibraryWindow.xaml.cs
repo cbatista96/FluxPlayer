@@ -131,7 +131,11 @@ public partial class LibraryWindow : FluentWindow
     }
 
     private void EditTags_Click(object sender, RoutedEventArgs e)
-    { if (MediaGrid.SelectedItem is LibraryEntry entry) MediaToolsWindows.ShowTagEditor(this, _vm, entry.Path); }
+    {
+        var paths = SelectedPaths();
+        if (paths.Length > 1) new BatchTagEditorWindow(this, _vm, paths).Show();
+        else if (paths.Length == 1) MediaToolsWindows.ShowTagEditor(this, _vm, paths[0]);
+    }
 
     private void Export_Click(object sender, RoutedEventArgs e)
     {

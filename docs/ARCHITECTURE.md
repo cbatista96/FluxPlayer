@@ -13,6 +13,7 @@ FluxPlayer is a Windows x64 WPF application using CommunityToolkit.Mvvm, depende
 | `LibraryService` / `LibraryQuery` | Persistent local index, folder watching, smart playlists and filtering. |
 | `PlaylistService` | Playlist parsing and export without UI dependencies. |
 | `ConversionService` / `ClipExportService` | Explicit conversion and clip export jobs. |
+| `BatchTagService` / `MetadataPatch` | Bounded, sequential tag jobs; null preserves a field and an empty string clears it. |
 | `SettingsService` / `FeatureCatalog` | Persistence, migrations, normalization and implemented/planned feature status. |
 | `ThumbnailService` | On-demand video preview generation. |
 
@@ -49,6 +50,8 @@ Capture requests are serialized and run outside the UI dispatcher. LibVLC 3 forc
 Scheduled captures are explicit bounded jobs. Each attempt completes before another delay starts, so slow encoding cannot accumulate queued requests. Paused, audio-only and busy playback are skipped. A schedule has no timer until the user starts it and ends when its image limit is reached or its window closes.
 
 ## Data and compatibility
+
+TagLibSharp is used only by explicit tag edits, without decoding media properties. Each save finishes before cancellation is honored and reopens the file to verify selected fields. This avoids the empty-field behavior of LibVLC 3's [metadata writer](https://github.com/videolan/vlc/blob/3.0.21/modules/meta_engine/taglib.cpp#L1172). Batch editing skips sources loaded in the player, processes one file at a time and reports each result. Successful writes refresh indexed metadata and file stamps, with one library notification at job completion. Editing does not add a playback filter or background scanner.
 
 Settings and library files belong to the current Windows user. Write changes through the service layer and preserve migration paths. Legacy preset names and query aliases remain accepted as compatibility data even though the public interface and documentation are English.
 

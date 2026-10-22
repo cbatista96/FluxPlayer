@@ -99,7 +99,8 @@ public static class MediaToolsWindows
                 if (ok)
                 {
                     var updated = await vm.Engine.ReadMetadataAsync(path);
-                    if (updated != null) await vm.Library.UpdateMetadataAsync(path, updated);
+                    if (updated != null) await vm.Library.UpdateMetadataAsync(path, updated, refreshFileStamp: true);
+                    vm.Library.NotifyMetadataChanged();
                 }
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { status.Text = ex.Message; }

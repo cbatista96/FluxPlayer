@@ -299,8 +299,7 @@ public partial class MediaService : IDisposable
 
     public void Stop()
     {
-
-        if (MediaPlayer.IsPlaying)
+        if (!_disposed && MediaPlayer.Media != null)
             MediaPlayer.Stop();
     }
 

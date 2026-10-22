@@ -99,20 +99,55 @@ public partial class MediaService
         catch { return Array.Empty<ChapterInfo>(); }
     }
 
-    public async Task<bool> SaveTagsAsync(string path, string title, string artist, string album, string genre)
+    public bool IsSourceInUse(string path) => !_disposed
+        && string.Equals(path, _currentSourcePath, StringComparison.OrdinalIgnoreCase)
+        && MediaPlayer.State is VLCState.Opening or VLCState.Buffering or VLCState.Playing or VLCState.Paused;
+
+    public Task<bool> SaveTagsAsync(string path, string title, string artist, string album, string genre) =>
+        SaveMetadataPatchAsync(path, new MetadataPatch(title, artist, album, genre));
+
+    public Task<bool> SaveMetadataPatchAsync(string path, MetadataPatch patch, CancellationToken token = default)
     {
-        if (_disposed || !File.Exists(path) || path == _currentSourcePath && MediaPlayer.IsPlaying) return false;
-        await _durationParseGate.WaitAsync().ConfigureAwait(false);
+        patch.Validate();
+        return Task.Run(async () =>
+        {
+            if (_disposed || MediaFormats.IsNetwork(path) || !File.Exists(path)) return false;
+            path = Path.GetFullPath(path);
+            if (IsSourceInUse(path)) return false;
+            await _durationParseGate.WaitAsync(token).ConfigureAwait(false);
+            try
+            {
+                if (_disposed || IsSourceInUse(path)) return false;
+                token.ThrowIfCancellationRequested();
+                return WriteMetadataPatch(path, patch, token);
+            }
+            finally { _durationParseGate.Release(); }
+        }, token);
+    }
+
+    // TagLib is loaded only for explicit edits. LibVLC's writer cannot reliably clear empty fields.
+    private bool WriteMetadataPatch(string path, MetadataPatch patch, CancellationToken token)
+    {
         try
         {
-            if (_disposed) return false;
-            using var media = new Media(_libVLC, new Uri(path));
-            await media.Parse(MediaParseOptions.ParseLocal, timeout: 3000).ConfigureAwait(false);
-            await Task.Yield();
-            media.SetMeta(MetadataType.Title, title); media.SetMeta(MetadataType.Artist, artist);
-            media.SetMeta(MetadataType.Album, album); media.SetMeta(MetadataType.Genre, genre);
-            return media.SaveMeta();
+            using (var file = TagLib.File.Create(path, TagLib.ReadStyle.None | TagLib.ReadStyle.PictureLazy))
+            {
+                token.ThrowIfCancellationRequested();
+                if (IsSourceInUse(path)) return false;
+                if (patch.Title != null) file.Tag.Title = patch.Title;
+                if (patch.Artist != null) file.Tag.Performers = patch.Artist.Length == 0 ? Array.Empty<string>() : new[] { patch.Artist };
+                if (patch.Album != null) file.Tag.Album = patch.Album;
+                if (patch.Genre != null) file.Tag.Genres = patch.Genre.Length == 0 ? Array.Empty<string>() : new[] { patch.Genre };
+                // Once started, a file save finishes before cancellation is observed.
+                file.Save();
+            }
+            using var saved = TagLib.File.Create(path, TagLib.ReadStyle.None | TagLib.ReadStyle.PictureLazy);
+            return (patch.Title == null || (saved.Tag.Title ?? "") == patch.Title)
+                && (patch.Artist == null || string.Join("; ", saved.Tag.Performers) == patch.Artist)
+                && (patch.Album == null || (saved.Tag.Album ?? "") == patch.Album)
+                && (patch.Genre == null || string.Join("; ", saved.Tag.Genres) == patch.Genre);
         }
-        finally { _durationParseGate.Release(); }
+        catch (Exception ex) when (ex is TagLib.UnsupportedFormatException or TagLib.CorruptFileException)
+        { return false; }
     }
 }

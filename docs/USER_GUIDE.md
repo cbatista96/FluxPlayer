@@ -41,6 +41,8 @@ Press **E** to open the floating equalizer. It offers ten bands from 31 Hz to 16
 
 The audio settings include output device selection, ReplayGain options, audio delay and preferred track language. Tag editing writes supported metadata to the original file; release it from playback before saving. Tag write support depends on its format.
 
+Open **Audio and video tools > Batch tag editor** to edit the current queue, or select several library rows and choose **Edit tags**. Add or remove files from the job, then check only the title, artist, album or genre fields you want to replace. A checked empty field clears that tag; unchecked fields are preserved. **Apply checked fields** writes to the original files and shows saved, skipped and failed results. Loaded files, missing files and network sources are skipped. Cancellation finishes the current save and stops before the next file; completed changes remain. Close the editor to cancel an active job. Keep backups of files before making large changes.
+
 For local lyrics, place an LRC or text file beside the media with the same base name. An LRC file displays synchronized lines. A matching CUE sheet provides track chapters where supported.
 
 **Audio and video tools > Create or edit CUE sheet** opens the track editor. Add source files, add the current playback position, or load an existing sheet. Edit titles, artists, source paths and `minutes:seconds:frames` start positions in the table; use Move up/down to arrange tracks. There are 75 frames per second and a maximum of 99 tracks. Play selected track opens its source at the indicated position.

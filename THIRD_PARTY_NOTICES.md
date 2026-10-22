@@ -11,6 +11,7 @@ FluxPlayer source uses the [GNU GPL v3.0](LICENSE). External packages and tools 
 | VideoLAN.LibVLC.Windows | 3.0.21 | LGPL-2.1-or-later | [LibVLC NuGet packaging](https://code.videolan.org/videolan/libvlc-nuget) |
 | CommunityToolkit.Mvvm | 8.3.2 | MIT | [Community Toolkit](https://github.com/CommunityToolkit/dotnet) |
 | Microsoft.Extensions.DependencyInjection | 8.0.1 | MIT | [.NET runtime](https://github.com/dotnet/runtime) |
+| TagLibSharp | 2.3.0 | LGPL-2.1-only | [TagLib#](https://github.com/mono/taglib-sharp) |
 
 The entries above reflect the pinned packages' NuGet metadata. Consult the exact restored packages for their copyright notices and license files, including transitive dependencies and native plugins. The WPF UI license is available [upstream](https://github.com/lepoco/wpfui/blob/main/LICENSE).
 

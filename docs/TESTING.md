@@ -24,6 +24,7 @@ The managed suite covers:
 11. Portable/named profile parsing, isolated settings, option validation and persistence of unset window geometry.
 12. CUE creation/editing, all 75 frame positions, multiple sources, Unicode, relative paths, invalid output rejection and overwrite protection.
 13. Bounded snapshot scheduling, skipped intervals, non-overlap and cancellation before capture.
+14. Metadata patch validation and the distinction between omitted fields and explicit clearing.
 
 GitHub Actions builds on Windows and runs these checks without publishing artifacts or creating releases. Its test invocation deliberately avoids native playback, which requires an interactive output environment.
 
@@ -36,6 +37,8 @@ dotnet run --project FluxPlayer.Tests/FluxPlayer.Tests.csproj -c Release
 Run in a Windows desktop session. The full suite also checks decoded-track detection independent of file extension, transport behavior and real native playback. When FFmpeg is found, it additionally checks canceled job cleanup and converts eight profiles, then reads metadata and plays the outputs with LibVLC. Tag saving, artwork and lyric sidecar paths are exercised with synthetic inputs.
 
 FFmpeg-dependent checks are conditional. A passing run without FFmpeg does not validate conversion. A managed-only run does not validate the native renderer or audio output. Results are written locally to `session-state/tests/results.json` and are not checked into Git.
+
+With FFmpeg available, tag saves and subsequent LibVLC playback are checked for all eight conversion profiles (FLAC, WAV, MP3, Opus, Vorbis, AAC/M4A, ALAC/M4A and WavPack). Batch checks use synthetic FLAC copies: selected-field replacement and clearing, retained titles, multiple album artists, year, track number, comment, embedded PNG artwork and a custom Xiph field. They also exercise per-file progress, duplicate inputs, missing/network/loaded sources, a paused source, cancellation before and between files, and refreshed library stamps after a rescan. Manual UI review saved an artist on two test copies and independently read the files back with FFprobe.
 
 ## Native transport coverage
 

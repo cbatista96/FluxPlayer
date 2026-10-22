@@ -351,6 +351,7 @@
                             <MenuItem x:Name="ChaptersMenu" Header="Chapters" />
                             <Separator />
                             <MenuItem Header="Edit tags for the current file…" Click="EditTagsButton_Click" />
+                            <MenuItem Header="Batch tag editor…" Click="BatchTagsButton_Click" />
                             <MenuItem Header="Search external subtitles…" Click="SearchSubtitlesButton_Click" />
                             <MenuItem Header="Open CUE sheet…" Click="OpenCueButton_Click" />
                             <MenuItem Header="Create or edit CUE sheet…" Click="EditCueButton_Click" />

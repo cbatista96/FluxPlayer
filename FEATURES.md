@@ -1,12 +1,12 @@
 # Feature checklist
 
-**72 implemented · 27 pending · 99 tracked capabilities.**
+**73 implemented · 27 pending · 100 tracked capabilities.**
 
 Each capability appears exactly once. Completing it moves the same stable ID from Pending to Implemented. A setting or catalog entry alone does not complete a feature. Source references describe the implementation; validation limits are documented in [Testing](docs/TESTING.md).
 
 Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Sync-PublicFeatures.ps1`; CI rejects an outdated checklist.
 
-## Implemented (72)
+## Implemented (73)
 
 ### Workspaces and interface
 
@@ -76,6 +76,7 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [x] **F0063** Bounded initial duration parsing rather than decoding the full library at startup. — LibraryService, LibraryQuery, PlaylistService and LibraryWindow
 - [x] **F0064** On-demand exact duplicate detection using actual size and SHA-256, with progress and cancellation. — DuplicateFinder / DuplicateFilesWindow; automated content/cancellation tests and manual UI review.
 - [x] **F0097** Remove selected records from the library without deleting media files. — LibraryService.RemoveEntriesAsync / Library tools / duplicate results; media preservation and reopened-index tests.
+- [x] **F0100** Batch editing of selected title, artist, album and genre tags, with explicit clearing, per-file results, progress and cancellation. — BatchTagService / BatchTagEditorWindow / TagLibSharp; eight-format tag/playback checks, preserved artwork and custom metadata, library refresh, cancellation and a two-file manual UI review.
 
 ### Video and subtitles
 

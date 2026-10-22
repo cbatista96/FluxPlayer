@@ -22,6 +22,7 @@ public sealed class LibraryService : IAsyncDisposable
     private bool _disposed;
     public string? LastError { get; private set; }
     public event EventHandler? Changed;
+    internal void NotifyMetadataChanged() => Changed?.Invoke(this, EventArgs.Empty);
     public LibraryService(string? dataDirectory = null)
     {
         _path = System.IO.Path.Combine(dataDirectory ?? AppProfile.Current.DataDirectory, "library.json");
@@ -151,8 +152,15 @@ public sealed class LibraryService : IAsyncDisposable
         finally { _gate.Release(); }
     }
 
-    public async Task UpdateMetadataAsync(string path, MediaMetadata metadata, bool countPlayback = false)
+    public async Task UpdateMetadataAsync(string path, MediaMetadata metadata, bool countPlayback = false, bool refreshFileStamp = false)
     {
+        (long Size, DateTime ModifiedUtc)? stamp = null;
+        if (refreshFileStamp && !MediaFormats.IsNetwork(path))
+            stamp = await Task.Run<(long, DateTime)?>(() =>
+            {
+                try { var file = new FileInfo(path); return (file.Length, file.LastWriteTimeUtc); }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { return null; }
+            });
         await _load; await _gate.WaitAsync();
         try
         {
@@ -161,11 +169,13 @@ public sealed class LibraryService : IAsyncDisposable
             old ??= new LibraryEntry { Path = path, Title = System.IO.Path.GetFileNameWithoutExtension(path) };
             _entries[path] = old with
             {
-                Title = string.IsNullOrWhiteSpace(metadata.Title) ? old.Title : metadata.Title,
+                Title = string.IsNullOrWhiteSpace(metadata.Title) ? System.IO.Path.GetFileNameWithoutExtension(path) : metadata.Title,
                 Artist = metadata.Artist,
                 Album = metadata.Album,
                 Genre = metadata.Genre,
-                DurationMs = Math.Max(metadata.DurationMs, old.DurationMs),
+                DurationMs = metadata.DurationMs > 0 ? metadata.DurationMs : old.DurationMs,
+                Size = stamp?.Size ?? old.Size,
+                ModifiedUtc = stamp?.ModifiedUtc ?? old.ModifiedUtc,
                 Kind = metadata.HasVideo ? "Video" : "Audio",
                 MetadataRead = true,
                 PlayCount = old.PlayCount + (countPlayback ? 1 : 0),

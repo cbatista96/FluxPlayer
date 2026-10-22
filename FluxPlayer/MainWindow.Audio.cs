@@ -14,6 +14,7 @@ public partial class MainWindow
     private LibraryWindow? _libraryWindow;
     private CueSheetEditorWindow? _cueEditorWindow;
     private SnapshotScheduleWindow? _snapshotScheduleWindow;
+    private BatchTagEditorWindow? _batchTagWindow;
     private bool _audioLayoutApplied;
     private Size _videoModeSize = new(1280, 760);
     private int _videoRotation;
@@ -153,6 +154,13 @@ public partial class MainWindow
     private void EditTagsButton_Click(object sender, RoutedEventArgs e)
     {
         if (_vm.CurrentItem != null) MediaToolsWindows.ShowTagEditor(this, _vm, _vm.CurrentItem.FilePath);
+    }
+    private void BatchTagsButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_batchTagWindow != null) { _batchTagWindow.Activate(); return; }
+        _batchTagWindow = new BatchTagEditorWindow(this, _vm, _vm.Playlist.Select(item => item.FilePath));
+        _batchTagWindow.Closed += (_, _) => _batchTagWindow = null;
+        _batchTagWindow.Show();
     }
     private void ConverterButton_Click(object sender, RoutedEventArgs e) =>
         new ConverterWindow(this, _vm, _vm.Playlist.Select(p => p.FilePath).ToArray()).Show();

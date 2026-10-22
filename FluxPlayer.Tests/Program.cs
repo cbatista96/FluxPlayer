@@ -311,6 +311,18 @@ internal static class Program
             Assert(canceled && calls == 0, "Cancel waiting job without capture");
         });
 
+        await Test("Metadata patches: omitted fields, explicit clearing and input limits", () =>
+        {
+            var patch = new MetadataPatch(Artist: "New artist", Album: ""); patch.Validate();
+            Assert(patch.Title == null && patch.Genre == null && patch.Album == "", "Preserve versus clear");
+            foreach (var invalid in new[] { new MetadataPatch(), new MetadataPatch(Title: new string('x', 4097)), new MetadataPatch(Genre: "bad\0value") })
+            {
+                bool rejected = false; try { invalid.Validate(); } catch (ArgumentException) { rejected = true; }
+                Assert(rejected, "Invalid patch rejected");
+            }
+            return Task.CompletedTask;
+        });
+
         // CI verifies managed services without requiring an interactive audio device.
         if (managedOnly) return;
 
@@ -354,15 +366,85 @@ internal static class Program
                     engine.Stop();
                     bool refused = false; try { await ConversionService.ConvertAsync(wav, output, profile, 8000, false, null, CancellationToken.None); } catch (IOException) { refused = true; }
                     Assert(refused, "Overwrite protection");
-                    if (profile.Encoder == "flac")
+                    if (profile.Extension is ".flac" or ".mp3" or ".m4a" or ".ogg" or ".opus" or ".wv" or ".wav")
                     {
-                        Assert(await engine.SaveTagsAsync(output, "Saved title ñ", "Artist", "Album", "Jazz"), "Save FLAC tags");
+                        Assert(await engine.SaveTagsAsync(output, "Saved title ñ", "Artist", "Album", "Jazz"), "Save tags: " + profile.Name);
                         var updated = await engine.ReadMetadataAsync(output);
-                        Assert(updated?.Title == "Saved title ñ" && updated.Artist == "Artist", "Read saved tags");
+                        Assert(updated is { HasAudio: true, Title: "Saved title ñ", Artist: "Artist" }, "Read saved tags");
+                        engine.PlayFile(output);
+                        await Until(() => Task.FromResult(engine.IsPlaying && engine.GetTime() > 100), 5000);
+                        engine.Stop();
                     }
                 }
                 Assert(File.Exists(wav), "Original preserved");
             });
+            await Test("Batch tags: field preservation, clearing, library refresh, loaded files and cancellation", async () =>
+            {
+                string folder = Path.Combine(Root, "batch-tags-" + Guid.NewGuid().ToString("N")); Directory.CreateDirectory(folder);
+                string first = Path.Combine(folder, "First ñ.flac"), second = Path.Combine(folder, "Second.flac");
+                var flac = ConversionService.Profiles.Single(profile => profile.Encoder == "flac");
+                await ConversionService.ConvertAsync(wav, first, flac, 8000, false, null, CancellationToken.None);
+                File.Copy(first, second);
+                Assert(await engine.SaveTagsAsync(first, "First title ñ", "Original artist", "Original album", "Jazz"), "Initial first tags");
+                Assert(await engine.SaveTagsAsync(second, "Second title", "Original artist", "Original album", "Jazz"), "Initial second tags");
+                byte[] picture = File.ReadAllBytes(Path.GetFullPath(Path.Combine(Root, "../../FluxPlayer/Assets/logo.png")));
+                using (var originalTags = TagLib.File.Create(first))
+                {
+                    originalTags.Tag.Track = 7; originalTags.Tag.Year = 2024; originalTags.Tag.Comment = "Keep this comment";
+                    originalTags.Tag.AlbumArtists = new[] { "Album artist one", "Album artist two" };
+                    originalTags.Tag.Pictures = new[] { new TagLib.Picture(new TagLib.ByteVector(picture)) { Type = TagLib.PictureType.FrontCover, MimeType = "image/png" } };
+                    var custom = (TagLib.Ogg.XiphComment)originalTags.GetTag(TagLib.TagTypes.Xiph, true);
+                    custom.SetField("FLUX_TEST_CUSTOM", new[] { "Keep custom metadata" }); originalTags.Save();
+                }
+                await using var library = new LibraryService(Path.Combine(folder, "index"));
+                await library.ScanFolderAsync(folder, false);
+                int notifications = 0; library.Changed += (_, _) => Interlocked.Increment(ref notifications);
+                var reports = new List<TagEditProgress>();
+                var result = await BatchTagService.ApplyAsync(new[] { first, second, Path.Combine(folder, "missing.flac"), "https://example.test/radio", first },
+                    new MetadataPatch(Artist: "Batch artist ñ"), engine, library, progress: new InlineProgress<TagEditProgress>(reports.Add));
+                Assert(result is { Saved: 2, Skipped: 2, Failed: 0, Canceled: false } && result.Results.Length == 4, "Distinct files and per-file results");
+                Assert(reports.Count == 4 && reports.Last().Completed == 4 && notifications == 1, "Progress and one index notification");
+                foreach (var item in new[] { (first, "First title ñ"), (second, "Second title") })
+                {
+                    var metadata = await engine.ReadMetadataAsync(item.Item1);
+                    Assert(metadata is { Artist: "Batch artist ñ", Album: "Original album", Genre: "Jazz" } && metadata.Title == item.Item2, "Unselected tags retained");
+                }
+                using (var preserved = TagLib.File.Create(first))
+                {
+                    Assert(preserved.Tag.Track == 7 && preserved.Tag.Year == 2024 && preserved.Tag.Comment == "Keep this comment"
+                        && preserved.Tag.AlbumArtists.SequenceEqual(new[] { "Album artist one", "Album artist two" }), "Other standard and multiple-value tags retained");
+                    Assert(preserved.Tag.Pictures.Single().Data.Data.SequenceEqual(picture), "Embedded artwork retained");
+                    Assert(((TagLib.Ogg.XiphComment)preserved.GetTag(TagLib.TagTypes.Xiph)).GetField("FLUX_TEST_CUSTOM").Single() == "Keep custom metadata", "Custom field retained");
+                }
+                var indexed = (await library.SnapshotAsync()).Single(entry => entry.Path == first);
+                var actualFile = new FileInfo(first);
+                Assert(indexed is { Artist: "Batch artist ñ", MetadataRead: true } && indexed.Size == actualFile.Length && indexed.ModifiedUtc == actualFile.LastWriteTimeUtc, "Updated metadata and file stamp");
+                await library.ScanFolderAsync(folder, false);
+                Assert((await library.SnapshotAsync()).All(entry => entry.MetadataRead), "Rescan retains freshly edited metadata");
+                result = await BatchTagService.ApplyAsync(new[] { first }, new MetadataPatch(Album: ""), engine, library);
+                var cleared = await engine.ReadMetadataAsync(first);
+                Assert(result.Saved == 1 && cleared is { Album: "", Artist: "Batch artist ñ", Title: "First title ñ" }, "Only the selected tag cleared");
+                result = await BatchTagService.ApplyAsync(new[] { second }, new MetadataPatch(Genre: "Do not write"), engine, excludedSource: second);
+                Assert(result.Skipped == 1 && (await engine.ReadMetadataAsync(second))?.Genre == "Jazz", "Loaded selection skipped");
+                engine.SetVolume(0); engine.PlayFile(first);
+                await Until(() => Task.FromResult(engine.IsPlaying && engine.GetTime() > 50), 5000);
+                engine.Pause();
+                await Until(() => Task.FromResult(engine.MediaPlayer.State == LibVLCSharp.Shared.VLCState.Paused), 2000);
+                result = await BatchTagService.ApplyAsync(new[] { first }, new MetadataPatch(Genre: "Do not write"), engine);
+                Assert(result.Skipped == 1 && (await engine.ReadMetadataAsync(first))?.Genre == "Jazz", "Paused playback skipped");
+                engine.Stop();
+                Assert(engine.MediaPlayer.State == LibVLCSharp.Shared.VLCState.Stopped, "Stop releases a paused source");
+                using var cancellation = new CancellationTokenSource(); cancellation.Cancel();
+                result = await BatchTagService.ApplyAsync(new[] { first, second }, new MetadataPatch(Artist: "Canceled"), engine, token: cancellation.Token);
+                Assert(result.Canceled && result.Results.Length == 0, "Pre-canceled batch makes no changes");
+                using var afterFirst = new CancellationTokenSource();
+                result = await BatchTagService.ApplyAsync(new[] { first, second }, new MetadataPatch(Artist: "Completed before cancellation"), engine,
+                    progress: new InlineProgress<TagEditProgress>(_ => afterFirst.Cancel()), token: afterFirst.Token);
+                Assert(result.Canceled && result.Saved == 1 && result.Results.Length == 1, "Cancellation stops before next file");
+                Assert((await engine.ReadMetadataAsync(first))?.Artist == "Completed before cancellation"
+                    && (await engine.ReadMetadataAsync(second))?.Artist == "Batch artist ñ", "Completed changes retained; next file untouched");
+            });
+
             await Test("Real video: H.264/AAC, MKV, classification and automatic mode switching", async () =>
             {
                 string video = Path.Combine(Root, "video-test.mkv");
