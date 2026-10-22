@@ -102,6 +102,19 @@ public class SettingsService
             subtitleProfiles[name] = SubtitleStyle.Normalize(pair.Value);
         }
         settings.SubtitleStyleProfiles = subtitleProfiles;
+        var audioProfiles = new Dictionary<string, AudioOutputProfile>(StringComparer.OrdinalIgnoreCase);
+        foreach (var pair in settings.AudioOutputProfiles ?? new())
+        {
+            if (!AudioOutputProfile.ValidDeviceId(pair.Key) || pair.Value == null || audioProfiles.Count >= AudioOutputProfile.MaximumProfiles) continue;
+            try
+            {
+                pair.Value.Validate();
+                audioProfiles[pair.Key] = pair.Value with { Bands = (float[])pair.Value.Bands.Clone(), Preset = EqualizerPresets.Normalize(pair.Value.Preset) };
+            }
+            catch (ArgumentException) { /* Ignore only the invalid profile, preserving other endpoints. */ }
+        }
+        settings.AudioOutputProfiles = audioProfiles;
+        if (!AudioOutputProfile.ValidDeviceId(settings.AudioOutputDevice)) settings.AudioOutputDevice = "Default";
         var featureFlags = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
         if (settings.FeatureFlags != null)
         {

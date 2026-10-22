@@ -90,6 +90,7 @@ public partial class MainViewModel
 
     public void RefreshNowPlaying()
     {
+        if (_shuttingDown) return;
         var item = CurrentItem;
         if (item == null) return;
         try
@@ -124,6 +125,7 @@ public partial class MainViewModel
 
     private void ApplyCurrentPlaybackOptions()
     {
+        if (_shuttingDown) return;
         // Native state resets on every file even if the bound properties did not change.
         _settings.PlaybackRate = PlaybackRate;
         _settings.AudioDelay = (int)AudioDelayMs;
@@ -206,13 +208,6 @@ public partial class MainViewModel
         _pendingResumeMs = Math.Max(0, positionMs);
         if (TotalDurationMs > positionMs && _mediaService.GetDuration() > positionMs)
         { _pendingResumeMs = -1; SeekToMs(positionMs); }
-    }
-
-    public void SelectOutputDevice(AudioDevice device)
-    {
-        _mediaService.SelectAudioDevice(device.Id);
-        _settings.AudioOutputDevice = device.Id;
-        var saved = _settingsService.Load(); saved.AudioOutputDevice = device.Id; _settingsService.Save(saved);
     }
 
     private string[] ExpandPlaylistInputs(string[] paths)

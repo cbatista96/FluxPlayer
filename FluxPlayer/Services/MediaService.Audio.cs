@@ -37,6 +37,7 @@ public partial class MediaService
         {
             return new[] { new AudioDevice("Default", "System default") }
                 .Concat(MediaPlayer.AudioOutputDeviceEnum.Select(d => new AudioDevice(d.DeviceIdentifier, d.Description)))
+                .Where(device => AudioOutputProfile.ValidDeviceId(device.Id))
                 .DistinctBy(d => d.Id).ToArray();
         }
         catch { return new[] { new AudioDevice("Default", "System default") }; }
@@ -63,8 +64,11 @@ public partial class MediaService
 
     public MediaMetadata? ReadCurrentMetadata()
     {
-        if (_currentMedia == null) return null;
-        return ReadMetadata(_currentMedia);
+        lock (_playbackStateLock)
+        {
+            if (_disposed || _currentMedia == null) return null;
+            return ReadMetadata(_currentMedia);
+        }
     }
 
     public async Task<MediaMetadata?> ReadMetadataAsync(string path, CancellationToken token = default)

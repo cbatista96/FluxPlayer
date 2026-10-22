@@ -395,11 +395,90 @@ internal static class Program
             return Task.CompletedTask;
         });
 
+        await Test("Audio output profiles: independent bands, case-insensitive storage, validation and bounded persistence", () =>
+        {
+            var current = new AppSettings { Volume = 24, EqualizerEnabled = true, EqualizerPreamp = -3, AudioDelay = 120 };
+            current.EqualizerBands[0] = 6;
+            var first = AudioOutputProfile.Capture(current, "Headphones ñ"); first.Validate();
+            current.EqualizerBands[0] = -8;
+            Assert(first.Bands[0] == 6, "Capture detaches saved bands from live sliders");
+            first.Apply(current); current.EqualizerBands[0] = 2;
+            Assert(first.Bands[0] == 6 && current.AudioDelay == 120, "Application detaches live bands from the saved profile");
+            string folder = Path.Combine(Root, "output-profiles-" + Guid.NewGuid().ToString("N"));
+            var store = new SettingsService(folder);
+            current.AudioOutputProfiles["headphones-id"] = first;
+            current.AudioOutputProfiles["speakers-id"] = first with { DeviceName = "Speakers", Volume = 51, Bands = new float[10], AudioDelayMs = -60 };
+            current.AutomaticallyApplyAudioOutputProfiles = false;
+            Assert(store.Save(current), "Save profiles");
+            var reopened = store.Load();
+            Assert(!reopened.AutomaticallyApplyAudioOutputProfiles && reopened.AudioOutputProfiles["HEADPHONES-ID"].Bands[0] == 6
+                && reopened.AudioOutputProfiles["speakers-id"].Volume == 51 && reopened.AudioOutputProfiles.Count == 2, "Independent endpoints and automatic setting round trip");
+            foreach (var invalid in new[] { first with { Bands = new float[31] }, first with { Bands = new[] { float.NaN }.Concat(new float[9]).ToArray() },
+                first with { Preamp = float.PositiveInfinity }, first with { Volume = -1 }, first with { DeviceName = "bad\0name" }, first with { AudioDelayMs = 86_400_001 } })
+            {
+                bool refused = false; try { invalid.Validate(); } catch (ArgumentException) { refused = true; }
+                Assert(refused, "Invalid adjustment rejected");
+            }
+            Assert(!AudioOutputProfile.ValidDeviceId("bad\0id") && !AudioOutputProfile.ValidDeviceId(" "), "Invalid endpoint keys rejected");
+            current.AudioOutputProfiles["invalid"] = first with { Bands = Array.Empty<float>() };
+            current.AudioOutputProfiles["bad\0id"] = first;
+            Assert(store.Save(current) && store.Load().AudioOutputProfiles.Count == 2, "Invalid records do not discard healthy endpoints");
+            current.AudioOutputProfiles = Enumerable.Range(0, 70).ToDictionary(index => "device-" + index, _ => first);
+            Assert(store.Save(current) && store.Load().AudioOutputProfiles.Count == AudioOutputProfile.MaximumProfiles, "Bounded saved endpoints");
+            return Task.CompletedTask;
+        });
+
         // CI verifies managed services without requiring an interactive audio device.
         if (managedOnly) return;
 
         using var engine = new MediaService(hardwareDecoding: false, enableDiagnosticLogging: false);
         using var renderer = new VlcWpfRenderer(engine, new System.Windows.Controls.Image());
+        await Test("Native output profiles: live application, mute, boost limit, opt-out, startup and failed save", async () =>
+        {
+            string folder = Path.Combine(Root, "native-output-profiles-" + Guid.NewGuid().ToString("N"));
+            var store = new SettingsService(folder); Assert(store.Save(new AppSettings { Volume = 0, RememberPlaylist = false }), "Initial isolated settings");
+            using var audioEngine = new MediaService(hardwareDecoding: false, enableDiagnosticLogging: false);
+            await using var library = new LibraryService(Path.Combine(folder, "library"));
+            var vm = new MainViewModel(audioEngine, store, library: library);
+            var output = new AudioDevice("Default", "System default");
+            vm.Volume = 17; vm.AudioDelayMs = 125; vm.IsEqualizerEnabled = true; vm.SetEqualizerBand(0, 6); vm.SetEqualizerPreamp(-2);
+            Assert(vm.SaveAudioOutputProfile(output), "Save live values");
+            vm.Volume = 39; vm.AudioDelayMs = -80; vm.SetEqualizerBand(0, -4);
+            Assert(vm.SaveAudioOutputProfile(new AudioDevice("saved-disconnected-endpoint", "Disconnected headphones")), "Retain an offline endpoint profile");
+            vm.AddFilesToPlaylist(new[] { wav }, true);
+            await Until(() => Task.FromResult(audioEngine.IsPlaying && audioEngine.GetTime() > 100), 5000);
+            vm.IsMuted = true; audioEngine.SetMute(true);
+            Assert(vm.SelectOutputDevice(output), "Select output and automatic profile");
+            await Until(() => Task.FromResult(audioEngine.GetVolume() == 17), 3000);
+            Assert(vm.Volume == 17 && vm.AudioDelayMs == 125 && vm.EqualizerBands[0] == 6 && vm.EqualizerPreamp == -2 && vm.EffectiveEqualizerPreamp == -6
+                && audioEngine.GetVolume() == 17 && audioEngine.GetAudioDelay() == 125_000 && vm.IsMuted && audioEngine.MediaPlayer.Mute,
+                $"Native profile values: volume={vm.Volume}/{audioEngine.GetVolume()}, delay={vm.AudioDelayMs}/{audioEngine.GetAudioDelay()}, band={vm.EqualizerBands[0]}, preamp={vm.EqualizerPreamp}/{vm.EffectiveEqualizerPreamp}, mute={vm.IsMuted}/{audioEngine.MediaPlayer.Mute}");
+            vm.SetEqualizerBand(0, 1);
+            Assert(vm.AudioOutputProfiles["Default"].Bands[0] == 6, "Live editing does not mutate the saved profile");
+            Assert(vm.SetAutomaticAudioOutputProfiles(false), "Opt out");
+            vm.Volume = 31; vm.AudioDelayMs = -50;
+            Assert(vm.SelectOutputDevice(output) && vm.Volume == 31 && vm.AudioDelayMs == -50, "Opt-out keeps current values");
+            Assert(vm.SelectOutputDevice(output, true) && vm.Volume == 17, "Explicit application works while automatic application is off");
+            vm.Volume = 180; Assert(vm.SaveAudioOutputProfile(output), "Save a boosted profile");
+            vm.IsMuted = true; audioEngine.SetMute(true);
+            vm.Volume = 0; Assert(vm.SelectOutputDevice(output, true), "Apply boosted profile");
+            await Until(() => Task.FromResult(audioEngine.GetVolume() == 100), 3000);
+            Assert(vm.Volume == 100 && vm.IsMuted, "Global boost limit remains enforced without unmuting");
+            Assert(vm.SetAutomaticAudioOutputProfiles(true), "Enable startup restore");
+            vm.StopCommand.Execute(null); await vm.ShutdownAsync();
+            using var startupEngine = new MediaService(hardwareDecoding: false, enableDiagnosticLogging: false);
+            await using var startupLibrary = new LibraryService(Path.Combine(folder, "startup-library"));
+            var startup = new MainViewModel(startupEngine, store, library: startupLibrary);
+            Assert(startup.Volume == 100 && startup.EqualizerBands[0] == 6 && startup.AudioDelayMs == 125, "Startup restores the selected endpoint and clamps volume");
+            await startup.ShutdownAsync();
+            string blocked = Path.Combine(folder, "blocked"); Directory.CreateDirectory(Path.Combine(blocked, "settings.json"));
+            using var blockedEngine = new MediaService(hardwareDecoding: false, enableDiagnosticLogging: false);
+            await using var blockedLibrary = new LibraryService(Path.Combine(blocked, "library"));
+            var failed = new MainViewModel(blockedEngine, new SettingsService(blocked), new AppSettings { Volume = 12 }, blockedLibrary);
+            Assert(!failed.SaveAudioOutputProfile(output) && failed.AudioOutputProfiles.Count == 0, "Failed save leaves the active profile map unchanged");
+            Assert(!failed.SelectOutputDevice(new AudioDevice("not-selected", "Test output")) && failed.SelectedOutputDeviceId == "Default" && failed.Volume == 12, "Failed save leaves selected output and live audio unchanged");
+            await failed.ShutdownAsync();
+        });
         await Test("Native engine: PCM detection and duration independent of file extension", async () =>
         {
             Assert(engine.GetAudioDevices().Any(device => device.Id == "Default"), "Selectable output device");

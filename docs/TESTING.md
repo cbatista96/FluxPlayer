@@ -44,6 +44,8 @@ With FFmpeg available, tag saves and subsequent LibVLC playback are checked for 
 
 ## Native transport coverage
 
+Output-profile coverage checks detached band arrays, independent endpoints, invalid records, case-insensitive persistence and the 64-profile limit. A native session verifies delay and volume, equalizer headroom, mute preservation, the global boost cap, automatic opt-out, explicit recall, startup restoration and failed-save isolation. Device volume reporting can settle asynchronously; the test waits for the native reported value. Manual UI review saved a profile for an enumerated headphone endpoint, applied it and independently checked the isolated settings file. Pending metadata and track refreshes also avoid a disposed engine during teardown.
+
 The native transport scenario also verifies actual PNG/JPEG/BMP file signatures, snapshot overwrite refusal and temporary cleanup, two scheduled native frames, audio/subtitle offset values and persistence, and playback from a restored queue with missing files removed. Frame stepping compares sampled pixels while playback remains paused; LibVLC's reported time is not guaranteed to advance on every single frame.
 
 The generated MKV contains an internal SubRip track. The test disables that track and checks that a subsequent track refresh preserves the choice, then attaches a second SRT with Unicode, spaces and `#` in its filename. It checks the new track and selected ID in the bound list after playback's initial parsing has finished. Manual UI verification exported two corrected cues at 110% scale plus 500 ms, checked the file contents and original hash, applied a live delay, and loaded the saved copy with live delay reset.

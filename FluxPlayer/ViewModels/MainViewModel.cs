@@ -120,6 +120,8 @@ public partial class MainViewModel : ObservableObject
         _mediaService = mediaService;
         _settingsService = settingsService;
         _settings = initialSettings ?? _settingsService.Load();
+        if (_settings.AutomaticallyApplyAudioOutputProfiles && _settings.AudioOutputProfiles.TryGetValue(_settings.AudioOutputDevice, out var outputProfile))
+            outputProfile.Apply(_settings);
         _library = library;
         ModePreference = _settings.PlayerModePreference;
         _mediaService.PlaybackSettings = _settings;
@@ -164,6 +166,7 @@ public partial class MainViewModel : ObservableObject
         _mediaService.VideoSurfaceChanged += OnTracksChanged;
         _mediaService.Playing += (_, _) => RunOnUi(() =>
         {
+            if (_shuttingDown) return;
             IsPlaying = true;
             IsBuffering = false;
             ApplyCurrentPlaybackOptions();
@@ -572,6 +575,7 @@ public partial class MainViewModel : ObservableObject
 
     partial void OnVolumeChanged(double value)
     {
+        if (_applyingAudioProfile) { OnPropertyChanged(nameof(VolumeIcon)); return; }
         _mediaService.SetVolume((int)value);
         if (value > 0 && IsMuted) { IsMuted = false; _mediaService.SetMute(false); }
         OnPropertyChanged(nameof(VolumeIcon));
@@ -586,7 +590,7 @@ public partial class MainViewModel : ObservableObject
 
     partial void OnAudioDelayMsChanged(long value)
     {
-        _mediaService.SetAudioDelay(value * 1000);
+        if (!_applyingAudioProfile) _mediaService.SetAudioDelay(value * 1000);
     }
 
     partial void OnSelectedSubtitleTrackChanged(TrackInfo? value)
@@ -630,7 +634,7 @@ public partial class MainViewModel : ObservableObject
 
     private void PushEqualizer()
     {
-        if (_mediaService == null) return;
+        if (_mediaService == null || _applyingAudioProfile) return;
         if (IsEqualizerEnabled) _mediaService.ApplyEqualizer(EqualizerBands, EffectiveEqualizerPreamp);
         else _mediaService.DisableEqualizer();
         OnPropertyChanged(nameof(EffectiveEqualizerPreamp));
@@ -889,6 +893,7 @@ public partial class MainViewModel : ObservableObject
 
     private void OnMediaChanged(object? sender, MediaPlayerMediaChangedEventArgs e)
     {
+        if (_shuttingDown) return;
         int token = Interlocked.Increment(ref _mediaChangeToken);
         RunOnUi(() => IsBuffering = true);
         _ = RefreshTracksAfterMediaChangeAsync(token);
@@ -899,7 +904,7 @@ public partial class MainViewModel : ObservableObject
         try
         {
             await Task.Delay(350);
-            if (token != _mediaChangeToken)
+            if (_shuttingDown || token != _mediaChangeToken)
                 return;
 
             var dispatcher = Application.Current?.Dispatcher;
@@ -971,6 +976,7 @@ public partial class MainViewModel : ObservableObject
 
     private void RefreshTracks()
     {
+        if (_shuttingDown || _mediaService.IsDisposed) return;
         var videoTracks = _mediaService.GetVideoTracks();
         var currentVideoTrack = _mediaService.GetVideoTrack();
         if (videoTracks.Length > 0 && currentVideoTrack < 0)

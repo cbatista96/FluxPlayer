@@ -324,9 +324,9 @@
   {
     "Id": "F0047",
     "Area": "Audio",
-    "Description": "Audio profiles per output device.",
-    "Status": "pending",
-    "Evidence": ""
+    "Description": "Saved volume, ten-band EQ, preamp, peak compensation and audio delay per output, with recall when selecting an output or starting the player.",
+    "Status": "implemented",
+    "Evidence": "AudioOutputProfile / MainViewModel.AudioProfiles / AudioOutputProfilesWindow; independent endpoint persistence, live native delay/volume, mute, boost limit, opt-out, startup, failure isolation and manual headphone-profile review."
   },
   {
     "Id": "F0048",

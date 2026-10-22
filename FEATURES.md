@@ -1,12 +1,12 @@
 # Feature checklist
 
-**75 implemented · 26 pending · 101 tracked capabilities.**
+**76 implemented · 25 pending · 101 tracked capabilities.**
 
 Each capability appears exactly once. Completing it moves the same stable ID from Pending to Implemented. A setting or catalog entry alone does not complete a feature. Source references describe the implementation; validation limits are documented in [Testing](docs/TESTING.md).
 
 Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Sync-PublicFeatures.ps1`; CI rejects an outdated checklist.
 
-## Implemented (75)
+## Implemented (76)
 
 ### Workspaces and interface
 
@@ -58,6 +58,7 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [x] **F0043** Optional FFmpeg conversion to FLAC, WAV, MP3, Opus, Vorbis, AAC, ALAC and WavPack. — MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools
 - [x] **F0044** Sequential conversion, progress, cancellation and optional loudness normalization. — MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools
 - [x] **F0045** Conversion writes to a temporary file and refuses to overwrite an existing destination. — MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools
+- [x] **F0047** Saved volume, ten-band EQ, preamp, peak compensation and audio delay per output, with recall when selecting an output or starting the player. — AudioOutputProfile / MainViewModel.AudioProfiles / AudioOutputProfilesWindow; independent endpoint persistence, live native delay/volume, mute, boost limit, opt-out, startup, failure isolation and manual headphone-profile review.
 - [x] **F0098** Create and edit CUE sheets with track titles, artists, sources, ordering and 75-fps start positions. — CueSheet.Write / CueSheetEditorWindow; frame and multi-file regression tests, plus manual edit/save verification with original preservation.
 
 ### Library and playlists
@@ -101,7 +102,7 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [x] **F0087** Source-only public repository and Windows build/test CI. — MediaFormats, MediaService, CI and build scripts
 - [x] **F0088** Local self-contained build profile and Inno Setup source. — MediaFormats, MediaService, CI and build scripts
 
-## Pending (26)
+## Pending (25)
 
 ### Workspaces and interface
 
@@ -118,7 +119,6 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 ### Audio
 
 - [ ] **F0046** Real 20-band and 31-band DSP equalizers. The current engine has ten bands.
-- [ ] **F0047** Audio profiles per output device.
 - [ ] **F0048** Headphone crossfeed.
 - [ ] **F0049** Verified gapless transitions and crossfade.
 - [ ] **F0050** Advanced DSP chain and measured output quality matrix.

@@ -1,0 +1,42 @@
+<ui:FluentWindow x:Class="FluxPlayer.Windows.AudioOutputProfilesWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    Title="Output profiles · FluxPlayer" Width="790" Height="640" MinWidth="740" MinHeight="590"
+    WindowStartupLocation="CenterOwner" ExtendsContentIntoTitleBar="True">
+    <Grid Margin="24,18,24,20">
+        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+        <StackPanel Margin="0,0,0,20">
+            <TextBlock Text="Audio output profiles" FontSize="25" FontWeight="SemiBold"/>
+            <TextBlock Text="Keep a volume, ten-band equalizer, preamp, peak compensation and audio delay for each output. Adjust them in the player first, then save here."
+                TextWrapping="Wrap" Margin="0,6,0,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Margin="0,0,0,20">
+            <CheckBox x:Name="AutomaticBox" Content="Apply saved profiles when choosing an output and at startup" Click="Automatic_Click" Margin="0,0,0,18"/>
+            <Grid>
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                <TextBlock Text="Output device" Margin="0,0,0,7"/>
+                <ComboBox x:Name="DeviceBox" Grid.Row="1" MinHeight="38" SelectionChanged="Device_Changed" AutomationProperties.Name="Output profile device"/>
+                <Button Content="Refresh devices" Grid.Row="1" Grid.Column="1" Click="Refresh_Click" Padding="14,8" Margin="10,0,0,0"/>
+            </Grid>
+        </StackPanel>
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <TextBlock x:Name="CurrentOutputText" TextWrapping="Wrap" Margin="0,0,0,16"/>
+                <TextBlock Text="Saved settings" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,9"/>
+                <TextBlock x:Name="ProfileDetails" TextWrapping="Wrap" LineHeight="23"/>
+                <TextBlock Text="Profiles are saved explicitly. Later adjustments do not overwrite them. System default follows Windows' current default output; physical-device detection is refreshed on demand. ReplayGain and other effects retain their global settings."
+                    TextWrapping="Wrap" Margin="0,18,0,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+            </StackPanel>
+        </ScrollViewer>
+        <StackPanel Grid.Row="3" Margin="0,20,0,0">
+            <WrapPanel>
+                <Button x:Name="ApplyButton" Content="Use output and saved profile" Click="Apply_Click" Padding="16,9" Margin="0,0,10,8"/>
+                <Button Content="Save current settings" Click="Save_Click" Padding="16,9" Margin="0,0,10,8"/>
+                <Button x:Name="RemoveButton" Content="Remove saved profile" Click="Remove_Click" Padding="14,9" Margin="0,0,0,8"/>
+            </WrapPanel>
+            <TextBlock x:Name="StatusText" Text="Choose an output to inspect its profile. Up to 64 profiles." TextWrapping="Wrap" Margin="0,6,0,0" AutomationProperties.LiveSetting="Polite"/>
+        </StackPanel>
+    </Grid>
+</ui:FluentWindow>

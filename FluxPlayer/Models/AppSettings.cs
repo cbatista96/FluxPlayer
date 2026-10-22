@@ -82,6 +82,8 @@ public class AppSettings
     public double? EqualizerWindowTop { get; set; }
     public int AudioDelay { get; set; } = 0;
     public string AudioOutputDevice { get; set; } = "Default";
+    public bool AutomaticallyApplyAudioOutputProfiles { get; set; } = true;
+    public Dictionary<string, AudioOutputProfile> AudioOutputProfiles { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public string AudioChannels { get; set; } = "Stereo";
     public bool NormalizeVolume { get; set; } = false;
     public bool BoostVolume { get; set; } = false;

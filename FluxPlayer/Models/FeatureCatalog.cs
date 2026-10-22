@@ -59,7 +59,7 @@ public static class FeatureCatalog
         new FeatureDefinition(VolumeNormalization, "Volume normalization", "Balance volume between files."),
         new FeatureDefinition(DynamicCompressorLimiter, "Compressor/limiter", "Improve the clarity of quiet dialogue."),
         new FeatureDefinition(Equalizer31Band, "Equalizer + preamp", "10 ISO bands, preamplifier and 30 presets (E)."),
-        new FeatureDefinition(AudioProfilesPerDevice, "Per-device profiles", "Audio settings for each output device."),
+        new FeatureDefinition(AudioProfilesPerDevice, "Per-device profiles", "Save volume, ten-band EQ, preamp and delay per output from Audio and video tools."),
         new FeatureDefinition(HeadphoneCrossfeed, "Headphone crossfeed", "Reduce stereo headphone listening fatigue."),
         new FeatureDefinition(AvSyncOverlayControls, "Overlay A/V adjustment", "Quick synchronization controls."),
         new FeatureDefinition(AutoDownloadSubtitles, "Subtitle downloads", "Search for subtitles automatically."),
@@ -99,12 +99,12 @@ public static class FeatureCatalog
         PlayNextQueue, PresentationLockControls, Equalizer31Band, ClipRecordingAb,
         MediaLibrary, WatchedFolders, FavoritesCollections, SubtitleTextSearch,
         LibraryAdvancedFilters, SmartPlaylists,
-        ScheduledSnapshots, LiveSubtitleSyncEditor, SubtitleStyleProfiles,
+        ScheduledSnapshots, LiveSubtitleSyncEditor, SubtitleStyleProfiles, AudioProfilesPerDevice,
     };
 
     private static readonly HashSet<string> PlannedKeys = new(StringComparer.OrdinalIgnoreCase)
     {
-        AudioProfilesPerDevice, HeadphoneCrossfeed, AutoDownloadSubtitles,
+        HeadphoneCrossfeed, AutoDownloadSubtitles,
         BilingualSubtitles, BurnedSubtitlesOcr,
         ConfigurableHud, AdvancedTouchGestures, AutoRenderProfileByGpu,
         ChromecastDlnaSender, MobileRemoteWebUi,

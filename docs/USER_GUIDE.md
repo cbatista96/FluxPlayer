@@ -41,6 +41,10 @@ Press **E** to open the floating equalizer. It offers ten bands from 31 Hz to 16
 
 The audio settings include output device selection, ReplayGain options, audio delay and preferred track language. Tag editing writes supported metadata to the original file; release it from playback before saving. Tag write support depends on its format.
 
+Open **Audio and video tools > Audio output profiles** to save the player's current volume, ten-band equalizer, preamp, peak compensation and audio delay for a selected output. Up to 64 profiles are keyed by output identifier; saving for one device leaves other profiles independent. Saved devices remain listed when disconnected. **Refresh devices** updates availability.
+
+Enable automatic application to recall a saved profile when selecting that output or starting FluxPlayer with it selected. With automatic application off, **Use output and saved profile** still applies it explicitly. Profile changes preserve mute and respect the global volume-boost limit. Changes made afterward do not overwrite a profile until **Save current settings** is chosen again. Removing a profile retains the current audio settings. The System default profile follows Windows' current default; automatic physical-device/hotplug profile switching remains pending. ReplayGain and other effects keep their global settings.
+
 Open **Audio and video tools > Batch tag editor** to edit the current queue, or select several library rows and choose **Edit tags**. Add or remove files from the job, then check only the title, artist, album or genre fields you want to replace. A checked empty field clears that tag; unchecked fields are preserved. **Apply checked fields** writes to the original files and shows saved, skipped and failed results. Loaded files, missing files and network sources are skipped. Cancellation finishes the current save and stops before the next file; completed changes remain. Close the editor to cancel an active job. Keep backups of files before making large changes.
 
 ## Subtitle timing

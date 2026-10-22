@@ -17,6 +17,7 @@ public partial class MainWindow
     private BatchTagEditorWindow? _batchTagWindow;
     private SubtitleTimingWindow? _subtitleTimingWindow;
     private SubtitleStyleWindow? _subtitleStyleWindow;
+    private AudioOutputProfilesWindow? _audioOutputProfilesWindow;
     private bool _audioLayoutApplied;
     private Size _videoModeSize = new(1280, 760);
     private int _videoRotation;
@@ -131,7 +132,11 @@ public partial class MainWindow
                 IsCheckable = true,
                 IsChecked = device.Id == _vm.CurrentSettings.AudioOutputDevice
             };
-            entry.Click += (_, _) => _vm.SelectOutputDevice(device);
+            entry.Click += (_, _) =>
+            {
+                if (!_vm.SelectOutputDevice(device))
+                    ShowActionOsd("\uE7BA", "The output change could not be saved: " + _vm.AudioOutputProfileSaveError);
+            };
             OutputDevicesMenu.Items.Add(entry);
         }
         ChaptersMenu.Items.Clear();
@@ -151,6 +156,14 @@ public partial class MainWindow
         var service = new SettingsService(); var settings = service.Load();
         settings.ReplayGainMode = mode; service.Save(settings);
         ShowActionOsd("\uE9E9", "ReplayGain will apply when opening the next track");
+    }
+
+    private void AudioOutputProfiles_Click(object sender, RoutedEventArgs e)
+    {
+        if (_audioOutputProfilesWindow != null) { _audioOutputProfilesWindow.Activate(); return; }
+        _audioOutputProfilesWindow = new AudioOutputProfilesWindow(this, _vm);
+        _audioOutputProfilesWindow.Closed += (_, _) => _audioOutputProfilesWindow = null;
+        _audioOutputProfilesWindow.Show();
     }
 
     private void EditTagsButton_Click(object sender, RoutedEventArgs e)

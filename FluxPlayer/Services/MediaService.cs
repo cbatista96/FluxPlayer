@@ -24,6 +24,7 @@ public partial class MediaService : IDisposable
     private Media? _currentMedia;
     private Equalizer? _equalizer;
     private volatile bool _disposed;
+    public bool IsDisposed => _disposed;
     private int _disposeStarted;
     public AppSettings PlaybackSettings { get; set; } = new();
 
@@ -563,7 +564,11 @@ public partial class MediaService : IDisposable
         // No native media parse may outlive the LibVLC instance it belongs to.
         _durationParseGate.Wait();
         try { MediaPlayer.Stop(); } catch { }
-        _currentMedia?.Dispose();
+        lock (_playbackStateLock)
+        {
+            _currentMedia?.Dispose();
+            _currentMedia = null;
+        }
         _equalizer?.Dispose();
         MediaPlayer.Dispose();
         CleanupSnapshotTemporaryFiles();

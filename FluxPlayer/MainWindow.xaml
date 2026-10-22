@@ -343,6 +343,7 @@
                             <MenuItem Header="Media library" Click="LibraryButton_Click" />
                             <MenuItem Header="Batch audio converter…" Click="ConverterButton_Click" />
                             <MenuItem x:Name="OutputDevicesMenu" Header="Output device" />
+                            <MenuItem Header="Audio output profiles…" Click="AudioOutputProfiles_Click" />
                             <MenuItem Header="ReplayGain">
                                 <MenuItem Header="Disabled" Tag="none" Click="ReplayGainItem_Click" />
                                 <MenuItem Header="By track" Tag="track" Click="ReplayGainItem_Click" />
