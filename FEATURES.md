@@ -1,12 +1,12 @@
 # Feature checklist
 
-**76 implemented · 26 pending · 102 tracked capabilities.**
+**77 implemented · 27 pending · 104 tracked capabilities.**
 
 Each capability appears exactly once. Completing it moves the same stable ID from Pending to Implemented. A setting or catalog entry alone does not complete a feature. Source references describe the implementation; validation limits are documented in [Testing](docs/TESTING.md).
 
 Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Sync-PublicFeatures.ps1`; CI rejects an outdated checklist.
 
-## Implemented (76)
+## Implemented (77)
 
 ### Workspaces and interface
 
@@ -42,6 +42,7 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [x] **F0027** Adaptive caching and playback fallback profiles. — MediaService, MediaFormats and MainViewModel
 - [x] **F0028** Plugin cache generation for local packaging. — MediaService, MediaFormats and MainViewModel
 - [x] **F0029** Optional local engine diagnostics. — MediaService, MediaFormats and MainViewModel
+- [x] **F0103** External OGM/Matroska XML navigation chapters, an editable/searchable timeline, session application and separate copy export. — ChapterDocument / ChapterEditorWindow / MainViewModel.Chapters; encoding and timing round trips, safe XML limits, overwrite refusal, native seek/reset/duration checks, MKV chapter offsets and manual edit/export/menu navigation.
 
 ### Audio
 
@@ -102,7 +103,7 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [x] **F0087** Source-only public repository and Windows build/test CI. — MediaFormats, MediaService, CI and build scripts
 - [x] **F0088** Local self-contained build profile and Inno Setup source. — MediaFormats, MediaService, CI and build scripts
 
-## Pending (26)
+## Pending (27)
 
 ### Workspaces and interface
 
@@ -115,6 +116,7 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [ ] **F0030** Dedicated GPU-specific renderer selection policy.
 - [ ] **F0031** Exhaustive codec/container/hardware compatibility matrix.
 - [ ] **F0032** Native DSD and verified bit-perfect exclusive output.
+- [ ] **F0104** Nested, ordered and linked-segment chapter playback, alternate editions/displays and editing chapters inside media containers.
 
 ### Audio
 

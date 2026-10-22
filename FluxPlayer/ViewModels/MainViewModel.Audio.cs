@@ -45,6 +45,7 @@ public partial class MainViewModel
     {
         if (value) return;
         LoadedSubtitlePath = null;
+        Chapters.Clear(); ExternalChapterPath = null;
         NowPlayingTitle = "Open your music"; NowPlayingArtist = "Local files and internet radio";
         NowPlayingAlbum = AudioTechnical = LyricLine = ""; AlbumArtwork = null; _lyrics = null;
         Interlocked.Increment(ref _artworkGeneration);
@@ -82,7 +83,7 @@ public partial class MainViewModel
         _recordedSource = null;
         LyricLine = "";
         _lyrics = null;
-        Chapters.Clear();
+        Chapters.Clear(); ExternalChapterPath = null;
         ResolvePlayerMode(null);
         _ = LoadLocalLyricsAsync(item.FilePath);
         _ = RefreshFavoriteAsync(item.FilePath);

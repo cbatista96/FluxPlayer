@@ -1116,8 +1116,9 @@ public partial class MainViewModel : ObservableObject
     public void SeekToMs(long ms)
     {
         if (!HasMedia) return;
-        _mediaService.SeekTo(Math.Max(0, ms));
-        SyncTimeDisplay(ms);
+        long target = TotalDurationMs > 0 ? Math.Clamp(ms, 0, TotalDurationMs) : Math.Max(0, ms);
+        _mediaService.SeekTo(target);
+        SyncTimeDisplay(target);
     }
 
     public void ClearBookmarks()

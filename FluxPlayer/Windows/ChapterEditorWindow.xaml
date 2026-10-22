@@ -1,0 +1,51 @@
+<ui:FluentWindow x:Class="FluxPlayer.Windows.ChapterEditorWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    Title="Chapter editor · FluxPlayer" Width="900" Height="650" MinWidth="780" MinHeight="570"
+    WindowStartupLocation="CenterOwner" ExtendsContentIntoTitleBar="True">
+    <Grid Margin="24,18,24,20">
+        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+        <StackPanel Margin="0,0,0,18">
+            <TextBlock Text="Chapter editor" FontSize="25" FontWeight="SemiBold"/>
+            <TextBlock Text="Load or create navigation points for one audio or video timeline. Saved chapter files leave the media container unchanged."
+                TextWrapping="Wrap" Margin="0,6,0,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+            <TextBlock Text="{Binding NowPlayingTitle, StringFormat=Current media: {0}}" TextTrimming="CharacterEllipsis" Margin="0,10,0,0"/>
+        </StackPanel>
+        <WrapPanel Grid.Row="1" Margin="0,0,0,10">
+            <Button x:Name="OpenButton" Content="Open chapter file…" Click="Open_Click" Padding="14,8" Margin="0,0,8,8"/>
+            <Button Content="Copy player chapters" Click="Copy_Click" Padding="14,8" Margin="0,0,8,8"/>
+            <Button Content="Add current position" Click="AddCurrent_Click" Padding="14,8" Margin="0,0,8,8"/>
+            <Button Content="Add row" Click="AddRow_Click" Padding="14,8" Margin="0,0,8,8"/>
+            <Button Content="Remove row" Click="Remove_Click" Padding="14,8" Margin="0,0,8,8"/>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                <TextBlock Text="Find" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <TextBox x:Name="SearchBox" Width="220" Height="36" TextChanged="Search_Changed"
+                    Padding="9,6" ToolTip="Find a chapter by title or timestamp" AutomationProperties.Name="Find chapter by title or time"/>
+            </StackPanel>
+        </WrapPanel>
+        <DataGrid x:Name="ChaptersGrid" Grid.Row="2" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
+            CanUserSortColumns="False" SelectionMode="Single" SelectionUnit="FullRow" HeadersVisibility="Column" GridLinesVisibility="None"
+            EnableRowVirtualization="True" EnableColumnVirtualization="True" VirtualizingPanel.VirtualizationMode="Recycling" RowHeight="40"
+            AutomationProperties.Name="Chapter start times and titles">
+            <DataGrid.Resources><Style TargetType="TextBlock"><Setter Property="Margin" Value="6,0"/><Setter Property="VerticalAlignment" Value="Center"/><Setter Property="TextTrimming" Value="CharacterEllipsis"/></Style></DataGrid.Resources>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Start (hh:mm:ss.mmm)" Width="190" Binding="{Binding Time, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"/>
+                <DataGridTextColumn Header="Chapter title" Width="*" MinWidth="250" Binding="{Binding Title, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <StackPanel Grid.Row="3" Margin="0,18,0,0">
+            <WrapPanel x:Name="ActionsPanel">
+                <Button Content="Sort by time" Click="Sort_Click" Padding="14,8" Margin="0,0,8,8"/>
+                <Button Content="Seek selected in player" Click="Seek_Click" Padding="14,8" Margin="0,0,8,8"/>
+                <Button Content="Apply to current media" Click="Apply_Click" Padding="14,8" Margin="0,0,8,8"/>
+                <Button Content="Restore native chapters" Click="Restore_Click" Padding="14,8" Margin="0,0,8,8"/>
+                <Button Content="Save chapter copy…" Click="Save_Click" Padding="16,8" Margin="0,0,0,8"/>
+            </WrapPanel>
+            <TextBlock Text="OGM simple text or Matroska XML. Flat visible chapters from one edition; nested/ordered/linked chapter playback and container metadata editing remain separate. Applying is for this playback session."
+                TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" FontSize="11"/>
+            <TextBlock x:Name="StatusText" Text="Edit start times and titles, then apply or save a separate chapter file. Up to 10,000 chapters."
+                TextWrapping="Wrap" Margin="0,10,0,0" AutomationProperties.LiveSetting="Polite"/>
+        </StackPanel>
+    </Grid>
+</ui:FluentWindow>

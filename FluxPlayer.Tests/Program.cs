@@ -143,6 +143,63 @@ internal static class Program
             var tracks = CueSheet.Read(cue); Assert(tracks.Length == 2 && tracks[1].StartMs == 3493 && tracks[1].Artist == "Artist", "CUE"); return Task.CompletedTask;
         });
 
+        await Test("External chapters: OGM/XML round trips, editions, encodings, limits, entities and cancellation", () =>
+        {
+            string folder = Path.Combine(Root, "chapters-" + Guid.NewGuid().ToString("N")); Directory.CreateDirectory(folder);
+            var chapters = new[] { new ChapterInfo(0, "Opening ñ & < >", 0), new ChapterInfo(1, "Second = scene", 2345), new ChapterInfo(2, "Long timeline", 100 * 3_600_000L + 7) };
+            foreach (bool xml in new[] { false, true })
+            {
+                string path = Path.Combine(folder, xml ? "chapters.xml" : "chapters.txt"); ChapterDocument.Write(path, chapters, xml);
+                Assert(ChapterDocument.Read(path).Chapters.SequenceEqual(chapters), "Round trip titles and millisecond positions");
+                string original = File.ReadAllText(path); bool refused = false;
+                try { ChapterDocument.Write(path, chapters, xml); } catch (IOException) { refused = true; }
+                Assert(refused && File.ReadAllText(path) == original, "Writer refuses to replace an existing chapter file");
+            }
+            Assert(ChapterDocument.TryParseTime("999:59:59.999999999", out long maximum) && maximum == ChapterDocument.MaximumTimeMs
+                && ChapterDocument.FormatTime(100 * 3_600_000L + 7) == "100:00:00.007", "Nanosecond inputs floor to milliseconds without wrapping at 24 hours");
+            foreach (string bad in new[] { "1000:00:00.000", "00:60:00.000", "-01:00:00.000", "00:00:00.0000000000" })
+                Assert(!ChapterDocument.TryParseTime(bad, out _), "Invalid chapter time rejected");
+            string sample = Path.Combine(folder, "edition.xml");
+            File.WriteAllText(sample, "<!DOCTYPE Chapters SYSTEM \"https://example.test/not-fetched.dtd\"><Chapters><EditionEntry><ChapterAtom><ChapterTimeStart>00:00:01.000</ChapterTimeStart></ChapterAtom></EditionEntry><EditionEntry><EditionFlagDefault>1</EditionFlagDefault><ChapterAtom><ChapterTimeStart>00:00:02.123456789</ChapterTimeStart><ChapterDisplay><ChapterString>Selected edition</ChapterString></ChapterDisplay><ChapterAtom><ChapterTimeStart>00:00:02.500</ChapterTimeStart></ChapterAtom></ChapterAtom><ChapterAtom><ChapterTimeStart>00:00:04.000</ChapterTimeStart><ChapterFlagHidden>1</ChapterFlagHidden></ChapterAtom></EditionEntry></Chapters>");
+            var selected = ChapterDocument.Read(sample);
+            Assert(selected.Chapters.Single() is { TimeMs: 2123, Name: "Selected edition" } && selected.Note.Contains("top-level"), "Default edition, hidden chapters and explicit flat import scope");
+            File.WriteAllBytes(sample, System.Text.Encoding.Latin1.GetBytes("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?><Chapters><EditionEntry><ChapterAtom><ChapterTimeStart>00:00:00.000</ChapterTimeStart><ChapterDisplay><ChapterString>Café</ChapterString></ChapterDisplay></ChapterAtom></EditionEntry></Chapters>"));
+            Assert(ChapterDocument.Read(sample).Chapters.Single().Name == "Café", "XML declaration controls byte decoding");
+            foreach (string bad in new[]
+            {
+                "<Chapters><EditionEntry><EditionFlagOrdered>1</EditionFlagOrdered></EditionEntry></Chapters>",
+                "<Chapters><EditionEntry><ChapterAtom><ChapterSegmentUID>01</ChapterSegmentUID></ChapterAtom></EditionEntry></Chapters>",
+                "<!DOCTYPE Chapters [<!ENTITY secret SYSTEM 'file:///C:/not-read'>]><Chapters><EditionEntry><ChapterAtom><ChapterTimeStart>00:00:00.000</ChapterTimeStart><ChapterDisplay><ChapterString>&secret;</ChapterString></ChapterDisplay></ChapterAtom></EditionEntry></Chapters>",
+                string.Concat(Enumerable.Repeat("<Chapters>", 34)) + string.Concat(Enumerable.Repeat("</Chapters>", 34)),
+                "CHAPTER01=00:00:01.000\nCHAPTER01=00:00:02.000", "CHAPTER01NAME=Orphan", "CHAPTER01=00:00:61.000", ""
+            })
+            {
+                File.WriteAllText(sample, bad); bool refused = false;
+                try { ChapterDocument.Read(sample); } catch (InvalidDataException) { refused = true; }
+                Assert(refused, "Malformed, linked, ordered, entity and excessive-depth chapter data rejected");
+            }
+            foreach (var invalid in new[] { new[] { chapters[1], chapters[0] }, new[] { chapters[0], chapters[0] }, new[] { new ChapterInfo(0, "Bad\0title", 0) }, new[] { new ChapterInfo(0, "End", 8000) } })
+            {
+                bool refused = false; try { ChapterDocument.Validate(invalid, 8000); } catch (InvalidDataException) { refused = true; }
+                Assert(refused, "Invalid draft order, duplicate positions, titles and duration bounds rejected");
+            }
+            string oversized = Path.Combine(folder, "large.txt"); using (var file = File.Create(oversized)) file.SetLength(ChapterDocument.MaximumBytes + 1L);
+            bool rejected = false; try { ChapterDocument.Read(oversized); } catch (InvalidDataException) { rejected = true; }
+            Assert(rejected, "Oversized chapter input rejected before parsing");
+            string maximumFile = Path.Combine(folder, "maximum.txt");
+            ChapterDocument.Write(maximumFile, Enumerable.Range(0, ChapterDocument.MaximumChapters).Select(index => new ChapterInfo(index, "Part " + index, index)), false);
+            Assert(ChapterDocument.Read(maximumFile).Chapters.Length == ChapterDocument.MaximumChapters, "The maximum supported flat chapter count round trips");
+            rejected = false;
+            try { ChapterDocument.Validate(Enumerable.Range(0, ChapterDocument.MaximumChapters + 1).Select(index => new ChapterInfo(index, "Part", index))); }
+            catch (InvalidDataException) { rejected = true; }
+            Assert(rejected, "Excessive chapter count rejected");
+            using var cancellation = new CancellationTokenSource(); cancellation.Cancel();
+            rejected = false; string canceled = Path.Combine(folder, "canceled.txt");
+            try { ChapterDocument.Write(canceled, chapters, false, cancellation.Token); } catch (OperationCanceledException) { rejected = true; }
+            Assert(rejected && !File.Exists(canceled) && !Directory.EnumerateFiles(folder).Any(path => Path.GetFileName(path).StartsWith(".flux-chapters-")), "Canceled export leaves no output or temporary file");
+            return Task.CompletedTask;
+        });
+
         await Test("CUE writing: frame round trips, multiple sources, editing, validation and original preservation", () =>
         {
             string folder = Path.Combine(Root, "cue-editor-" + Guid.NewGuid().ToString("N")); Directory.CreateDirectory(folder);
@@ -500,6 +557,34 @@ internal static class Program
 
         using var engine = new MediaService(hardwareDecoding: false, enableDiagnosticLogging: false);
         using var renderer = new VlcWpfRenderer(engine, new System.Windows.Controls.Image());
+        await Test("Native chapter navigation: external points, seek, source reset and duration validation", async () =>
+        {
+            string folder = Path.Combine(Root, "native-chapters-" + Guid.NewGuid().ToString("N"));
+            using var chapterEngine = new MediaService(hardwareDecoding: false, enableDiagnosticLogging: false);
+            await using var chapterLibrary = new LibraryService(Path.Combine(folder, "library"));
+            var vm = new MainViewModel(chapterEngine, new SettingsService(folder), new AppSettings { Volume = 0, RememberPlaylist = false }, chapterLibrary);
+            try
+            {
+                Assert(!vm.ApplyExternalChapters(new[] { new ChapterInfo(0, "Opening", 0) }), "A current media timeline is required");
+                vm.AddFilesToPlaylist(new[] { wav }, true);
+                await Until(() => Task.FromResult(chapterEngine.IsPlaying && vm.TotalDurationMs == 8000), 5000);
+                var external = new[] { new ChapterInfo(0, "Opening", 0), new ChapterInfo(1, "Second", 3000) };
+                Assert(vm.ApplyExternalChapters(external, "test.chapters.txt") && vm.Chapters.SequenceEqual(external) && vm.ExternalChapterPath == "test.chapters.txt", "External navigation points applied");
+                vm.SeekToMs(vm.Chapters[1].TimeMs);
+                await Until(() => Task.FromResult(chapterEngine.GetTime() is >= 2800 and <= 4500), 3000);
+                vm.PlayPauseCommand.Execute(null);
+                await Until(() => Task.FromResult(!chapterEngine.IsPlaying), 1000);
+                bool refused = false; try { vm.ApplyExternalChapters(new[] { new ChapterInfo(0, "Beyond end", 9000) }); } catch (InvalidDataException) { refused = true; }
+                Assert(refused && vm.Chapters.SequenceEqual(external), "Invalid application leaves current navigation intact");
+                vm.RestoreNativeChapters(); Assert(vm.Chapters.Count == 0 && vm.ExternalChapterPath == null, "Restore the chapterless PCM source");
+                vm.ApplyExternalChapters(external);
+                string next = Path.Combine(folder, "next.wav"); Directory.CreateDirectory(folder); File.Copy(wav, next);
+                vm.AddFilesToPlaylist(new[] { next }, true);
+                await Until(() => Task.FromResult(chapterEngine.IsPlaying && vm.CurrentItem?.FilePath == next), 3000);
+                Assert(vm.Chapters.Count == 0 && vm.ExternalChapterPath == null, "A new source clears session-only external chapters");
+            }
+            finally { vm.StopCommand.Execute(null); await vm.ShutdownAsync(); }
+        });
         await Test("Native audio DSP: measured ISO band centers and compensated preamp", () => AudioDspChecks.VerifyIsoBandsAsync(Root));
         if (ProbePendingAudioFilters)
             await Test("Pending audio filters: compressor acceptance probe", () => AudioDspChecks.VerifyCompressorAsync(Root));
@@ -730,8 +815,11 @@ internal static class Program
             await Test("Real video: H.264/AAC, MKV, classification and automatic mode switching", async () =>
             {
                 string video = Path.Combine(Root, "video-test.mkv");
+                string chapterMetadata = Path.Combine(Root, "native-chapter-metadata.txt");
+                File.WriteAllText(chapterMetadata, ";FFMETADATA1\n[CHAPTER]\nTIMEBASE=1/1000\nSTART=0\nEND=3000\ntitle=Opening\n[CHAPTER]\nTIMEBASE=1/1000\nSTART=3000\nEND=8000\ntitle=Second scene\n");
                 var start = new ProcessStartInfo(ConversionService.FindExecutable()!) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardError = true };
-                foreach (string value in new[] { "-hide_banner", "-loglevel", "error", "-y", "-f", "lavfi", "-i", "testsrc2=size=320x180:rate=25", "-i", wav, "-i", Path.Combine(Root, "test.srt"), "-t", "8", "-c:v", "libx264", "-preset", "ultrafast", "-c:a", "aac", "-c:s", "srt", video }) start.ArgumentList.Add(value);
+                foreach (string value in new[] { "-hide_banner", "-loglevel", "error", "-y", "-f", "lavfi", "-i", "testsrc2=size=320x180:rate=25", "-i", wav, "-i", Path.Combine(Root, "test.srt"), "-f", "ffmetadata", "-i", chapterMetadata,
+                    "-map", "0:v", "-map", "1:a", "-map", "2:s", "-map_chapters", "3", "-t", "8", "-c:v", "libx264", "-preset", "ultrafast", "-c:a", "aac", "-c:s", "srt", video }) start.ArgumentList.Add(value);
                 using var ffmpeg = Process.Start(start)!; var errors = ffmpeg.StandardError.ReadToEndAsync(); await ffmpeg.WaitForExitAsync(); Assert(ffmpeg.ExitCode == 0, await errors);
                 var metadata = await engine.ReadMetadataAsync(video); Assert(metadata is { HasAudio: true, HasVideo: true }, "Video tracks");
                 await using var library = new LibraryService(Path.Combine(Root, "vm-library"));
@@ -741,6 +829,8 @@ internal static class Program
                 vm.AddFilesToPlaylist(new[] { video }, true);
                 await Until(() => Task.FromResult(vm.IsPlaying && vm.ActiveMode == PlayerMode.Video), 8000);
                 await Until(() => Task.FromResult(renderer.CurrentBitmap != null && engine.MediaPlayer.VoutCount > 0 && engine.GetTime() > 50), 5000);
+                await Until(() => Task.FromResult(vm.Chapters.Count == 2), 3000);
+                Assert(vm.Chapters[1].TimeMs == 3000, "Native chapter offsets use milliseconds: " + JsonSerializer.Serialize(vm.Chapters));
                 await Until(() => Task.FromResult(vm.SubtitleTracks.Count(track => track.Id >= 0) == 1), 3000);
                 Assert(vm.SelectedSubtitleTrack?.Id >= 0, "Default language preference falls back to the unlabeled embedded track");
                 Assert(vm.SubtitleTracks.Count(track => track.Id == -1) == 1, "One disabled subtitle entry");

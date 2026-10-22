@@ -71,6 +71,14 @@ For local lyrics, place an LRC or text file beside the media with the same base 
 
 Save as suggests an edited copy. The writer uses relative source paths, checks increasing positions within each source and rejects invalid text or an accidental overwrite. This editor writes audio `FILE`, `TRACK`, `TITLE`, `PERFORMER` and `INDEX 01` entries. Advanced directives such as CD-TEXT, PREGAP and other indexes are not retained, so keep the original when editing a more complex sheet.
 
+## External chapters
+
+Open **Audio and video tools > Chapter editor and external chapters**. Load an OGM simple chapter file (`.txt`/`.ogm`) or Matroska chapter XML, or copy the player's existing chapter points. Add a row or the current playback position, then edit titles and `hours:minutes:seconds.milliseconds` start times directly in the table. **Find** filters the draft by title or time; **Sort by time** orders it before validation. Saving and applying use the full draft, including rows hidden by Find.
+
+**Apply to current media** updates navigation for this session. Use **Audio and video tools > Chapters** or **Seek selected in player** to jump to a point. The menu shows up to 200 entries; the editor can search all 10,000 supported points. Times must increase without duplicates and stay before the known end of the media. **Restore native chapters** restores source navigation while retaining the editor draft. Opening a different source clears session-only external chapter points.
+
+**Save chapter copy** writes a new OGM text or flat Matroska XML document and refuses to overwrite existing files. Imported XML uses visible top-level chapters from the default or first edition, with times floored to milliseconds. Nested chapters, alternate languages/editions, ends, UIDs and other container metadata are not retained in the copy. Ordered and linked-segment chapters are rejected because they cannot describe one flat playback timeline. The original chapter document and media container remain unchanged.
+
 ## Library and smart playlists
 
 Open the library from the title bar. Add a media folder to scan its files and watch for changes. Select an entry to play it, mark favorites and save searches as smart playlists. Library data can be exported to and imported from a JSON backup.

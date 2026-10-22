@@ -18,6 +18,7 @@ public partial class MainWindow
     private SubtitleTimingWindow? _subtitleTimingWindow;
     private SubtitleStyleWindow? _subtitleStyleWindow;
     private AudioOutputProfilesWindow? _audioOutputProfilesWindow;
+    private ChapterEditorWindow? _chapterEditorWindow;
     private bool _audioLayoutApplied;
     private Size _videoModeSize = new(1280, 760);
     private int _videoRotation;
@@ -140,11 +141,21 @@ public partial class MainWindow
             OutputDevicesMenu.Items.Add(entry);
         }
         ChaptersMenu.Items.Clear();
-        foreach (var chapter in _vm.Chapters)
+        foreach (var chapter in _vm.Chapters.Take(200))
         {
-            var entry = new MenuItem { Header = chapter.Name };
+            var entry = new MenuItem
+            {
+                Header = new TextBlock { Text = chapter.Name, TextTrimming = TextTrimming.CharacterEllipsis, MaxWidth = 360 },
+                ToolTip = ChapterDocument.FormatTime(Math.Clamp(chapter.TimeMs, 0, ChapterDocument.MaximumTimeMs)) + " · " + chapter.Name,
+                IsEnabled = _vm.TotalDurationMs <= 0 || chapter.TimeMs < _vm.TotalDurationMs
+            };
             entry.Click += (_, _) => _vm.SeekToMs(chapter.TimeMs);
             ChaptersMenu.Items.Add(entry);
+        }
+        if (_vm.Chapters.Count > 200)
+        {
+            var more = new MenuItem { Header = $"View all {_vm.Chapters.Count:N0} chapters in the editor…" };
+            more.Click += ChapterEditor_Click; ChaptersMenu.Items.Add(new Separator()); ChaptersMenu.Items.Add(more);
         }
         ChaptersMenu.IsEnabled = _vm.Chapters.Count > 0;
     }
@@ -195,6 +206,13 @@ public partial class MainWindow
         _subtitleStyleWindow.Show();
     }
     private void OpenCueButton_Click(object sender, RoutedEventArgs e) => MediaToolsWindows.ShowCueSheet(this, _vm);
+    private void ChapterEditor_Click(object sender, RoutedEventArgs e)
+    {
+        if (_chapterEditorWindow != null) { _chapterEditorWindow.Activate(); return; }
+        _chapterEditorWindow = new ChapterEditorWindow(this, _vm);
+        _chapterEditorWindow.Closed += (_, _) => _chapterEditorWindow = null;
+        _chapterEditorWindow.Show();
+    }
     private void EditCueButton_Click(object sender, RoutedEventArgs e)
     {
         if (_cueEditorWindow != null) { _cueEditorWindow.Activate(); return; }

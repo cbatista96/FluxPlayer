@@ -712,5 +712,19 @@
     "Description": "Personal library labels with batch add/remove, label search rules, smart playlists and backup merging.",
     "Status": "implemented",
     "Evidence": "Immutable label values / LibraryService.UpdateLabelsAsync / LibraryLabelsWindow; atomic limits and persistence rollback, cancellation, concurrent updates, reopened/merged backups, preserved media bytes and manual label/smart-playlist review."
+  },
+  {
+    "Id": "F0103",
+    "Area": "Playback and formats",
+    "Description": "External OGM/Matroska XML navigation chapters, an editable/searchable timeline, session application and separate copy export.",
+    "Status": "implemented",
+    "Evidence": "ChapterDocument / ChapterEditorWindow / MainViewModel.Chapters; encoding and timing round trips, safe XML limits, overwrite refusal, native seek/reset/duration checks, MKV chapter offsets and manual edit/export/menu navigation."
+  },
+  {
+    "Id": "F0104",
+    "Area": "Playback and formats",
+    "Description": "Nested, ordered and linked-segment chapter playback, alternate editions/displays and editing chapters inside media containers.",
+    "Status": "pending",
+    "Evidence": ""
   }
 ]

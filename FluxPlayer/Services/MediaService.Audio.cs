@@ -106,6 +106,7 @@ public partial class MediaService
 
     public ChapterInfo[] GetChapters()
     {
+        if (_disposed) return Array.Empty<ChapterInfo>();
         try
         {
             return MediaPlayer.FullChapterDescriptions(Math.Max(MediaPlayer.Title, 0))
