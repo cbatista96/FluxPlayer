@@ -1,0 +1,11 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <SolidColorBrush x:Key="PlayerPrimaryForegroundBrush" Color="#F2F2F2" />
+    <SolidColorBrush x:Key="PlayerSecondaryForegroundBrush" Color="#CCEEEEEE" />
+    <SolidColorBrush x:Key="PlayerHoverBrush" Color="#30FFFFFF" />
+    <SolidColorBrush x:Key="PlayerPressedBrush" Color="#50FFFFFF" />
+    <SolidColorBrush x:Key="PlayerSeparatorBrush" Color="#28FFFFFF" />
+    <SolidColorBrush x:Key="ChipBrush" Color="#14FFFFFF" />
+    <SolidColorBrush x:Key="ChipBorderBrush" Color="#1FFFFFFF" />
+    <SolidColorBrush x:Key="SliderTrackBrush" Color="#2EFFFFFF" />
+</ResourceDictionary>

@@ -1,0 +1,56 @@
+# Generated .NET and IDE files
+**/bin/
+**/obj/
+.vs/
+.idea/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.pubxml.user
+TestResults/
+*.trx
+*.coverage*
+
+# Local builds and installers: this repository publishes source only
+publish/
+artifacts/
+installer/output/
+installer/assets/
+*.exe
+*.dll
+*.pdb
+*.lib
+*.msi
+*.msix
+*.zip
+plugins.dat
+
+# Private workspace, original research inputs and generated local reports
+session-state/
+.claude/
+.codex/
+_wpfui_combobox_ref.txt
+FUNCIONALIDADES.md
+INSTRUCCIONES.md
+docs/IMPLEMENTACION.md
+docs/VALIDACION.md
+docs/REQUISITOS-ORIGINALES.txt
+docs/feature-inventory.csv
+docs/feature-status.json
+docs/test-results.json
+tools/Sync-FeatureChecklist.ps1
+
+# Credentials, media samples and machine-specific data
+.env
+.env.*
+!.env.example
+*.pfx
+*.p12
+*.key
+*.pem
+*.log
+*.dmp
+Thumbs.db
+.DS_Store

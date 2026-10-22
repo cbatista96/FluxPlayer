@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
+    <UseWPF>true</UseWPF>
+    <PlatformTarget>x64</PlatformTarget>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../FluxPlayer/FluxPlayer.csproj"/>
+    <Reference Include="LibVLCSharp">
+      <HintPath>$(NuGetPackageRoot)libvlcsharp/3.8.5/lib/net6.0/LibVLCSharp.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>

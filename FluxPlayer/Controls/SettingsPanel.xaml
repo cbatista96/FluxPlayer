@@ -1,0 +1,1578 @@
+<UserControl x:Class="FluxPlayer.Controls.SettingsPanel" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="clr-namespace:FluxPlayer.Controls" UseLayoutRounding="True" Background="Transparent">
+
+    <UserControl.Resources>
+
+        <SolidColorBrush x:Key="PlayerHoverBrush" Color="{DynamicResource FxHoverColor}" />
+        <SolidColorBrush x:Key="PlayerPressedBrush" Color="{DynamicResource FxPressedColor}" />
+        <SolidColorBrush x:Key="ChipBrush" Color="{DynamicResource FxChipColor}" />
+        <SolidColorBrush x:Key="ChipBorderBrush" Color="{DynamicResource FxChipBorderColor}" />
+
+        <Style x:Key="OptionCard" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource FxCardBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource FxCardBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="16,12" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
+        <Style x:Key="OptTitle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+        </Style>
+        <Style x:Key="OptSub" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+            <Setter Property="Margin" Value="0,2,0,0" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style x:Key="SectionHdr" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="22" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+            <Setter Property="Margin" Value="0,0,0,18" />
+        </Style>
+        <Style x:Key="SubsectionHdr" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+            <Setter Property="Margin" Value="0,16,0,8" />
+        </Style>
+
+        <Style x:Key="ActionBtn" TargetType="Button" BasedOn="{StaticResource ChipButton}">
+            <Setter Property="Background" Value="{DynamicResource FxChipBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource FxChipBorderBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+            <Setter Property="FontWeight" Value="Normal" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Padding" Value="14,0" />
+            <Setter Property="MinWidth" Value="100" />
+            <Setter Property="Focusable" Value="True" />
+        </Style>
+        <Style x:Key="DangerBtn" TargetType="Button" BasedOn="{StaticResource ActionBtn}">
+            <Setter Property="Background" Value="{DynamicResource FxDangerBgBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource FxDangerBorderBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource FxDangerTextBrush}" />
+        </Style>
+        <Style x:Key="SuccessBtn" TargetType="Button" BasedOn="{StaticResource ActionBtn}">
+            <Setter Property="Background" Value="{DynamicResource FxSuccessBgBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource FxSuccessBorderBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource FxSuccessTextBrush}" />
+        </Style>
+    </UserControl.Resources>
+
+    <Border Background="{DynamicResource FxSurfaceBrush}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="36" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0" Background="Transparent" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                <StackPanel Orientation="Horizontal" Margin="14,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False">
+                    <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="12" Foreground="{DynamicResource FxAccentTextBrush}" VerticalAlignment="Center" Margin="0,0,9,0" />
+                    <TextBlock Text="Settings" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                </StackPanel>
+                <Button x:Name="CloseBtn" Style="{StaticResource CaptionCloseBtn}" Height="36" HorizontalAlignment="Right" VerticalAlignment="Top" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Content="" ToolTip="Close (Esc)" Click="CancelBtn_Click" />
+            </Grid>
+
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="200" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" BorderBrush="{DynamicResource FxDividerBrush}" BorderThickness="0,1,1,0" Background="{DynamicResource FxSidebarBrush}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Text="" FontFamily="Segoe Fluent Icons" FontSize="28" Foreground="{DynamicResource FxAccentTextBrush}" HorizontalAlignment="Center" Margin="0,18,0,12" />
+
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                            <ListBox x:Name="CategoryList" Background="Transparent" BorderThickness="0" SelectionChanged="CategoryList_SelectionChanged" SelectedIndex="0">
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem">
+                                        <Setter Property="Padding" Value="14,10" />
+                                        <Setter Property="Cursor" Value="Hand" />
+                                        <Setter Property="FontSize" Value="13" />
+                                        <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="ListBoxItem">
+                                                    <Border x:Name="bd" Background="Transparent" CornerRadius="6" Margin="6,1" Padding="{TemplateBinding Padding}">
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="26" />
+                                                                <ColumnDefinition Width="*" />
+                                                            </Grid.ColumnDefinitions>
+                                                            <TextBlock x:Name="fxIcon" Grid.Column="0" Text="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}" FontFamily="Segoe Fluent Icons" FontSize="15" VerticalAlignment="Center" HorizontalAlignment="Left" RenderTransformOrigin="0.5,0.5" Foreground="{TemplateBinding Foreground}" />
+                                                            <ContentPresenter Grid.Column="1" VerticalAlignment="Center" />
+                                                            <Border x:Name="selBar" Grid.Column="0" Width="3" Height="16" CornerRadius="1.5" HorizontalAlignment="Left" Margin="-11,0,0,0" Visibility="Collapsed" RenderTransformOrigin="0.5,0.5" Background="{DynamicResource FxAccentTextBrush}">
+                                                                <Border.RenderTransform>
+                                                                    <ScaleTransform x:Name="selScale" ScaleY="1" />
+                                                                </Border.RenderTransform>
+                                                            </Border>
+                                                        </Grid>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="bd" Property="Background" Value="{DynamicResource FxHoverBrush}" />
+                                                        </Trigger>
+                                                        <Trigger Property="IsSelected" Value="True">
+                                                            <Setter TargetName="bd" Property="Background" Value="{DynamicResource FxAccentSoftBrush}" />
+                                                            <Setter TargetName="selBar" Property="Visibility" Value="Visible" />
+                                                            <Setter Property="Foreground" Value="{DynamicResource FxAccentTextBrush}" />
+                                                            <Trigger.EnterActions>
+                                                                <BeginStoryboard>
+                                                                    <Storyboard>
+                                                                        <DoubleAnimation Storyboard.TargetName="selScale" Storyboard.TargetProperty="ScaleY" From="0" To="1" Duration="0:0:0.32">
+                                                                            <DoubleAnimation.EasingFunction><BackEase EasingMode="EaseOut" Amplitude="0.7" /></DoubleAnimation.EasingFunction>
+                                                                        </DoubleAnimation>
+                                                                    </Storyboard>
+                                                                </BeginStoryboard>
+                                                            </Trigger.EnterActions>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
+
+                                <ListBoxItem Content="General" Tag="" local:ButtonFx.IconEffect="SpinCW" />
+                                <ListBoxItem Content="Playback" Tag="" local:ButtonFx.IconEffect="NudgeRight" />
+                                <ListBoxItem Content="Video" Tag="" local:ButtonFx.IconEffect="Pop" />
+                                <ListBoxItem Content="Audio" Tag="" local:ButtonFx.IconEffect="Wiggle" />
+                                <ListBoxItem Content="Subtitles" Tag="" local:ButtonFx.IconEffect="Bounce" />
+                                <ListBoxItem Content="Keyboard shortcuts" Tag="" local:ButtonFx.IconEffect="Bounce" />
+                                <ListBoxItem Content="Mouse" Tag="" local:ButtonFx.IconEffect="Wiggle" />
+                                <ListBoxItem Content="Locations" Tag="" local:ButtonFx.IconEffect="Bounce" />
+                                <ListBoxItem Content="Accessibility" Tag="" local:ButtonFx.IconEffect="Pop" />
+                                <ListBoxItem Content="Features" Tag="" local:ButtonFx.IconEffect="Wiggle" />
+                                <ListBoxItem Content="About" Tag="" local:ButtonFx.IconEffect="SpinCW" />
+                            </ListBox>
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
+
+                <ScrollViewer Grid.Column="1" x:Name="PageScroller" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" CanContentScroll="False" Padding="24,18,24,24">
+                    <Grid>
+
+                        <StackPanel x:Name="PageGeneral">
+                            <TextBlock Text="General" Style="{StaticResource SectionHdr}" />
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Theme" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Change the window appearance (Mica, Acrylic, Black)" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="ThemeComboSetting" Grid.Column="1" Width="160" VerticalContentAlignment="Center">
+                                        <ComboBoxItem Content="Dark Mica" Tag="DarkMica" />
+                                        <ComboBoxItem Content="Light Mica" Tag="LightMica" />
+                                        <ComboBoxItem Content="Full Black" Tag="FullBlack" />
+                                        <ComboBoxItem Content="Acrylic Blur" Tag="AcrylicBlur" />
+                                    </ComboBox>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Language" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Interface language" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="LanguageCombo" Grid.Column="1" Width="160" VerticalContentAlignment="Center">
+                                        <ComboBoxItem Content="English" Tag="English" />
+                                    </ComboBox>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Always on top" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Keep the window above other windows" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="AlwaysOnTopCombo" Grid.Column="1" Width="200" VerticalContentAlignment="Center">
+                                        <ComboBoxItem Content="Never" Tag="Never" />
+                                        <ComboBoxItem Content="While playing" Tag="WhilePlaying" />
+                                        <ComboBoxItem Content="Always" Tag="Always" />
+                                        <ComboBoxItem Content="In fullscreen" Tag="Fullscreen" />
+                                    </ComboBox>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="When opening files" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Behavior when opening media files" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="FileOpenCombo" Grid.Column="1" Width="200" VerticalContentAlignment="Center">
+                                        <ComboBoxItem Content="Open similar files together" Tag="OpenSimilarTogether" />
+                                        <ComboBoxItem Content="Selected file only" Tag="OpenOnlyOne" />
+                                        <ComboBoxItem Content="Add to playlist" Tag="AddToPlaylist" />
+                                    </ComboBox>
+                                </Grid>
+                            </Border>
+
+                            <TextBlock Text="Window behavior" Style="{StaticResource SubsectionHdr}" />
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Remember window position" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Open the window where you last left it" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="RememberPositionToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Window size" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Default size, last used size or the actual video resolution" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="WindowSizeModeCombo" Grid.Column="1" Width="220" VerticalContentAlignment="Center">
+                                        <ComboBoxItem Content="Default" Tag="Default" />
+                                        <ComboBoxItem Content="Remember when closing" Tag="Remember" />
+                                        <ComboBoxItem Content="Fit to video (100%)" Tag="FitVideo" />
+                                    </ComboBox>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Show playlist at startup" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Open the playlist sidebar automatically" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="ShowPlaylistToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Snap to edges" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Snap the window to screen edges" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="SnapEdgesToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Pause when minimized" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Pause playback when minimized" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="PauseOnMinToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Pause when focus is lost" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Pause when another window gains focus" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="PauseOnBlurToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Pause when screen is locked" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Pause when Windows is locked" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="PauseOnLockToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Show tooltips" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Show help when hovering over controls" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="TooltipsToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <TextBlock Text="System" Style="{StaticResource SubsectionHdr}" />
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="System tray icon" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Show taskbar icon" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="TrayIconToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Minimize to tray" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Hide the window in the system tray when minimized" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="MinimizeToTrayToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Taskbar features" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Show progress and thumbnails on the taskbar" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="TaskbarFeaturesToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="System controls" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Allow control through media keys and SMTC" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="SystemMediaControlsToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Multiple instances" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Allow multiple windows at once" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="MultiInstanceToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Check for updates" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Update check frequency" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="UpdateModeCombo" Grid.Column="1" Width="160" VerticalContentAlignment="Center">
+                                        <ComboBoxItem Content="Always" Tag="Always" />
+                                        <ComboBoxItem Content="Manual" Tag="Manual" />
+                                        <ComboBoxItem Content="Never" Tag="Never" />
+                                    </ComboBox>
+                                </Grid>
+                            </Border>
+
+                            <TextBlock Text="Recent files" Style="{StaticResource SubsectionHdr}" />
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Maximum number" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Number of files retained in the recent list" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="MaxRecentCombo" Grid.Column="1" Width="80" VerticalContentAlignment="Center">
+                                        <ComboBoxItem Content="5" Tag="5" />
+                                        <ComboBoxItem Content="10" Tag="10" />
+                                        <ComboBoxItem Content="20" Tag="20" />
+                                        <ComboBoxItem Content="30" Tag="30" />
+                                        <ComboBoxItem Content="50" Tag="50" />
+                                    </ComboBox>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Clear recent files" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Clear playback history" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <Button Grid.Column="1" Content="Clear" Style="{StaticResource DangerBtn}" Click="ClearRecentBtn_Click" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Settings folder" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Open the folder containing settings.json" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <Button Grid.Column="1" Content="Open folder" Style="{StaticResource ActionBtn}" Click="OpenConfigFolderBtn_Click" />
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+
+                        <StackPanel x:Name="PagePlayback" Visibility="Collapsed">
+                            <TextBlock Text="Playback" Style="{StaticResource SectionHdr}" />
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="160" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Default volume" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Volume when the application starts" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                        <Slider x:Name="VolumeSliderSetting" Width="110" Minimum="0" Maximum="100" TickFrequency="5" IsSnapToTickEnabled="True" VerticalAlignment="Center" ValueChanged="VolumeSlider_ValueChanged" />
+                                        <TextBlock x:Name="VolumeLabel" FontSize="12" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="8,0,0,0" MinWidth="32" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Volume step" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Keyboard / wheel adjustment step" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <TextBox x:Name="VolumeStepBox" Grid.Column="1" Width="80" Height="32" VerticalContentAlignment="Center" Text="5" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Default speed" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Playback speed at startup" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="SpeedComboSetting" Grid.Column="1" Width="100" VerticalContentAlignment="Center">
+                                        <ComboBoxItem Content="0.25x" Tag="0.25" />
+                                        <ComboBoxItem Content="0.5x" Tag="0.5" />
+                                        <ComboBoxItem Content="0.75x" Tag="0.75" />
+                                        <ComboBoxItem Content="1x" Tag="1" />
+                                        <ComboBoxItem Content="1.25x" Tag="1.25" />
+                                        <ComboBoxItem Content="1.5x" Tag="1.5" />
+                                        <ComboBoxItem Content="2x" Tag="2" />
+                                        <ComboBoxItem Content="3x" Tag="3" />
+                                        <ComboBoxItem Content="4x" Tag="4" />
+                                    </ComboBox>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Small seek step (seconds)" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Seek step for Left/Right arrows" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <TextBox x:Name="SeekStepBox" Grid.Column="1" Width="80" Height="32" VerticalContentAlignment="Center" Text="10" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Large seek step (seconds)" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Seek step for Page Up/Down" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <TextBox x:Name="SeekLargeStepBox" Grid.Column="1" Width="80" Height="32" VerticalContentAlignment="Center" Text="60" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Repeat mode" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="How to repeat the playlist when it ends" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="RepeatComboSetting" Grid.Column="1" Width="140" VerticalContentAlignment="Center">
+                                        <ComboBoxItem Content="Do not repeat" Tag="None" />
+                                        <ComboBoxItem Content="Repeat all" Tag="All" />
+                                        <ComboBoxItem Content="Repeat one" Tag="One" />
+                                    </ComboBox>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Shuffle playback" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Shuffle playback order" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="ShuffleToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Auto-play" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Start playback when adding files" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="AutoPlayToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Resume last position" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Continue where the file was last stopped" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="ResumeLastToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Remember playback speed" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Remember playback speed between files" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="RememberSpeedToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Remember aspect ratio" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Remember the aspect ratio between files" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="RememberAspectToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="At the end of playback" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Action at the end of a file" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="OnEndCombo" Grid.Column="1" Width="140" VerticalContentAlignment="Center">
+                                        <ComboBoxItem Content="Stop" Tag="Stop" />
+                                        <ComboBoxItem Content="Repeat" Tag="Repeat" />
+                                        <ComboBoxItem Content="Next" Tag="Next" />
+                                        <ComboBoxItem Content="Close" Tag="Close" />
+                                    </ComboBox>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+
+                        <StackPanel x:Name="PageVideo" Visibility="Collapsed">
+                            <TextBlock Text="Video" Style="{StaticResource SectionHdr}" />
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Ambient light" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Illuminate letterboxing with colors from the video" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="AmbientLightToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Ambient light intensity" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Style="{StaticResource OptSub}">
+                                            <Run Text="{Binding Value, ElementName=AmbientIntensitySlider, StringFormat={}{0:0}%, Mode=OneWay}" />
+                                        </TextBlock>
+                                    </StackPanel>
+                                    <Slider x:Name="AmbientIntensitySlider" Grid.Column="1" Width="160" Minimum="10" Maximum="100" SmallChange="5" LargeChange="10" IsSnapToTickEnabled="True" TickFrequency="5" VerticalAlignment="Center" Value="70" IsEnabled="{Binding IsChecked, ElementName=AmbientLightToggle}" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Hardware decoding" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Use the GPU for decoding (restart required)" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="HwDecodingToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Video output" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Internal renderer (Auto recommended)" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="VideoOutputCombo" Grid.Column="1" Width="140" VerticalContentAlignment="Center">
+                                        <ComboBoxItem Content="Auto" Tag="Auto" />
+                                        <ComboBoxItem Content="DirectX" Tag="DirectX" />
+                                        <ComboBoxItem Content="OpenGL" Tag="OpenGL" />
+                                        <ComboBoxItem Content="GDI" Tag="GDI" />
+                                    </ComboBox>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Scaling algorithm" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Filter used when scaling video" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="VideoScalerCombo" Grid.Column="1" Width="140" VerticalContentAlignment="Center">
+                                        <ComboBoxItem Content="Auto" Tag="Auto" />
+                                        <ComboBoxItem Content="Lanczos" Tag="Lanczos" />
+                                        <ComboBoxItem Content="Bicubic" Tag="Bicubic" />
+                                        <ComboBoxItem Content="Bilinear" Tag="Bilinear" />
+                                    </ComboBox>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Aspect ratio" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Video aspect ratio" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="AspectComboSetting" Grid.Column="1" Width="120" VerticalContentAlignment="Center">
+                                        <ComboBoxItem Content="Auto" Tag="Auto" />
+                                        <ComboBoxItem Content="16:9" Tag="16:9" />
+                                        <ComboBoxItem Content="4:3" Tag="4:3" />
+                                        <ComboBoxItem Content="21:9" Tag="21:9" />
+                                        <ComboBoxItem Content="1:1" Tag="1:1" />
+                                        <ComboBoxItem Content="Stretch" Tag="Stretch" />
+                                    </ComboBox>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="V-Sync" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Synchronize video with monitor refresh" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="VSyncToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Deinterlacing" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Enable deinterlacing for interlaced video" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="DeinterlaceToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Restrict cursor in fullscreen" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Keep the cursor inside the active screen" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="RestrictCursorToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <TextBlock Text="Picture settings" Style="{StaticResource SubsectionHdr}" />
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="220" /></Grid.ColumnDefinitions>
+                                    <TextBlock Text="Brightness" Style="{StaticResource OptTitle}" />
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                        <Slider x:Name="BrightnessSlider" Width="160" Minimum="-100" Maximum="100" TickFrequency="10" VerticalAlignment="Center" ValueChanged="ImageSlider_ValueChanged" />
+                                        <TextBlock x:Name="BrightnessLabel" FontSize="12" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="8,0,0,0" MinWidth="36" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="220" /></Grid.ColumnDefinitions>
+                                    <TextBlock Text="Contrast" Style="{StaticResource OptTitle}" />
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                        <Slider x:Name="ContrastSlider" Width="160" Minimum="-100" Maximum="100" TickFrequency="10" VerticalAlignment="Center" ValueChanged="ImageSlider_ValueChanged" />
+                                        <TextBlock x:Name="ContrastLabel" FontSize="12" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="8,0,0,0" MinWidth="36" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="220" /></Grid.ColumnDefinitions>
+                                    <TextBlock Text="Saturation" Style="{StaticResource OptTitle}" />
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                        <Slider x:Name="SaturationSlider" Width="160" Minimum="-100" Maximum="100" TickFrequency="10" VerticalAlignment="Center" ValueChanged="ImageSlider_ValueChanged" />
+                                        <TextBlock x:Name="SaturationLabel" FontSize="12" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="8,0,0,0" MinWidth="36" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="220" /></Grid.ColumnDefinitions>
+                                    <TextBlock Text="Hue" Style="{StaticResource OptTitle}" />
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                        <Slider x:Name="HueSlider" Width="160" Minimum="-180" Maximum="180" TickFrequency="20" VerticalAlignment="Center" ValueChanged="ImageSlider_ValueChanged" />
+                                        <TextBlock x:Name="HueLabel" FontSize="12" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="8,0,0,0" MinWidth="36" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="220" /></Grid.ColumnDefinitions>
+                                    <TextBlock Text="Gamma" Style="{StaticResource OptTitle}" />
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                        <Slider x:Name="GammaSlider" Width="160" Minimum="-100" Maximum="100" TickFrequency="10" VerticalAlignment="Center" ValueChanged="ImageSlider_ValueChanged" />
+                                        <TextBlock x:Name="GammaLabel" FontSize="12" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="8,0,0,0" MinWidth="36" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <TextBlock Text="Snapshots" Style="{StaticResource SubsectionHdr}" />
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Snapshot folder" Style="{StaticResource OptTitle}" />
+                                        <TextBlock x:Name="SnapshotPathLabel" Style="{StaticResource OptSub}" TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                    <Button Grid.Column="1" Content="Change..." Style="{StaticResource ActionBtn}" Click="BrowseSnapshotBtn_Click" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Snapshot format" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Image format for snapshots" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="SnapshotFormatCombo" Grid.Column="1" Width="100" VerticalContentAlignment="Center">
+                                        <ComboBoxItem Content="PNG" Tag="PNG" />
+                                        <ComboBoxItem Content="JPG" Tag="JPG" />
+                                    </ComboBox>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+
+                        <StackPanel x:Name="PageAudio" Visibility="Collapsed">
+                            <TextBlock Text="Audio" Style="{StaticResource SectionHdr}" />
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Audio channels" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Output channel configuration" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="AudioChannelsCombo" Grid.Column="1" Width="120" VerticalContentAlignment="Center">
+                                        <ComboBoxItem Content="Mono" Tag="Mono" />
+                                        <ComboBoxItem Content="Stereo" Tag="Stereo" />
+                                        <ComboBoxItem Content="2.1" Tag="2.1" />
+                                        <ComboBoxItem Content="5.1" Tag="5.1" />
+                                        <ComboBoxItem Content="7.1" Tag="7.1" />
+                                    </ComboBox>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Equalizer" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Enable the equalizer at startup" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="EqualizerToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Equalizer preset" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Preset applied to the equalizer" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="EqPresetComboSetting" Grid.Column="1" Width="200" VerticalContentAlignment="Center" MaxDropDownHeight="320" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Normalize volume" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Balance volume between files" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="NormalizeVolumeToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Volume boost" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Allow amplification above 100%" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="BoostVolumeToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Boost limit (%)" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Maximum volume slider value" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <TextBox x:Name="VolumeBoostMaxBox" Grid.Column="1" Width="80" Height="32" VerticalContentAlignment="Center" Text="200" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Audio delay (ms)" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Adjust synchronization with the video" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <TextBox x:Name="AudioDelayBox" Grid.Column="1" Width="100" Height="32" VerticalContentAlignment="Center" Text="0" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Delay step (ms)" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Adjustment step with the keyboard" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <TextBox x:Name="AudioDelayStepBox" Grid.Column="1" Width="80" Height="32" VerticalContentAlignment="Center" Text="50" />
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+
+                        <StackPanel x:Name="PageSubtitles" Visibility="Collapsed">
+                            <TextBlock Text="Subtitles" Style="{StaticResource SectionHdr}" />
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Show subtitles by default" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Enable subtitles when loading a file" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="ShowSubsByDefaultToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Load subtitles automatically" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Look for .srt/.ass files in the video folder" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="AutoLoadSubsToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Preferred language" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="ISO 639-1 code (en, es, pt, ja, ...)" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <TextBox x:Name="PreferredSubLangBox" Grid.Column="1" Width="80" Height="32" VerticalContentAlignment="Center" Text="es" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Encoding" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Character encoding for external subtitles" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="SubEncodingCombo" Grid.Column="1" Width="140" VerticalContentAlignment="Center">
+                                        <ComboBoxItem Content="UTF-8" Tag="UTF-8" />
+                                        <ComboBoxItem Content="Latin-1" Tag="ISO-8859-1" />
+                                        <ComboBoxItem Content="Windows-1252" Tag="Windows-1252" />
+                                        <ComboBoxItem Content="Auto" Tag="Auto" />
+                                    </ComboBox>
+                                </Grid>
+                            </Border>
+
+                            <TextBlock Text="Font style" Style="{StaticResource SubsectionHdr}" />
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Font" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Subtitle typeface" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <TextBox x:Name="SubFontBox" Grid.Column="1" Width="160" Height="32" VerticalContentAlignment="Center" Text="Segoe UI" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Font size" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="0 = automatic based on video resolution" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <TextBox x:Name="SubFontSizeBox" Grid.Column="1" Width="80" Height="32" VerticalContentAlignment="Center" Text="0" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Text color" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Hexadecimal color (#RRGGBB)" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <TextBox x:Name="SubColorBox" Grid.Column="1" Width="120" Height="32" VerticalContentAlignment="Center" Text="#FFFFFF" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Outline color" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Text outline" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <TextBox x:Name="SubOutlineColorBox" Grid.Column="1" Width="120" Height="32" VerticalContentAlignment="Center" Text="#000000" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Outline thickness (px)" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Outline thickness" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <TextBox x:Name="SubOutlineThicknessBox" Grid.Column="1" Width="80" Height="32" VerticalContentAlignment="Center" Text="2" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Bold" Style="{StaticResource OptTitle}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="SubBoldToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Italic" Style="{StaticResource OptTitle}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="SubItalicToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Shadow" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Add a text shadow for readability" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="SubShadowToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <TextBlock Text="Position / synchronization" Style="{StaticResource SubsectionHdr}" />
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Vertical position" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Subtitle placement" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="SubPositionCombo" Grid.Column="1" Width="120" VerticalContentAlignment="Center">
+                                        <ComboBoxItem Content="Top" Tag="Top" />
+                                        <ComboBoxItem Content="Center" Tag="Center" />
+                                        <ComboBoxItem Content="Bottom" Tag="Bottom" />
+                                    </ComboBox>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Vertical margin" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Distance from the edge (px)" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <TextBox x:Name="SubVerticalMarginBox" Grid.Column="1" Width="80" Height="32" VerticalContentAlignment="Center" Text="16" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Delay (ms)" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Manual synchronization adjustment" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <TextBox x:Name="SubDelayBox" Grid.Column="1" Width="100" Height="32" VerticalContentAlignment="Center" Text="0" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Delay step (ms)" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Adjustment step with the keyboard" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <TextBox x:Name="SubDelayStepBox" Grid.Column="1" Width="80" Height="32" VerticalContentAlignment="Center" Text="100" />
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+
+                        <StackPanel x:Name="PageHotkeys" Visibility="Collapsed">
+                            <TextBlock Text="Keyboard shortcuts" Style="{StaticResource SectionHdr}" />
+                            <TextBlock Text="Click Change and press a new combination (Esc cancels). If another action uses it, the shortcuts are swapped. Esc, F11, 0–9, Tab, Alt+F4 and media keys are reserved." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,14" TextWrapping="Wrap" />
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <StackPanel>
+                                    <Grid Margin="0,0,0,10">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Actions" Style="{StaticResource OptTitle}" VerticalAlignment="Center" />
+                                        <Button Grid.Column="1" Content="Restore defaults" Style="{StaticResource ActionBtn}" Click="ResetHotkeysBtn_Click" />
+                                    </Grid>
+                                    <ItemsControl x:Name="HotkeysList">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Background="{DynamicResource FxCardBrush}" CornerRadius="6" Padding="12,8" Margin="0,0,0,4">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock Text="{Binding DisplayName}" FontSize="13" Foreground="{DynamicResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" Margin="0,0,10,0" VerticalAlignment="Center" />
+                                                        <Border x:Name="keyChip" Grid.Column="1" Background="{DynamicResource FxAccentSoftBrush}" CornerRadius="6" BorderBrush="{DynamicResource FxAccentBorderBrush}" BorderThickness="1" Height="32" Padding="10,0" MinWidth="120">
+                                                            <TextBlock x:Name="keyText" Text="{Binding KeyDisplay}" FontSize="12" FontFamily="Consolas" Foreground="{DynamicResource FxAccentTextBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                        </Border>
+                                                        <Button Grid.Column="2" Content="Change" Style="{StaticResource ActionBtn}" MinWidth="80" Margin="8,0,0,0" Click="ChangeHotkey_Click" Tag="{Binding Key}" />
+                                                        <Button x:Name="clearBtn" Grid.Column="3" Style="{StaticResource ActionBtn}" Width="32" MinWidth="0" Padding="0" Margin="6,0,0,0" ToolTip="Remove shortcut" Click="ClearHotkey_Click" Tag="{Binding Key}">
+                                                            <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="11" />
+                                                        </Button>
+                                                    </Grid>
+                                                </Border>
+                                                <DataTemplate.Triggers>
+                                                    <DataTrigger Binding="{Binding IsAssigned}" Value="False">
+                                                        <Setter TargetName="keyChip" Property="Background" Value="Transparent" />
+                                                        <Setter TargetName="keyChip" Property="BorderBrush" Value="{DynamicResource FxCardBorderBrush}" />
+                                                        <Setter TargetName="keyText" Property="Foreground" Value="{DynamicResource TextFillColorTertiaryBrush}" />
+                                                        <Setter TargetName="keyText" Property="FontFamily" Value="Segoe UI" />
+                                                        <Setter TargetName="clearBtn" Property="Visibility" Value="Hidden" />
+                                                    </DataTrigger>
+                                                </DataTemplate.Triggers>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
+                        <StackPanel x:Name="PageMouse" Visibility="Collapsed">
+                            <TextBlock Text="Mouse" Style="{StaticResource SectionHdr}" />
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Left click" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Action when clicking the video" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="LeftClickCombo" Grid.Column="1" Width="200" VerticalContentAlignment="Center">
+                                        <ComboBoxItem Content="Play / pause" Tag="PlayPause" />
+                                        <ComboBoxItem Content="Fullscreen" Tag="ToggleFullscreen" />
+                                        <ComboBoxItem Content="Mute" Tag="ToggleMute" />
+                                        <ComboBoxItem Content="None" Tag="None" />
+                                    </ComboBox>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Double-click" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Double-click action" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="DoubleClickCombo" Grid.Column="1" Width="200" VerticalContentAlignment="Center">
+                                        <ComboBoxItem Content="Fullscreen" Tag="ToggleFullscreen" />
+                                        <ComboBoxItem Content="Play / pause" Tag="PlayPause" />
+                                        <ComboBoxItem Content="None" Tag="None" />
+                                    </ComboBox>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Middle click" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Action when clicking the mouse wheel" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="MiddleClickCombo" Grid.Column="1" Width="200" VerticalContentAlignment="Center">
+                                        <ComboBoxItem Content="Mute" Tag="ToggleMute" />
+                                        <ComboBoxItem Content="Fullscreen" Tag="ToggleFullscreen" />
+                                        <ComboBoxItem Content="Play / pause" Tag="PlayPause" />
+                                        <ComboBoxItem Content="None" Tag="None" />
+                                    </ComboBox>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Wheel" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Action when scrolling the mouse wheel" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="WheelCombo" Grid.Column="1" Width="200" VerticalContentAlignment="Center">
+                                        <ComboBoxItem Content="Volume" Tag="Volume" />
+                                        <ComboBoxItem Content="Search" Tag="Seek" />
+                                        <ComboBoxItem Content="Speed" Tag="Speed" />
+                                        <ComboBoxItem Content="None" Tag="None" />
+                                    </ComboBox>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Ctrl + Wheel" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Combined action" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="CtrlWheelCombo" Grid.Column="1" Width="200" VerticalContentAlignment="Center">
+                                        <ComboBoxItem Content="Search" Tag="Seek" />
+                                        <ComboBoxItem Content="Volume" Tag="Volume" />
+                                        <ComboBoxItem Content="Speed" Tag="Speed" />
+                                        <ComboBoxItem Content="None" Tag="None" />
+                                    </ComboBox>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Shift + Wheel" Style="{StaticResource OptTitle}" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="ShiftWheelCombo" Grid.Column="1" Width="200" VerticalContentAlignment="Center">
+                                        <ComboBoxItem Content="Speed" Tag="Speed" />
+                                        <ComboBoxItem Content="Volume" Tag="Volume" />
+                                        <ComboBoxItem Content="Search" Tag="Seek" />
+                                        <ComboBoxItem Content="None" Tag="None" />
+                                    </ComboBox>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Reverse wheel direction" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Reverse the mouse wheel direction" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="InvertWheelToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+
+                        <StackPanel x:Name="PageLocations" Visibility="Collapsed">
+                            <TextBlock Text="Locations" Style="{StaticResource SectionHdr}" />
+                            <TextBlock Text="Folders used to save and find different file types." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,14" TextWrapping="Wrap" />
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Initial folder (open file)" Style="{StaticResource OptTitle}" />
+                                        <TextBlock x:Name="OpenStartPathLabel" Style="{StaticResource OptSub}" TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                    <Button Grid.Column="1" Content="Change..." Style="{StaticResource ActionBtn}" Tag="OpenStart" Click="BrowseFolder_Click" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Playlist (.m3u)" Style="{StaticResource OptTitle}" />
+                                        <TextBlock x:Name="PlaylistsPathLabel" Style="{StaticResource OptSub}" TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                    <Button Grid.Column="1" Content="Change..." Style="{StaticResource ActionBtn}" Tag="Playlists" Click="BrowseFolder_Click" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Image snapshots" Style="{StaticResource OptTitle}" />
+                                        <TextBlock x:Name="SnapshotPathLabel2" Style="{StaticResource OptSub}" TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                    <Button Grid.Column="1" Content="Change..." Style="{StaticResource ActionBtn}" Tag="Snapshot" Click="BrowseFolder_Click" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Video recording" Style="{StaticResource OptTitle}" />
+                                        <TextBlock x:Name="VideoRecPathLabel" Style="{StaticResource OptSub}" TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                    <Button Grid.Column="1" Content="Change..." Style="{StaticResource ActionBtn}" Tag="VideoRec" Click="BrowseFolder_Click" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Audio recording" Style="{StaticResource OptTitle}" />
+                                        <TextBlock x:Name="AudioRecPathLabel" Style="{StaticResource OptSub}" TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                    <Button Grid.Column="1" Content="Change..." Style="{StaticResource ActionBtn}" Tag="AudioRec" Click="BrowseFolder_Click" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Stream recording" Style="{StaticResource OptTitle}" />
+                                        <TextBlock x:Name="StreamRecPathLabel" Style="{StaticResource OptSub}" TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                    <Button Grid.Column="1" Content="Change..." Style="{StaticResource ActionBtn}" Tag="StreamRec" Click="BrowseFolder_Click" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Temporary folder" Style="{StaticResource OptTitle}" />
+                                        <TextBlock x:Name="TempPathLabel" Style="{StaticResource OptSub}" TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                    <Button Grid.Column="1" Content="Change..." Style="{StaticResource ActionBtn}" Tag="Temp" Click="BrowseFolder_Click" />
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+
+                        <StackPanel x:Name="PageAccessibility" Visibility="Collapsed">
+                            <TextBlock Text="Accessibility" Style="{StaticResource SectionHdr}" />
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Large interface text" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Increase interface font sizes" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="LargeUiTextToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="High contrast mode" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Increase contrast for improved visibility" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="HighContrastToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Reduce motion" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Reduce animations and transitions" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="ReduceMotionToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <TextBlock Text="Text to speech (TTS)" Style="{StaticResource SubsectionHdr}" />
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Read on-screen messages (OSD)" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Read player messages aloud" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="ReadOsdToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Read subtitles" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Read subtitles aloud" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="ReadSubsToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="220" /></Grid.ColumnDefinitions>
+                                    <TextBlock Text="Speech speed" Style="{StaticResource OptTitle}" />
+                                    <Slider Grid.Column="1" x:Name="TtsSpeedSlider" Width="200" Minimum="-10" Maximum="10" TickFrequency="2" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="220" /></Grid.ColumnDefinitions>
+                                    <TextBlock Text="Speech volume" Style="{StaticResource OptTitle}" />
+                                    <Slider Grid.Column="1" x:Name="TtsVolumeSlider" Width="200" Minimum="0" Maximum="100" TickFrequency="10" />
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+
+                        <StackPanel x:Name="PageFeatures" Visibility="Collapsed">
+                            <TextBlock Text="Advanced features" Style="{StaticResource SectionHdr}" />
+                            <TextBlock Text="Enable or disable advanced and experimental features." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,0,0,14" />
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Skip intro/outro (seconds)" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Time to skip at the beginning and end" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                        <TextBox x:Name="IntroSkipBox" Width="70" Height="32" Text="0" VerticalContentAlignment="Center" />
+                                        <TextBlock Text=" / " VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="8,0" />
+                                        <TextBox x:Name="OutroSkipBox" Width="70" Height="32" Text="0" VerticalContentAlignment="Center" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <StackPanel>
+                                    <Grid Margin="0,0,0,10">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Feature settings" Style="{StaticResource OptTitle}" VerticalAlignment="Center" />
+                                        <Button Grid.Column="1" Content="Recommended" Margin="0,0,8,0" Style="{StaticResource ActionBtn}" Click="RecommendedFeaturesBtn_Click" />
+                                        <Button Grid.Column="2" Content="Enable all" Margin="0,0,8,0" Style="{StaticResource SuccessBtn}" Click="EnableAllFeaturesBtn_Click" />
+                                        <Button Grid.Column="3" Content="Disable all" Style="{StaticResource DangerBtn}" Click="DisableAllFeaturesBtn_Click" />
+                                    </Grid>
+
+                                    <ItemsControl x:Name="FeatureFlagsList">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border x:Name="card" Background="{DynamicResource FxCardBrush}" CornerRadius="8" Padding="12,9" Margin="0,0,0,6">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <StackPanel x:Name="texts">
+                                                            <TextBlock Text="{Binding Name}" FontSize="12.5" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                                            <TextBlock Text="{Binding Description}" FontSize="11.5" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,0" />
+                                                        </StackPanel>
+                                                        <Border x:Name="badge" Grid.Column="1" Visibility="Collapsed" CornerRadius="10" Padding="9,2" Margin="10,0,0,0" VerticalAlignment="Center" Background="{DynamicResource FxAccentSoftBrush}" BorderBrush="{DynamicResource FxAccentBorderBrush}" BorderThickness="1">
+                                                            <TextBlock Text="{Binding Badge}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource FxAccentTextBrush}" />
+                                                        </Border>
+                                                        <CheckBox x:Name="toggle" Grid.Column="1" IsChecked="{Binding IsEnabled, Mode=TwoWay}" VerticalAlignment="Center" Margin="10,0,0,0" />
+                                                    </Grid>
+                                                </Border>
+                                                <DataTemplate.Triggers>
+                                                    <DataTrigger Binding="{Binding State}" Value="BuiltIn">
+                                                        <Setter TargetName="toggle" Property="Visibility" Value="Collapsed" />
+                                                        <Setter TargetName="badge" Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding State}" Value="Planned">
+                                                        <Setter TargetName="toggle" Property="Visibility" Value="Collapsed" />
+                                                        <Setter TargetName="badge" Property="Visibility" Value="Visible" />
+                                                        <Setter TargetName="badge" Property="Background" Value="{DynamicResource FxChipBrush}" />
+                                                        <Setter TargetName="badge" Property="BorderBrush" Value="{DynamicResource FxChipBorderBrush}" />
+                                                        <Setter TargetName="texts" Property="Opacity" Value="0.6" />
+                                                    </DataTrigger>
+                                                </DataTemplate.Triggers>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
+                        <StackPanel x:Name="PageAbout" Visibility="Collapsed">
+                            <TextBlock Text="About" Style="{StaticResource SectionHdr}" />
+
+                            <Border Style="{StaticResource OptionCard}" Padding="20,18">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                        <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="28" Foreground="{DynamicResource FxAccentTextBrush}" VerticalAlignment="Center" />
+                                        <StackPanel Margin="12,0,0,0">
+                                            <TextBlock Text="FluxPlayer" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                            <TextBlock x:Name="AboutVersionText" Text="Version" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                    <TextBlock FontSize="12" TextWrapping="Wrap" Margin="0,4,0,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="A modern media player built with WPF, LibVLCSharp and WPF-UI." />
+                                    <Rectangle Height="1" Fill="{DynamicResource FxDividerBrush}" Margin="0,14" />
+                                    <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}">
+                                        <Run Text="Engine: " />
+                                        <Run Text="LibVLCSharp 3.8.5 + LibVLC 3.0.21" FontWeight="SemiBold" />
+                                    </TextBlock>
+                                    <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,3,0,0">
+                                        <Run Text="UI: " />
+                                        <Run Text="WPF-UI 3.0.4 — Fluent Design" FontWeight="SemiBold" />
+                                    </TextBlock>
+                                    <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,3,0,0">
+                                        <Run Text="Framework: " />
+                                        <Run Text=".NET 8 (WPF)" FontWeight="SemiBold" />
+                                    </TextBlock>
+                                    <Rectangle Height="1" Fill="{DynamicResource FxDividerBrush}" Margin="0,14" />
+                                    <TextBlock x:Name="SettingsPathLabel" FontSize="11" Foreground="{DynamicResource TextFillColorTertiaryBrush}" TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Restore default settings" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Reset every setting to its default value" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <Button Grid.Column="1" Content="Restore" Style="{StaticResource DangerBtn}" Click="ResetSettingsBtn_Click" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}" Padding="20,24" Margin="0,16,0,0">
+                                <StackPanel HorizontalAlignment="Center">
+                                    <TextBlock Text="Developed by" FontSize="13" HorizontalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,8" />
+                                    <TextBlock Text="Carlos Batista" FontSize="28" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource FxBrandTextBrush}" Margin="0,0,0,12" />
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <TextBlock Text="Made with " FontSize="13" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+
+                                        <TextBlock x:Name="HeartGlyph" Text="❤" FontSize="16" Foreground="#FF3B5C" VerticalAlignment="Center" Margin="2,0">
+                                            <TextBlock.RenderTransform>
+                                                <ScaleTransform x:Name="HeartScale" ScaleX="1" ScaleY="1" CenterX="8" CenterY="8" />
+                                            </TextBlock.RenderTransform>
+                                            <TextBlock.Triggers>
+                                                <EventTrigger RoutedEvent="Loaded">
+                                                    <BeginStoryboard>
+                                                        <Storyboard RepeatBehavior="Forever">
+
+                                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="HeartScale" Storyboard.TargetProperty="ScaleX">
+                                                                <LinearDoubleKeyFrame KeyTime="0:0:0.00" Value="1.0" />
+                                                                <LinearDoubleKeyFrame KeyTime="0:0:0.15" Value="1.35" />
+                                                                <LinearDoubleKeyFrame KeyTime="0:0:0.30" Value="1.0" />
+                                                                <LinearDoubleKeyFrame KeyTime="0:0:0.45" Value="1.35" />
+                                                                <LinearDoubleKeyFrame KeyTime="0:0:0.60" Value="1.0" />
+                                                                <LinearDoubleKeyFrame KeyTime="0:0:1.30" Value="1.0" />
+                                                            </DoubleAnimationUsingKeyFrames>
+                                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="HeartScale" Storyboard.TargetProperty="ScaleY">
+                                                                <LinearDoubleKeyFrame KeyTime="0:0:0.00" Value="1.0" />
+                                                                <LinearDoubleKeyFrame KeyTime="0:0:0.15" Value="1.35" />
+                                                                <LinearDoubleKeyFrame KeyTime="0:0:0.30" Value="1.0" />
+                                                                <LinearDoubleKeyFrame KeyTime="0:0:0.45" Value="1.35" />
+                                                                <LinearDoubleKeyFrame KeyTime="0:0:0.60" Value="1.0" />
+                                                                <LinearDoubleKeyFrame KeyTime="0:0:1.30" Value="1.0" />
+                                                            </DoubleAnimationUsingKeyFrames>
+                                                        </Storyboard>
+                                                    </BeginStoryboard>
+                                                </EventTrigger>
+                                            </TextBlock.Triggers>
+                                        </TextBlock>
+                                        <TextBlock Text=" in Miami, FL" FontSize="13" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
+                    </Grid>
+                </ScrollViewer>
+            </Grid>
+
+            <Border Grid.Row="2" BorderBrush="{DynamicResource FxDividerBrush}" BorderThickness="0,1,0,0" Background="{DynamicResource FxFooterBrush}" Padding="18,10">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Cancel" MinWidth="100" Height="34" Margin="0,0,8,0" Click="CancelBtn_Click" Style="{StaticResource ActionBtn}" ToolTip="Discard changes (Esc)" />
+                    <Button Content="Save" MinWidth="110" Height="34" Click="SaveBtn_Click" Style="{StaticResource AccentButton}" ToolTip="Save and apply" />
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Border>
+</UserControl>

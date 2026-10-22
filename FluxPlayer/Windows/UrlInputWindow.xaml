@@ -1,0 +1,53 @@
+<ui:FluentWindow x:Class="FluxPlayer.Windows.UrlInputWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml" Title="Open network URL" Width="500" MinHeight="0" SizeToContent="Height" WindowStartupLocation="CenterOwner" WindowBackdropType="Mica" ExtendsContentIntoTitleBar="True" ResizeMode="NoResize" ShowInTaskbar="False" PreviewKeyDown="Window_PreviewKeyDown">
+
+    <ui:FluentWindow.Resources>
+
+        <Style x:Key="DialogChip" TargetType="Button" BasedOn="{StaticResource ChipButton}">
+            <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+            <Setter Property="Background" Value="{DynamicResource ControlFillColorDefaultBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource ControlStrokeColorDefaultBrush}" />
+        </Style>
+    </ui:FluentWindow.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Height="40" Background="Transparent" MouseLeftButtonDown="Header_MouseLeftButtonDown">
+            <StackPanel Orientation="Horizontal" Margin="16,0,0,0" VerticalAlignment="Center">
+                <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="14" Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Center" Margin="0,0,10,0" />
+                <TextBlock Text="Open network URL" FontSize="12" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+            </StackPanel>
+            <Button Style="{StaticResource CaptionCloseBtn}" Height="40" HorizontalAlignment="Right" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Content="" ToolTip="Close (Esc)" Click="CancelBtn_Click" />
+        </Grid>
+
+        <StackPanel Grid.Row="1" Margin="22,6,22,20">
+            <TextBlock Text="Enter a stream or network file URL" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+            <TextBlock Text="HTTP(S), HLS (.m3u8), RTSP, RTMP, MMS, UDP/RTP, FTP or SMB" FontSize="12" Margin="0,4,0,12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+
+            <ui:TextBox x:Name="UrlTextBox" PlaceholderText="https://... o rtsp://..." FontSize="13" TextChanged="UrlTextBox_TextChanged" />
+
+            <TextBlock x:Name="ValidationText" FontSize="11.5" Margin="2,6,0,0" Foreground="#FFFF9A8A" TextWrapping="Wrap" Visibility="Collapsed" />
+
+            <Grid Margin="0,18,0,0">
+                <Button Style="{StaticResource DialogChip}" HorizontalAlignment="Left" ToolTip="Paste from clipboard (Ctrl+V)" Click="PasteBtn_Click">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="12" VerticalAlignment="Center" Margin="0,0,7,0" />
+                        <TextBlock Text="Paste" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Style="{StaticResource DialogChip}" Content="Cancel" MinWidth="96" Margin="0,0,8,0" Click="CancelBtn_Click" />
+                    <Button x:Name="OkBtn" Style="{StaticResource AccentButton}" MinWidth="118" IsEnabled="False" Click="OkBtn_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="12" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <TextBlock Text="Play" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+    </Grid>
+</ui:FluentWindow>

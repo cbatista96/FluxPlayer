@@ -1,0 +1,6 @@
+<ui:FluentWindow x:Class="FluxPlayer.Windows.SettingsWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml" xmlns:controls="clr-namespace:FluxPlayer.Controls" Title="Settings — FluxPlayer" Height="640" Width="980" MinHeight="500" MinWidth="760" WindowStartupLocation="CenterOwner" WindowBackdropType="Mica" ExtendsContentIntoTitleBar="True" Background="Transparent" ResizeMode="CanResize" ShowInTaskbar="False">
+
+    <Grid>
+        <controls:SettingsPanel x:Name="EmbeddedSettingsPanel" />
+    </Grid>
+</ui:FluentWindow>

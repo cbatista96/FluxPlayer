@@ -1,0 +1,46 @@
+<Window x:Class="FluxPlayer.Windows.HotkeyCaptureWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="Assign shortcut" Width="472" Height="292" WindowStartupLocation="CenterOwner" WindowStyle="None" AllowsTransparency="True" Background="Transparent" ResizeMode="NoResize" ShowInTaskbar="False">
+
+    <Window.Resources>
+
+        <SolidColorBrush x:Key="PlayerHoverBrush" Color="{DynamicResource FxHoverColor}" />
+        <SolidColorBrush x:Key="PlayerPressedBrush" Color="{DynamicResource FxPressedColor}" />
+        <SolidColorBrush x:Key="ChipBrush" Color="{DynamicResource FxChipColor}" />
+        <SolidColorBrush x:Key="ChipBorderBrush" Color="{DynamicResource FxChipBorderColor}" />
+    </Window.Resources>
+
+    <Border x:Name="Card" Background="{DynamicResource FxDialogSurfaceBrush}" Margin="16" CornerRadius="12" BorderBrush="{DynamicResource FxDialogBorderBrush}" BorderThickness="1" RenderTransformOrigin="0.5,0.5" MouseLeftButtonDown="Border_MouseLeftButtonDown">
+        <Border.RenderTransform>
+            <ScaleTransform x:Name="CardScale" ScaleX="0.96" ScaleY="0.96" />
+        </Border.RenderTransform>
+        <Border.Effect>
+            <DropShadowEffect Color="Black" BlurRadius="18" ShadowDepth="2" Direction="270" Opacity="0.4" />
+        </Border.Effect>
+        <Grid Margin="22,18">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0">
+                <TextBlock x:Name="ActionLabel" Text="Action" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                <TextBlock Text="Press a key combination..." FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,2,0,0" />
+            </StackPanel>
+
+            <Border x:Name="CaptureBox" Grid.Row="1" Background="{DynamicResource FxAccentSoftBrush}" BorderBrush="{DynamicResource FxAccentBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="14,10" Margin="0,16,0,8">
+                <TextBlock x:Name="CaptureDisplay" Text="—" FontSize="20" FontFamily="Consolas" FontWeight="SemiBold" Foreground="{DynamicResource FxAccentTextBrush}" TextTrimming="CharacterEllipsis" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+
+            <TextBlock x:Name="MessageText" Grid.Row="2" FontSize="12" TextWrapping="Wrap" MinHeight="18" Margin="0,0,0,10" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Text=" " />
+
+            <Grid Grid.Row="3">
+                <TextBlock Text="Esc to cancel" FontSize="11" Foreground="{DynamicResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Style="{StaticResource ChipButton}" Content="Cancel" MinWidth="90" Margin="0,0,8,0" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Click="Cancel_Click" />
+                    <Button x:Name="AcceptBtn" Style="{StaticResource AccentButton}" Content="OK" MinWidth="96" IsEnabled="False" Click="Accept_Click" />
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

@@ -1,0 +1,56 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <!-- Windows SDK projections provide system media transport controls. -->
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>FluxPlayer</RootNamespace>
+    <AssemblyName>FluxPlayer</AssemblyName>
+    <Platforms>x64</Platforms>
+    <PlatformTarget>x64</PlatformTarget>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ApplicationIcon>app.ico</ApplicationIcon>
+    <TieredPGO>true</TieredPGO>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <Version>1.4.0</Version>
+    <Product>FluxPlayer</Product>
+    <Company>FluxPlayer</Company>
+    <Authors>FluxPlayer</Authors>
+    <Description>A modern Windows audio and video player with Fluent Design and Mica</Description>
+    <Copyright>Copyright © 2026 FluxPlayer contributors</Copyright>
+    <RepositoryUrl>https://github.com/cbatista96/FluxPlayer</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <Optimize>true</Optimize>
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>None</DebugType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
+    <PackageReference Include="WPF-UI" Version="3.0.4" />
+    <!-- Select the .NET assembly explicitly: Windows TFMs otherwise choose the
+         WinUI variant and pull in unnecessary Windows App SDK runtime assets. -->
+    <PackageReference Include="LibVLCSharp" Version="3.8.5" ExcludeAssets="compile;runtime" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.1.1" ExcludeAssets="all" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22000.194" ExcludeAssets="all" PrivateAssets="all" />
+    <Reference Include="LibVLCSharp">
+      <HintPath>$(PkgLibVLCSharp)\lib\net6.0\LibVLCSharp.dll</HintPath>
+    </Reference>
+    <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.21" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\logo.png" />
+  </ItemGroup>
+</Project>

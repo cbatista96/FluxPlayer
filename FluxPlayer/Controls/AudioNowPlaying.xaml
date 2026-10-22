@@ -1,0 +1,33 @@
+<UserControl x:Class="FluxPlayer.Controls.AudioNowPlaying" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" UseLayoutRounding="True" SnapsToDevicePixels="True">
+    <Border Margin="16,12,16,8" Padding="18" CornerRadius="12" Background="{DynamicResource FxCardBrush}" BorderBrush="{DynamicResource FxCardBorderBrush}" BorderThickness="1">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="126" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Border CornerRadius="8" Background="{DynamicResource ChromeTintBrush}" Width="126" Height="126" ClipToBounds="True">
+                <Grid>
+                    <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="42" Opacity="0.35" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="{DynamicResource PlayerPrimaryForegroundBrush}" />
+                    <Image Source="{Binding AlbumArtwork}" Stretch="UniformToFill" RenderOptions.BitmapScalingMode="HighQuality" />
+                </Grid>
+            </Border>
+            <StackPanel Grid.Column="1" Margin="20,0,16,0" VerticalAlignment="Center">
+                <TextBlock Text="NOW PLAYING" FontSize="10" FontWeight="SemiBold" Opacity="0.55" Foreground="{DynamicResource PlayerPrimaryForegroundBrush}" />
+                <TextBlock Text="{Binding NowPlayingTitle}" FontSize="23" FontWeight="SemiBold" Margin="0,5,0,4" TextTrimming="CharacterEllipsis" ToolTip="{Binding NowPlayingTitle}" Foreground="{DynamicResource PlayerPrimaryForegroundBrush}" />
+                <TextBlock Text="{Binding NowPlayingArtist}" FontSize="13" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource PlayerPrimaryForegroundBrush}" Opacity="0.8" />
+                <TextBlock Text="{Binding NowPlayingAlbum}" FontSize="12" Margin="0,3,0,0" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource PlayerPrimaryForegroundBrush}" Opacity="0.55" />
+                <TextBlock Text="{Binding AudioTechnical}" FontFamily="Cascadia Mono, Consolas" FontSize="10.5" Margin="0,10,0,0" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource PlayerPrimaryForegroundBrush}" Opacity="0.6" />
+                <TextBlock Text="{Binding LyricLine}" FontSize="12" Margin="0,7,0,0" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource FxAccentTextBrush}" />
+            </StackPanel>
+            <StackPanel Grid.Column="2" VerticalAlignment="Top">
+                <Button Command="{Binding ToggleFavoriteCommand}" Style="{StaticResource TransportButton}" Width="36" Height="36" AutomationProperties.Name="Marcar o quitar favorito" ToolTip="Favorite" Tag="{Binding IsCurrentFavorite, Converter={StaticResource ActiveTag}}">
+                    <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="17" />
+                </Button>
+                <Button Command="{Binding ToggleEqualizerCommand}" Style="{StaticResource TransportButton}" Width="36" Height="36" Margin="0,6,0,0" AutomationProperties.Name="Open equalizer" ToolTip="Equalizer (E)">
+                    <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="17" />
+                </Button>
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl>
