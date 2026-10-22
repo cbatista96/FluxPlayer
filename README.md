@@ -26,7 +26,7 @@ An audio workspace with artwork, lyrics and a playlist. A video workspace with s
 | **Audio and video modes** | Automatic selection based on decoded tracks, manual mode selection and separate audio window dimensions. |
 | **Music workspace** | Artwork, metadata, synchronized LRC lyrics, CUE chapters, favorites, playlist controls and a floating equalizer. |
 | **Playback** | Local files and supported network sources, seeking, speed control, repeat, shuffle, A–B looping and frame stepping. |
-| **Audio tools** | 10/20/31 native equalizer bands, preamplifier, 30 presets, gain compensation, per-output profiles, ReplayGain options and audio delay. |
+| **Audio tools** | 10/15/20/31 native equalizer bands, preamplifier, 30 presets, gain compensation, per-output profiles, ReplayGain options and audio delay. |
 | **Library** | A local index, watched folders, favorites, playback statistics, smart playlists, field queries, backup restore and exact duplicate detection. |
 | **Playlists** | Import and export M3U/M3U8, PLS and XSPF; reorder tracks and queue an item to play next. |
 | **Video tools** | Subtitle loading and timing, subtitle text search, bookmarks, timeline thumbnails, snapshots, ambient light and A–B clip export. |
@@ -40,7 +40,7 @@ Playback compatibility comes from the selected LibVLC runtime and its plugins. S
 
 - 64-bit Windows. The application targets Windows 10 1809 or later; Mica and other Windows 11 materials depend on OS support.
 - The .NET SDK selected by [`global.json`](global.json) to build, and the .NET 8 desktop runtime to run a framework-dependent build.
-- Visual Studio 2022 Build Tools with **Desktop development with C++** for the native 20/31-band DSP module. See [Building](docs/BUILDING.md) for the optional ten-band-only build.
+- Visual Studio 2022 Build Tools with **Desktop development with C++** for the native 15/20/31-band DSP module. See [Building](docs/BUILDING.md) for the optional ten-band-only build.
 - NuGet access for the initial dependency restore. LibVLC is restored with the project; a separate VLC installation is unnecessary.
 - Optional: `ffmpeg.exe` on `PATH` or next to the application for audio conversion. The required encoders must be available in that FFmpeg build.
 
@@ -71,7 +71,7 @@ Omit `--managed-only` to also exercise the native playback engine. FFmpeg-depend
 ```text
 FluxPlayer/          WPF application, views, models and playback services
 FluxPlayer.Tests/    Executable regression suite
-Native/FluxDsp/      Native 20/31-band VLC filter and processing-cost probe
+Native/FluxDsp/      Native 15/20/31-band VLC filter and processing-cost probe
 docs/               Build instructions, user guide and engineering notes
 installer/          Inno Setup installer source
 .github/            Source-only CI and contribution guidance

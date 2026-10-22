@@ -19,7 +19,7 @@ public static class EqualizerPresets
         if (count == 10) return preset;
         var frequencies = EqualizerLayout.Frequencies(count);
         // Resample the preset curve onto independent native filters, never fold a
-        // 20/31-band layout back into the ten-band processing API.
+        // 15/20/31-band layout back into the ten-band processing API.
         var gains = frequencies.Select(frequency =>
         {
             double position = Math.Clamp(Math.Log2(frequency / 31.25), 0, 9);

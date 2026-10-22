@@ -8,7 +8,7 @@
         <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
         <StackPanel Margin="0,0,0,20">
             <TextBlock Text="Audio output profiles" FontSize="25" FontWeight="SemiBold"/>
-            <TextBlock Text="Keep a volume, 10/20/31-band equalizer, preamp, peak compensation and audio delay for each output. Adjust them in the player first, then save here."
+            <TextBlock Text="Keep a volume, 10/15/20/31-band equalizer, preamp, gain compensation and audio delay for each output. Adjust them in the player first, then save here."
                 TextWrapping="Wrap" Margin="0,6,0,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
         </StackPanel>
         <StackPanel Grid.Row="1" Margin="0,0,0,20">

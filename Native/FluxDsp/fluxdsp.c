@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: GPL-3.0-only
- * In-place 20/31-band peaking EQ for the pinned VLC 3 plugin SDK.
+ * In-place 15/20/31-band peaking EQ for the pinned VLC 3 plugin SDK.
  * Control updates use a shared-memory sequence lock; the audio path never waits
  * for the UI, allocates memory, performs file I/O or calls managed code.
  */
@@ -80,7 +80,7 @@ static bool ReadConfig(dsp_shared *shared, dsp_config *result)
     MemoryBarrier();
     if (before != shared->config.sequence || result->magic != DSP_MAGIC || result->protocol != DSP_PROTOCOL)
         return false;
-    if (result->band_count != 20 && result->band_count != 31) return false;
+    if (result->band_count != 15 && result->band_count != 20 && result->band_count != 31) return false;
     if (!isfinite(result->preamp) || result->preamp < -20.f || result->preamp > 20.f
         || !isfinite(result->bandwidth) || result->bandwidth < 0.1f || result->bandwidth > 2.f) return false;
     float previous = 0.f;
@@ -258,7 +258,7 @@ static void Close(vlc_object_t *object)
 
 vlc_module_begin()
     set_shortname("FluxPlayer DSP")
-    set_description("FluxPlayer native 20/31-band equalizer")
+    set_description("FluxPlayer native 15/20/31-band equalizer")
     set_capability("audio filter", 1000)
     add_shortcut("equalizer")
     add_string("fluxdsp-map", NULL, "Control map", "FluxPlayer shared control map", true)

@@ -2,7 +2,7 @@
 
 ## Development environment
 
-Use 64-bit Windows and install the SDK selected by `global.json` (currently 10.0.402). The application itself targets .NET 8 for Windows. A framework-dependent build also requires the .NET 8 desktop runtime. Install Visual Studio 2022 or its Build Tools with **Desktop development with C++**, including the x64 MSVC compiler and Windows SDK, for the native 20/31-band DSP module. The Visual Studio editor is optional.
+Use 64-bit Windows and install the SDK selected by `global.json` (currently 10.0.402). The application itself targets .NET 8 for Windows. A framework-dependent build also requires the .NET 8 desktop runtime. Install Visual Studio 2022 or its Build Tools with **Desktop development with C++**, including the x64 MSVC compiler and Windows SDK, for the native 15/20/31-band DSP module. The Visual Studio editor is optional.
 
 Restore downloads managed dependencies and the native LibVLC runtime from NuGet. No globally installed VLC player is required.
 

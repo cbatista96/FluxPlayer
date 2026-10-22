@@ -23,7 +23,7 @@ public sealed record AudioOutputProfile
         if (!double.IsFinite(Volume) || Volume is < 0 or > 200 || !float.IsFinite(Preamp) || Preamp is < -20 or > 20
             || Bands == null || !EqualizerLayout.IsSupported(Bands.Length) || Bands.Any(value => !float.IsFinite(value) || value is < -20 or > 20)
             || AudioDelayMs is < -86_400_000 or > 86_400_000)
-            throw new ArgumentException("Use 10, 20 or 31 finite bands and requested preamp within ±20 dB, volume 0–200%, and audio delay within 24 hours.");
+            throw new ArgumentException("Use 10, 15, 20 or 31 finite bands and requested preamp within ±20 dB, volume 0–200%, and audio delay within 24 hours.");
     }
 
     public static AudioOutputProfile Capture(AppSettings settings, string deviceName) => new()

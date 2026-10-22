@@ -1,12 +1,12 @@
 # Feature checklist
 
-**78 implemented · 26 pending · 104 tracked capabilities.**
+**79 implemented · 26 pending · 105 tracked capabilities.**
 
 Each capability appears exactly once. Completing it moves the same stable ID from Pending to Implemented. A setting or catalog entry alone does not complete a feature. Source references describe the implementation; validation limits are documented in [Testing](docs/TESTING.md).
 
 Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Sync-PublicFeatures.ps1`; CI rejects an outdated checklist.
 
-## Implemented (78)
+## Implemented (79)
 
 ### Workspaces and interface
 
@@ -59,8 +59,9 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [x] **F0044** Sequential conversion, progress, cancellation and optional loudness normalization. — MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools
 - [x] **F0045** Conversion writes to a temporary file and refuses to overwrite an existing destination. — MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools
 - [x] **F0046** Independent native 20-band logarithmic and 31-band ISO graphic equalizers, with requested gains and preamp within ±20 dB. — Native/FluxDsp, NativeDspBridge and dynamic EqualizerWindow; measured processed PCM, high-rate precision, live layout switching, persistence and visual panel review. Filter-only measurements: docs/NATIVE_DSP.md.
-- [x] **F0047** Saved volume, full 10/20/31-band EQ layout, preamp, gain compensation and audio delay per output, with recall when selecting an output or starting the player. — AudioOutputProfile / MainViewModel.AudioProfiles / AudioOutputProfilesWindow; independent endpoint persistence, live native delay/volume, mute, boost limit, opt-out, startup, failure isolation and manual headphone-profile review. Full native layout/profile recall and unrelated-settings reload are covered by the multiband scenario.
+- [x] **F0047** Saved volume, full 10/15/20/31-band EQ layout, preamp, gain compensation and audio delay per output, with recall when selecting an output or starting the player. — AudioOutputProfile / MainViewModel.AudioProfiles / AudioOutputProfilesWindow; independent endpoint persistence, live native delay/volume, mute, boost limit, opt-out, startup, failure isolation and manual headphone-profile review. Full native layout/profile recall and unrelated-settings reload are covered by the multiband scenario.
 - [x] **F0098** Create and edit CUE sheets with track titles, artists, sources, ordering and 75-fps start positions. — CueSheet.Write / CueSheetEditorWindow; frame and multi-file regression tests, plus manual edit/save verification with original preservation.
+- [x] **F0105** Independent native 15-band ISO graphic EQ from 25 Hz to 16 kHz, with factory presets and complete output-profile persistence. — Native multiband module and EqualizerLayout; measured PCM at 25 Hz, 1 kHz and 16 kHz, flat/gain/headroom checks, live layout round trip, persisted 15-band profiles and visual review of all controls.
 
 ### Library and playlists
 
@@ -152,4 +153,4 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 
 ## Compatibility notes
 
-Playback depends on the selected LibVLC runtime, plugins, input and hardware. Universal format support, native DSD, bit-perfect output and a complete hardware matrix are not claimed. The 20/31-band equalizer requires the native DSP module built from source; a legacy-only build retains ten-band processing. UI status identifies actual native acknowledgement.
+Playback depends on the selected LibVLC runtime, plugins, input and hardware. Universal format support, native DSD, bit-perfect output and a complete hardware matrix are not claimed. The 15/20/31-band equalizer requires the native DSP module built from source; a legacy-only build retains ten-band processing. UI status identifies actual native acknowledgement.

@@ -1,6 +1,6 @@
 # Native equalizer implementation and measurements
 
-The 20/31-band layouts are implemented in `Native/FluxDsp/fluxdsp.c`, compiled against the pinned VLC 3.0.21 plugin SDK. They process actual decoded audio in independent native biquads. The ten-band layout continues to use VLC's original equalizer. See [Architecture](ARCHITECTURE.md) for configuration and lifetime details and [Building](BUILDING.md) for the C++ prerequisites.
+The 15/20/31-band layouts are implemented in `Native/FluxDsp/fluxdsp.c`, compiled against the pinned VLC 3.0.21 plugin SDK. They process actual decoded audio in independent native biquads. The ten-band layout continues to use VLC's original equalizer. See [Architecture](ARCHITECTURE.md) for configuration and lifetime details and [Building](BUILDING.md) for the C++ prerequisites.
 
 ## Response checks
 
@@ -12,11 +12,13 @@ These are targeted response checks, not a complete swept-response, distortion, m
 
 ```powershell
 dotnet build FluxPlayer.sln -c Release -p:Platform=x64 -warnaserror
-dotnet run --project FluxPlayer.Tests/FluxPlayer.Tests.csproj -c Release --no-build -- --filter="Native 20/31-band DSP"
+dotnet run --project FluxPlayer.Tests/FluxPlayer.Tests.csproj -c Release --no-build -- --filter="Native 15/20/31-band DSP"
 dotnet run --project FluxPlayer.Tests/FluxPlayer.Tests.csproj -c Release --no-build -- --filter="Native EQ layouts"
 ```
 
 The layout scenario switches live between 31, 20 and ten-band processing, restores a prior curve, recalls a full multiband output profile, reloads unrelated settings and disables the filter while the source continues. A desktop visual review inspected the complete 31-band panel, all frequency labels and controls, and acknowledged native processing with −6.3 dB effective gain for a +6 dB band and compensation enabled. This does not substitute for a full DPI/theme or manual interaction matrix.
+
+The fifteen-band extension is also measured at its first, middle and last centers (25 Hz, 1 kHz and 16 kHz). Observed flat/bypass ratios were 1.000, +6 dB ratios 1.995, and compensated ratios 0.971–0.972. Managed tests persist all 15 values and presets; the live layout scenario visits fifteen-band processing and restores the prior twenty-band curve. A separate visual review inspected its 15 labeled controls and native acknowledgement. The processing-cost table below measures the original 20/31-band cases, not a separate fifteen-band benchmark.
 
 ## Processing-cost probe
 

@@ -33,6 +33,7 @@ public partial class EqualizerWindow : FluentWindow
         _vm = vm;
         DataContext = vm;
         LayoutCombo.ItemsSource = new[] { new LayoutChoice(10, "10 bands · legacy", true),
+            new LayoutChoice(15, "15 bands · ISO", vm.SupportsExtendedEqualizer),
             new LayoutChoice(20, "20 bands · logarithmic", vm.SupportsExtendedEqualizer), new LayoutChoice(31, "31 bands · ISO", vm.SupportsExtendedEqualizer) };
         LayoutCombo.ItemContainerStyle = new Style(typeof(ComboBoxItem), TryFindResource(typeof(ComboBoxItem)) as Style)
         { Setters = { new Setter(IsEnabledProperty, new Binding(nameof(LayoutChoice.Available))) } };
@@ -71,7 +72,7 @@ public partial class EqualizerWindow : FluentWindow
         var area = System.Windows.Forms.Screen.FromHandle(new WindowInteropHelper(reference).Handle).WorkingArea;
         var dpi = VisualTreeHelper.GetDpi(reference);
         double workWidth = area.Width / dpi.DpiScaleX;
-        Width = Math.Min(_vm.EqualizerBandCount switch { 20 => 960, 31 => 1220, _ => 660 }, Math.Max(600, workWidth - 32));
+        Width = Math.Min(_vm.EqualizerBandCount switch { 15 => 820, 20 => 960, 31 => 1220, _ => 660 }, Math.Max(600, workWidth - 32));
         if (IsLoaded && !double.IsNaN(Left))
             Left = Math.Clamp(Left, area.Left / dpi.DpiScaleX + 8, Math.Max(area.Left / dpi.DpiScaleX + 8, area.Right / dpi.DpiScaleX - Width - 8));
     }

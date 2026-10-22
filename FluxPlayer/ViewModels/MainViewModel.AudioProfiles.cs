@@ -65,7 +65,7 @@ public partial class MainViewModel
             && saved.AudioOutputProfiles.TryGetValue(device.Id, out var profile);
         if (apply) adjustment = saved.AudioOutputProfiles[device.Id];
         if (adjustment.EqualizerEnabled && adjustment.Bands.Length > 10 && !SupportsExtendedEqualizer)
-        { _audioOutputProfileError = "Build the native DSP module before applying a 20/31-band output profile."; return false; }
+        { _audioOutputProfileError = "Build the native DSP module before applying a 15/20/31-band output profile."; return false; }
         adjustment.Apply(saved);
         saved.Volume = Math.Min(saved.Volume, MaxVolume);
         saved.AudioOutputDevice = device.Id;

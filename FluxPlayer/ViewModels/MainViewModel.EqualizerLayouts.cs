@@ -19,7 +19,7 @@ public partial class MainViewModel
 
     public bool SetEqualizerLayout(int count)
     {
-        if (!EqualizerLayout.IsSupported(count)) throw new ArgumentException("Choose 10, 20 or 31 bands.");
+        if (!EqualizerLayout.IsSupported(count)) throw new ArgumentException("Choose 10, 15, 20 or 31 bands.");
         if (count > 10 && !SupportsExtendedEqualizer) return false;
         if (count == EqualizerBandCount) return true;
         _equalizerLayouts[EqualizerBandCount] = new(EqualizerPreset, "Saved layout", EqualizerPreamp, (float[])EqualizerBands.Clone());

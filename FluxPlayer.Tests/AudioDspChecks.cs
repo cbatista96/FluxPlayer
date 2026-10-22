@@ -35,10 +35,10 @@ internal static class AudioDspChecks
 
     public static async Task VerifyExtendedBandsAsync(string root)
     {
-        foreach (int count in new[] { 20, 31 })
+        foreach (int count in new[] { 15, 20, 31 })
         {
             double[] frequencies = EqualizerLayout.Frequencies(count);
-            int center = count == 31 ? 17 : 10;
+            int center = count switch { 31 => 17, 20 => 10, _ => 8 };
             foreach (int band in new[] { center, 0, count - 1 })
             {
                 double frequency = frequencies[band];
@@ -117,7 +117,7 @@ internal static class AudioDspChecks
             logs.Enqueue($"capture: rate={sampleRate}, samples={samples}, measured={measured}, native={engine.ExtendedEqualizerStatus}");
             File.WriteAllLines(source + "." + (bands == null ? "flat" : preamp.ToString(System.Globalization.CultureInfo.InvariantCulture)) + ".log", logs);
         }
-        if (bands?.Length is 20 or 31)
+        if (bands?.Length is 15 or 20 or 31)
         {
             var status = engine.ExtendedEqualizerStatus;
             if (status is not { Active: true, CurrentSettingsApplied: true, Channels: 2, Error: 0 } || status.SampleRate != (uint)sampleRate)

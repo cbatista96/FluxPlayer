@@ -463,9 +463,9 @@ public partial class MediaService : IDisposable
 
     public void ApplyEqualizer(float[] bands, float preamp = 0f, bool antiClip = false)
     {
-        bool extended = bands.Length is 20 or 31;
-        if (!EqualizerLayout.IsSupported(bands.Length)) throw new ArgumentException("Choose 10, 20 or 31 bands.");
-        if (extended && _nativeDsp == null) throw new InvalidOperationException("Build the native DSP module to use 20/31 bands.");
+        bool extended = bands.Length is 15 or 20 or 31;
+        if (!EqualizerLayout.IsSupported(bands.Length)) throw new ArgumentException("Choose 10, 15, 20 or 31 bands.");
+        if (extended && _nativeDsp == null) throw new InvalidOperationException("Build the native DSP module to use 15/20/31 bands.");
         _nativeDsp?.Publish(bands, preamp, true, antiClip);
         _equalizerBandCount = bands.Length;
         if (extended && _usingExtendedEqualizer && _equalizer != null) return;
