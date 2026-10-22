@@ -21,6 +21,7 @@ public static partial class LibraryQuery
                 "artist" or "artista" => e => Has(e.Artist),
                 "album" or "álbum" => e => Has(e.Album),
                 "genre" or "genero" or "género" => e => Has(e.Genre),
+                "label" => e => !e.Labels.IsDefaultOrEmpty && e.Labels.Contains(value, StringComparer.OrdinalIgnoreCase),
                 "format" or "formato" => e => e.Format.Equals(value.TrimStart('.'), StringComparison.OrdinalIgnoreCase),
                 "title" or "titulo" or "título" => e => Has(e.Title),
                 "folder" or "carpeta" => e => Has(e.Folder),
@@ -30,6 +31,7 @@ public static partial class LibraryQuery
                 "added" or "fecha" => e => DateMatches(e.AddedUtc, value),
                 "favorite" or "favorito" => e => e.Favorite == (value is "true" or "1" or "sí" or "si"),
                 _ => e => Has(e.Title) || Has(e.Artist) || Has(e.Album) || Has(e.Genre) || Has(e.Path)
+                    || (!e.Labels.IsDefaultOrEmpty && e.Labels.Any(Has))
             };
             tests.Add(negate ? e => !test(e) : test);
         }

@@ -67,4 +67,6 @@ TagLibSharp is used only by explicit tag edits, without decoding media propertie
 
 Settings and library files belong to the current Windows user. Write changes through the service layer and preserve migration paths. Legacy preset names and query aliases remain accepted as compatibility data even though the public interface and documentation are English.
 
+Personal library labels use immutable arrays, bounded to 32 names of 64 characters per entry. Explicit batch edits validate the complete selection before mutation, serialize under the index gate on a worker, and publish through a unique temporary file. Failure restores the prior records; cancellation is observed before commit. Backup label unions are preflighted before any imported entry changes. Queries compile exact label tests once per search; no label scan is added to playback or idle processing.
+
 The full competitor research and private working reports are not distribution inputs. Public capability status is maintained in `FEATURES.md` and `FeatureCatalog`; unimplemented catalog entries must remain visibly planned.

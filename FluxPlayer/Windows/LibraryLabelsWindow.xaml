@@ -1,0 +1,41 @@
+<ui:FluentWindow x:Class="FluxPlayer.Windows.LibraryLabelsWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    Title="Personal labels · FluxPlayer" Width="760" Height="640" MinWidth="680" MinHeight="580"
+    WindowStartupLocation="CenterOwner" ExtendsContentIntoTitleBar="True">
+    <Grid Margin="24,18,24,20">
+        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+        <StackPanel Margin="0,0,0,18">
+            <TextBlock Text="Personal labels" FontSize="25" FontWeight="SemiBold"/>
+            <TextBlock x:Name="SelectionText" Margin="0,6,0,0" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+        </StackPanel>
+        <DataGrid x:Name="FilesGrid" Grid.Row="1" AutoGenerateColumns="False" IsReadOnly="True" RowHeight="36" HeadersVisibility="Column"
+            GridLinesVisibility="None" EnableRowVirtualization="True" EnableColumnVirtualization="True" VirtualizingPanel.VirtualizationMode="Recycling"
+            AutomationProperties.Name="Selected files and personal labels">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="*" MinWidth="180">
+                    <DataGridTextColumn.ElementStyle><Style TargetType="TextBlock"><Setter Property="TextTrimming" Value="CharacterEllipsis"/><Setter Property="ToolTip" Value="{Binding Path}"/></Style></DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="Current labels" Binding="{Binding LabelText}" Width="*" MinWidth="180">
+                    <DataGridTextColumn.ElementStyle><Style TargetType="TextBlock"><Setter Property="TextTrimming" Value="CharacterEllipsis"/><Setter Property="ToolTip" Value="{Binding LabelText}"/></Style></DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+        <StackPanel Grid.Row="2" Margin="0,18,0,0">
+            <TextBlock Text="Labels to add or remove · one per line" Margin="0,0,0,7"/>
+            <TextBox x:Name="LabelsBox" Height="100" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" MaxLength="4096" Padding="10,8"
+                AutomationProperties.Name="Personal labels, one per line"/>
+            <TextBlock Text="Up to 32 labels per file, 64 characters each. Labels are stored in your library and its backups. They do not edit the media file's metadata."
+                TextWrapping="Wrap" Margin="0,8,0,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+        </StackPanel>
+        <StackPanel Grid.Row="3" Margin="0,18,0,0">
+            <WrapPanel>
+                <Button x:Name="AddButton" Content="Add labels to selected files" Click="Add_Click" Padding="16,9" Margin="0,0,10,0"/>
+                <Button x:Name="RemoveButton" Content="Remove these labels" Click="Remove_Click" Padding="16,9"/>
+            </WrapPanel>
+            <TextBlock x:Name="StatusText" Text="Existing labels are preserved when adding. Search with label:&quot;Road trip&quot; or save that rule as a smart playlist."
+                TextWrapping="Wrap" Margin="0,12,0,0" AutomationProperties.LiveSetting="Polite"/>
+        </StackPanel>
+    </Grid>
+</ui:FluentWindow>

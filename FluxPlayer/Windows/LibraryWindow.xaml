@@ -19,7 +19,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" /><ColumnDefinition Width="170" /><ColumnDefinition Width="200" /><ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <TextBox x:Name="SearchBox" MinWidth="160" Height="34" Padding="10,5" TextChanged="Search_Changed" ToolTip="Search text or rules: artist:&quot;First Last&quot; format:flac duration:&gt;3:00 plays:&gt;2 added:&gt;=2026-01-01. Use - to exclude." AutomationProperties.Name="Search the library" />
+            <TextBox x:Name="SearchBox" MinWidth="160" Height="34" Padding="10,5" TextChanged="Search_Changed" ToolTip="Search text or rules: artist:&quot;First Last&quot; label:&quot;Road trip&quot; format:flac duration:&gt;3:00 plays:&gt;2 added:&gt;=2026-01-01. Use - to exclude." AutomationProperties.Name="Search the library" />
             <TextBlock Text="Search title, artist, album or rules…" Margin="12,0,12,0" VerticalAlignment="Center" IsHitTestVisible="False" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis">
                 <TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Visibility" Value="Collapsed" />
                     <Style.Triggers><DataTrigger Binding="{Binding Text, ElementName=SearchBox}" Value=""><Setter Property="Visibility" Value="Visible" /></DataTrigger></Style.Triggers>
@@ -50,6 +50,9 @@
                         <DataGridTextColumn Header="Format" Binding="{Binding Format}" Width="75" />
                         <DataGridTextColumn Header="Duration" Binding="{Binding Duration}" Width="80" />
                         <DataGridTextColumn Header="Plays" Binding="{Binding PlayCount}" Width="60" />
+                        <DataGridTextColumn Header="Labels" Binding="{Binding LabelText}" Width="140">
+                            <DataGridTextColumn.ElementStyle><Style TargetType="TextBlock"><Setter Property="TextTrimming" Value="CharacterEllipsis"/><Setter Property="ToolTip" Value="{Binding LabelText}"/></Style></DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
                     </DataGrid.Columns>
                 </DataGrid>
                 <TextBlock x:Name="EmptyText" Text="Add a folder to get started. Files you play will also appear here." HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" MaxWidth="470" TextAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" IsHitTestVisible="False" />
@@ -57,14 +60,15 @@
         </Border>
         <StackPanel Grid.Row="3" Margin="0,14,0,0">
             <WrapPanel>
-                <Button Content="Play" Click="Play_Click" Padding="14,7" />
-                <Button Content="Add to playlist" Click="Enqueue_Click" Margin="8,0,0,0" Padding="14,7" />
-                <Button Content="Favorite" Click="Favorite_Click" Margin="8,0,0,0" Padding="14,7" />
-                <Button Content="Read tags" Click="Analyze_Click" Margin="8,0,0,0" Padding="14,7" />
-                <Button Content="Edit tags" Click="EditTags_Click" Margin="8,0,0,0" Padding="14,7" />
-                <Button Content="Export playlist" Click="Export_Click" Margin="8,0,0,0" Padding="14,7" />
-                <Button Content="Library tools" Click="LibraryTools_Click" Margin="8,0,0,0" Padding="14,7" />
-                <Button x:Name="CancelButton" Content="Cancel task" Click="Cancel_Click" Visibility="Collapsed" Margin="8,0,0,0" Padding="14,7" />
+                <Button Content="Play" Click="Play_Click" Margin="0,0,0,8" Padding="14,7" />
+                <Button Content="Add to playlist" Click="Enqueue_Click" Margin="8,0,0,8" Padding="14,7" />
+                <Button Content="Favorite" Click="Favorite_Click" Margin="8,0,0,8" Padding="14,7" />
+                <Button Content="Read tags" Click="Analyze_Click" Margin="8,0,0,8" Padding="14,7" />
+                <Button Content="Edit tags" Click="EditTags_Click" Margin="8,0,0,8" Padding="14,7" />
+                <Button Content="Personal labels…" Click="PersonalLabels_Click" Margin="8,0,0,8" Padding="14,7" />
+                <Button Content="Export playlist" Click="Export_Click" Margin="8,0,0,8" Padding="14,7" />
+                <Button Content="Library tools" Click="LibraryTools_Click" Margin="8,0,0,8" Padding="14,7" />
+                <Button x:Name="CancelButton" Content="Cancel task" Click="Cancel_Click" Visibility="Collapsed" Margin="8,0,0,8" Padding="14,7" />
             </WrapPanel>
             <TextBlock x:Name="StatusText" Text="Loading library…" FontSize="11" Margin="0,10,0,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
         </StackPanel>

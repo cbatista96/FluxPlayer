@@ -20,7 +20,8 @@ public static class MediaToolsWindows
 {
     public static string? RequestText(Window owner, MainViewModel vm, string title, string label)
     {
-        var window = Window(owner, vm, title, 520, 360);
+        var window = Window(owner, vm, title, 520, 240);
+        window.MinHeight = 240; window.ResizeMode = ResizeMode.NoResize;
         var panel = new StackPanel { Margin = new Thickness(24) };
         panel.Children.Add(new TextBlock { Text = label, FontSize = 16, Margin = new Thickness(0, 0, 0, 16) });
         var input = new TextBox { MaxLength = 120, Padding = new Thickness(10, 8, 10, 8) }; panel.Children.Add(input);

@@ -5,7 +5,7 @@ using System.Text.Json;
 namespace FluxPlayer.Services;
 
 /// <summary>Lazy local index. Scans names first; expensive decoding is always an explicit operation.</summary>
-public sealed class LibraryService : IAsyncDisposable
+public sealed partial class LibraryService : IAsyncDisposable
 {
     private readonly string _path;
     private readonly SemaphoreSlim _gate = new(1, 1);
@@ -42,7 +42,7 @@ public sealed class LibraryService : IAsyncDisposable
             var store = await JsonSerializer.DeserializeAsync<Store>(file);
             if (store == null || store.Version != 1) return;
             foreach (var entry in store.Entries.Take(200_000))
-                if (!string.IsNullOrWhiteSpace(entry.Path)) _entries[entry.Path] = entry with { Kind = NormalizeKind(entry.Kind) };
+                if (!string.IsNullOrWhiteSpace(entry.Path)) _entries[entry.Path] = entry with { Kind = NormalizeKind(entry.Kind), Labels = LibraryLabels.Sanitize(entry.Labels) };
             foreach (var folder in store.Folders) if (Directory.Exists(folder)) _folders.Add(folder);
             foreach (var list in store.Lists ?? Array.Empty<SmartList>()) _lists[list.Name] = list;
             ConfigureWatchers();
@@ -257,11 +257,7 @@ public sealed class LibraryService : IAsyncDisposable
         try
         {
             if (!_dirty) return;
-            Directory.CreateDirectory(System.IO.Path.GetDirectoryName(_path)!);
-            string temporary = _path + ".tmp";
-            await using (var file = File.Create(temporary))
-                await JsonSerializer.SerializeAsync(file, new Store(1, _folders.ToArray(), _entries.Values.ToArray(), _lists.Values.ToArray()));
-            File.Move(temporary, _path, true); _dirty = false; LastError = null;
+            await WriteStoreLockedAsync(); _dirty = false; LastError = null;
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException) { LastError = e.Message; }
         finally { _gate.Release(); }
@@ -318,7 +314,10 @@ public sealed class LibraryService : IAsyncDisposable
             try { path = MediaFormats.IsNetwork(entry.Path) ? entry.Path : System.IO.Path.GetFullPath(entry.Path); }
             catch (Exception e) when (e is ArgumentException or NotSupportedException)
             { throw new InvalidDataException("The backup contains an invalid media path.", e); }
-            if (!imported.TryAdd(path, entry with { Path = path, Kind = NormalizeKind(entry.Kind) }))
+            System.Collections.Immutable.ImmutableArray<string> labels;
+            try { labels = LibraryLabels.Canonicalize(entry.Labels.IsDefault ? Array.Empty<string>() : entry.Labels); }
+            catch (ArgumentException e) { throw new InvalidDataException("The backup contains invalid personal labels.", e); }
+            if (!imported.TryAdd(path, entry with { Path = path, Kind = NormalizeKind(entry.Kind), Labels = labels }))
                 throw new InvalidDataException("The backup contains duplicate media paths.");
         }
         var lists = store.Lists ?? Array.Empty<SmartList>();
@@ -340,6 +339,12 @@ public sealed class LibraryService : IAsyncDisposable
                 || _folders.Union(folders, StringComparer.OrdinalIgnoreCase).Count() > 64
                 || _lists.Keys.Union(lists.Select(l => l.Name), StringComparer.OrdinalIgnoreCase).Count() > 5000)
                 throw new InvalidDataException("The merged library would exceed its entry or watched-folder limit.");
+            // Preflight label unions before publishing any imported record.
+            var mergedLabels = new Dictionary<string, System.Collections.Immutable.ImmutableArray<string>>(StringComparer.OrdinalIgnoreCase);
+            foreach (var pair in imported)
+                if (_entries.TryGetValue(pair.Key, out var existing))
+                    try { mergedLabels[pair.Key] = LibraryLabels.Canonicalize(existing.Labels.Concat(pair.Value.Labels)); }
+                    catch (ArgumentException e) { throw new InvalidDataException("Merged personal labels would exceed the per-file limit.", e); }
             foreach (var pair in imported)
             {
                 if (_entries.TryGetValue(pair.Key, out var current))
@@ -348,6 +353,7 @@ public sealed class LibraryService : IAsyncDisposable
                     _entries[pair.Key] = metadata with
                     {
                         Favorite = current.Favorite || pair.Value.Favorite,
+                        Labels = mergedLabels[pair.Key],
                         PlayCount = Math.Max(current.PlayCount, pair.Value.PlayCount),
                         AddedUtc = current.AddedUtc < pair.Value.AddedUtc ? current.AddedUtc : pair.Value.AddedUtc,
                         LastPlayedUtc = Nullable.Compare(current.LastPlayedUtc, pair.Value.LastPlayedUtc) >= 0

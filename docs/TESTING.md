@@ -64,6 +64,8 @@ Rapid source switching or teardown can emit native diagnostics on stderr about u
 
 ## Manual UI verification
 
+Personal-label regression checks cover Unicode and duplicate names, multi-file add/remove, exact and partial search, concurrent edits, reopened storage, backup unions, cancellation, rejected limits and rollback on a blocked save destination. They confirm the original audio bytes remain unchanged. Manual UI review added two labels, filtered the library with `label:"Road trip"`, saved that rule as a smart playlist and independently checked the stored labels, query and media hashes. UI removal was not exercised; removal behavior is covered by the service checks.
+
 For a user-facing change, verify the complete affected flow in both workspaces:
 
 - Open audio, video and audio with cover art; confirm automatic and manual mode selection.

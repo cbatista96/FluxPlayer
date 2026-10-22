@@ -1,4 +1,6 @@
 using System.IO;
+using System.Collections.Immutable;
+using System.Text.Json.Serialization;
 
 namespace FluxPlayer.Models;
 
@@ -16,6 +18,8 @@ public sealed record LibraryEntry
     public DateTime? LastPlayedUtc { get; init; }
     public int PlayCount { get; init; }
     public bool Favorite { get; init; }
+    public ImmutableArray<string> Labels { get; init; } = ImmutableArray<string>.Empty;
+    [JsonIgnore] public string LabelText => string.Join("; ", Labels.IsDefault ? ImmutableArray<string>.Empty : Labels);
     public bool MetadataRead { get; init; }
     public string Kind { get; init; } = "Audio";
     public string Format => MediaFormats.Extension(Path).TrimStart('.').ToUpperInvariant();

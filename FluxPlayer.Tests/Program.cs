@@ -312,6 +312,68 @@ internal static class Program
             Assert(canceled, "Scan cancellation");
         });
 
+        await Test("Personal labels: batch edits, queries, persistence, backups, atomic limits, cancellation and failed save", async () =>
+        {
+            string folder = Path.Combine(Root, "personal-labels-" + Guid.NewGuid().ToString("N"));
+            string media = Path.Combine(folder, "media"); Directory.CreateDirectory(media);
+            string first = Path.Combine(media, "first.wav"), second = Path.Combine(media, "second.wav");
+            File.Copy(wav, first); File.Copy(wav, second);
+            byte[] original = File.ReadAllBytes(first);
+            string data = Path.Combine(folder, "data"), backup = Path.Combine(folder, "backup.json");
+            var parsed = LibraryLabels.Parse(" Road trip\nROAD TRIP\r\nCafé ñ\n\n");
+            Assert(parsed.Length == 2 && parsed.Contains("Road trip"), "Trim, Unicode and case-insensitive duplicates");
+            await using (var library = new LibraryService(data))
+            {
+                await library.ScanFolderAsync(media, false);
+                Assert(await library.UpdateLabelsAsync(new[] { first, second, first, Path.Combine(media, "missing.wav") }, parsed, LibraryLabelEdit.Add) == 2, "Batch edits affect existing unique paths only");
+                Assert(await library.UpdateLabelsAsync(new[] { first }, new[] { "Private" }, LibraryLabelEdit.Add) == 1, "Add preserves existing labels");
+                var entries = await library.SnapshotAsync(); var labeled = entries.Single(entry => entry.Path == first);
+                Assert(LibraryQuery.Compile("label:\"road trip\" -label:Private")(entries.Single(entry => entry.Path == second)), "Exact label and exclusion rules");
+                Assert(LibraryQuery.Compile("café")(labeled) && !LibraryQuery.Compile("label:Road")(labeled), "General search includes labels; field rule is exact");
+                Assert(await library.UpdateLabelsAsync(new[] { first }, new[] { "ROAD TRIP" }, LibraryLabelEdit.Remove) == 1
+                    && (await library.SnapshotAsync()).Single(entry => entry.Path == first).Labels.Contains("Private"), "Remove matches a label without clearing unrelated labels");
+                await Task.WhenAll(library.UpdateLabelsAsync(new[] { first }, new[] { "Morning" }, LibraryLabelEdit.Add),
+                    library.UpdateLabelsAsync(new[] { first }, new[] { "Evening" }, LibraryLabelEdit.Add));
+                Assert((await library.SnapshotAsync()).Single(entry => entry.Path == first).Labels.Contains("Morning")
+                    && (await library.SnapshotAsync()).Single(entry => entry.Path == first).Labels.Contains("Evening"), "Concurrent edits serialize without lost updates");
+                await library.ExportBackupAsync(backup);
+                Assert(File.ReadAllBytes(first).SequenceEqual(original) && File.ReadAllBytes(second).SequenceEqual(original), "Media bytes remain unchanged");
+                using var cancel = new CancellationTokenSource(); cancel.Cancel(); bool refused = false;
+                try { await library.UpdateLabelsAsync(new[] { first }, new[] { "Canceled" }, LibraryLabelEdit.Add, cancel.Token); } catch (OperationCanceledException) { refused = true; }
+                Assert(refused && !(await library.SnapshotAsync()).Single(entry => entry.Path == first).Labels.Contains("Canceled"), "Cancellation before commit");
+                string snapshot = JsonSerializer.Serialize(await library.SnapshotAsync());
+                string libraryFile = Path.Combine(data, "library.json"), previousFile = libraryFile + ".preserved";
+                File.Move(libraryFile, previousFile); Directory.CreateDirectory(libraryFile);
+                refused = false;
+                try { await library.UpdateLabelsAsync(new[] { first }, new[] { "Unsaved" }, LibraryLabelEdit.Add); }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { refused = true; }
+                Assert(refused && JsonSerializer.Serialize(await library.SnapshotAsync()) == snapshot
+                    && !Directory.EnumerateFiles(data).Any(path => path.EndsWith(".tmp")), "Failed persistence rolls back labels and cleans temporary output");
+                Directory.Delete(libraryFile); File.Move(previousFile, libraryFile);
+            }
+            await using (var reopened = new LibraryService(data))
+                Assert((await reopened.SnapshotAsync()).Single(entry => entry.Path == first).Labels.Contains("Morning"), "Reopen persisted labels");
+            await using var target = new LibraryService(Path.Combine(folder, "target"));
+            await target.ScanFolderAsync(media, false);
+            await target.UpdateLabelsAsync(new[] { first }, new[] { "Current" }, LibraryLabelEdit.Add);
+            await target.ImportBackupAsync(backup);
+            Assert((await target.SnapshotAsync()).Single(entry => entry.Path == first).Labels.Contains("Current")
+                && (await target.SnapshotAsync()).Single(entry => entry.Path == first).Labels.Contains("Morning"), "Backup merge preserves both current and imported labels");
+            var existingSecond = (await target.SnapshotAsync()).Single(entry => entry.Path == second);
+            await target.UpdateLabelsAsync(new[] { second }, existingSecond.Labels, LibraryLabelEdit.Remove);
+            await target.UpdateLabelsAsync(new[] { second }, Enumerable.Range(0, 32).Select(index => "Label " + index), LibraryLabelEdit.Add);
+            string before = JsonSerializer.Serialize(await target.SnapshotAsync()); bool rejected = false;
+            try { await target.UpdateLabelsAsync(new[] { first, second }, new[] { "Overflow" }, LibraryLabelEdit.Add); } catch (ArgumentException) { rejected = true; }
+            Assert(rejected && JsonSerializer.Serialize(await target.SnapshotAsync()) == before, "Per-file limit rejects the entire batch before mutation");
+            rejected = false; try { await target.ImportBackupAsync(backup); } catch (InvalidDataException) { rejected = true; }
+            Assert(rejected && JsonSerializer.Serialize(await target.SnapshotAsync()) == before, "Backup label-union limit is validated before merging any entry");
+            foreach (var invalid in new[] { new[] { "bad\0label" }, new[] { new string('x', 65) }, new[] { " " } })
+            {
+                rejected = false; try { LibraryLabels.Canonicalize(invalid); } catch (ArgumentException) { rejected = true; }
+                Assert(rejected, "Invalid labels rejected");
+            }
+        });
+
         await Test("Portable and named profiles: isolated data, option parsing and settings persistence", () =>
         {
             string root = Path.Combine(Root, "profiles-" + Guid.NewGuid().ToString("N"));

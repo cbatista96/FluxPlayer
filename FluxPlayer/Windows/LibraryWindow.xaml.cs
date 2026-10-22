@@ -137,6 +137,14 @@ public partial class LibraryWindow : FluentWindow
         else if (paths.Length == 1) MediaToolsWindows.ShowTagEditor(this, _vm, paths[0]);
     }
 
+    private void PersonalLabels_Click(object sender, RoutedEventArgs e)
+    {
+        var selected = MediaGrid.SelectedItems.Cast<LibraryEntry>().Take(10_001).ToArray();
+        if (selected.Length == 0) { StatusText.Text = "Select library files to edit their personal labels."; return; }
+        if (selected.Length > 10_000) { StatusText.Text = "Select up to 10,000 files per label edit."; return; }
+        new LibraryLabelsWindow(this, _vm, selected).Show();
+    }
+
     private void Export_Click(object sender, RoutedEventArgs e)
     {
         var dialog = new SaveFileDialog { Filter = "UTF-8 playlist|*.m3u8|PLS|*.pls|XSPF|*.xspf", FileName = "My library.m3u8" };

@@ -705,5 +705,12 @@
     "Description": "Accelerated subtitle composition on the WPF memory-video surface without a software decoder fallback.",
     "Status": "pending",
     "Evidence": ""
+  },
+  {
+    "Id": "F0102",
+    "Area": "Library and playlists",
+    "Description": "Personal library labels with batch add/remove, label search rules, smart playlists and backup merging.",
+    "Status": "implemented",
+    "Evidence": "Immutable label values / LibraryService.UpdateLabelsAsync / LibraryLabelsWindow; atomic limits and persistence rollback, cancellation, concurrent updates, reopened/merged backups, preserved media bytes and manual label/smart-playlist review."
   }
 ]

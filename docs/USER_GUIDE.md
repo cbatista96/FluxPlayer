@@ -85,6 +85,10 @@ favorite:true plays:>=3 added:>=2026-01-01
 
 Fields include `title`, `artist`, `album`, `genre`, `format`, `folder`, `duration`, `plays`, `size`, `added` and `favorite`. Duration uses seconds or `minutes:seconds`; size uses MiB; dates use `yyyy-MM-dd`. Existing saved queries using legacy localized aliases remain readable.
 
+Select up to 10,000 library rows and choose **Personal labels** to add or remove labels across the selection. Enter one label per line; each file supports up to 32 labels of 64 characters. Adding preserves existing labels; removing affects only the entered labels. Labels belong to the local library and its backups, and do not modify media metadata. A failed or canceled save before commit leaves the previous labels intact.
+
+Use `label:"Road trip"` for an exact label match, `-label:Private` to exclude one, or ordinary search text for a partial label match. Label matching ignores letter case. **Save view as playlist** stores those rules as a smart playlist. Backup restoration merges current and imported labels; a merge that would exceed the per-file limit is rejected before changing the index.
+
 Playlists can be imported or exported as M3U/M3U8, PLS and XSPF. Relative file entries are resolved against the playlist folder.
 
 When playlist persistence is enabled, reopening FluxPlayer restores its queue and selected item without starting playback. Play then starts the restored selection; unavailable files are skipped when restoring.

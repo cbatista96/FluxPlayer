@@ -1,12 +1,12 @@
 # Feature checklist
 
-**75 implemented · 26 pending · 101 tracked capabilities.**
+**76 implemented · 26 pending · 102 tracked capabilities.**
 
 Each capability appears exactly once. Completing it moves the same stable ID from Pending to Implemented. A setting or catalog entry alone does not complete a feature. Source references describe the implementation; validation limits are documented in [Testing](docs/TESTING.md).
 
 Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Sync-PublicFeatures.ps1`; CI rejects an outdated checklist.
 
-## Implemented (75)
+## Implemented (76)
 
 ### Workspaces and interface
 
@@ -77,6 +77,7 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [x] **F0064** On-demand exact duplicate detection using actual size and SHA-256, with progress and cancellation. — DuplicateFinder / DuplicateFilesWindow; automated content/cancellation tests and manual UI review.
 - [x] **F0097** Remove selected records from the library without deleting media files. — LibraryService.RemoveEntriesAsync / Library tools / duplicate results; media preservation and reopened-index tests.
 - [x] **F0100** Batch editing of selected title, artist, album and genre tags, with explicit clearing, per-file results, progress and cancellation. — BatchTagService / BatchTagEditorWindow / TagLibSharp; eight-format tag/playback checks, preserved artwork and custom metadata, library refresh, cancellation and a two-file manual UI review.
+- [x] **F0102** Personal library labels with batch add/remove, label search rules, smart playlists and backup merging. — Immutable label values / LibraryService.UpdateLabelsAsync / LibraryLabelsWindow; atomic limits and persistence rollback, cancellation, concurrent updates, reopened/merged backups, preserved media bytes and manual label/smart-playlist review.
 
 ### Video and subtitles
 
