@@ -63,7 +63,7 @@ public static class FeatureCatalog
         new FeatureDefinition(HeadphoneCrossfeed, "Headphone crossfeed", "Reduce stereo headphone listening fatigue."),
         new FeatureDefinition(AvSyncOverlayControls, "Overlay A/V adjustment", "Quick synchronization controls."),
         new FeatureDefinition(AutoDownloadSubtitles, "Subtitle downloads", "Search for subtitles automatically."),
-        new FeatureDefinition(LiveSubtitleSyncEditor, "Live subtitle synchronization", "Adjust subtitle timing during playback."),
+        new FeatureDefinition(LiveSubtitleSyncEditor, "Subtitle timing editor", "Live delay, cue navigation, two-anchor correction and SRT copy export from Audio and video tools."),
         new FeatureDefinition(SubtitleStyleProfiles, "Subtitle style profiles", "Save subtitle style profiles."),
         new FeatureDefinition(BilingualSubtitles, "Bilingual subtitles", "Display two subtitle tracks."),
         new FeatureDefinition(SubtitleTextSearch, "Subtitle text search", "Search text in the loaded subtitle file."),
@@ -99,12 +99,12 @@ public static class FeatureCatalog
         PlayNextQueue, PresentationLockControls, Equalizer31Band, ClipRecordingAb,
         MediaLibrary, WatchedFolders, FavoritesCollections, SubtitleTextSearch,
         LibraryAdvancedFilters, SmartPlaylists,
-        ScheduledSnapshots,
+        ScheduledSnapshots, LiveSubtitleSyncEditor,
     };
 
     private static readonly HashSet<string> PlannedKeys = new(StringComparer.OrdinalIgnoreCase)
     {
-        AudioProfilesPerDevice, HeadphoneCrossfeed, AutoDownloadSubtitles, LiveSubtitleSyncEditor,
+        AudioProfilesPerDevice, HeadphoneCrossfeed, AutoDownloadSubtitles,
         SubtitleStyleProfiles, BilingualSubtitles, BurnedSubtitlesOcr,
         ConfigurableHud, AdvancedTouchGestures, AutoRenderProfileByGpu,
         ChromecastDlnaSender, MobileRemoteWebUi,

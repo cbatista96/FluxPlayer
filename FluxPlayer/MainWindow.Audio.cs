@@ -15,6 +15,7 @@ public partial class MainWindow
     private CueSheetEditorWindow? _cueEditorWindow;
     private SnapshotScheduleWindow? _snapshotScheduleWindow;
     private BatchTagEditorWindow? _batchTagWindow;
+    private SubtitleTimingWindow? _subtitleTimingWindow;
     private bool _audioLayoutApplied;
     private Size _videoModeSize = new(1280, 760);
     private int _videoRotation;
@@ -165,6 +166,13 @@ public partial class MainWindow
     private void ConverterButton_Click(object sender, RoutedEventArgs e) =>
         new ConverterWindow(this, _vm, _vm.Playlist.Select(p => p.FilePath).ToArray()).Show();
     private void SearchSubtitlesButton_Click(object sender, RoutedEventArgs e) => MediaToolsWindows.ShowSubtitleSearch(this, _vm);
+    private void SubtitleTiming_Click(object sender, RoutedEventArgs e)
+    {
+        if (_subtitleTimingWindow != null) { _subtitleTimingWindow.Activate(); return; }
+        _subtitleTimingWindow = new SubtitleTimingWindow(this, _vm);
+        _subtitleTimingWindow.Closed += (_, _) => _subtitleTimingWindow = null;
+        _subtitleTimingWindow.Show();
+    }
     private void OpenCueButton_Click(object sender, RoutedEventArgs e) => MediaToolsWindows.ShowCueSheet(this, _vm);
     private void EditCueButton_Click(object sender, RoutedEventArgs e)
     {

@@ -43,6 +43,14 @@ The audio settings include output device selection, ReplayGain options, audio de
 
 Open **Audio and video tools > Batch tag editor** to edit the current queue, or select several library rows and choose **Edit tags**. Add or remove files from the job, then check only the title, artist, album or genre fields you want to replace. A checked empty field clears that tag; unchecked fields are preserved. **Apply checked fields** writes to the original files and shows saved, skipped and failed results. Loaded files, missing files and network sources are skipped. Cancellation finishes the current save and stops before the next file; completed changes remain. Close the editor to cancel an active job. Keep backups of files before making large changes.
 
+## Subtitle timing
+
+Open **Audio and video tools > Subtitle timing editor**. The **Live delay** controls affect the currently selected subtitle track; positive milliseconds display subtitles later. Load an external SRT, VTT, ASS or SSA file to compare its original and adjusted timestamps. Select a row and use **Seek selected original cue** to navigate using the current live delay.
+
+Export correction is separate from live delay. Set an offset and time scale, then choose **Update table**. For drift correction, pause the video at the matching time for an early cue, select that cue and capture the first anchor. Repeat with a later cue and the second anchor. The editor calculates a positive scale and offset from those two matches.
+
+**Save corrected SRT copy** preserves the original. Text ending before zero is omitted; a partially visible cue is clipped to zero. The copy is plain text: ASS/VTT styling is not retained. **Load saved copy in player** selects it and resets live delay to zero, preventing a second timing adjustment. External subtitle tracks appear in the selector as they are discovered; choosing Disabled remains respected.
+
 For local lyrics, place an LRC or text file beside the media with the same base name. An LRC file displays synchronized lines. A matching CUE sheet provides track chapters where supported.
 
 **Audio and video tools > Create or edit CUE sheet** opens the track editor. Add source files, add the current playback position, or load an existing sheet. Edit titles, artists, source paths and `minutes:seconds:frames` start positions in the table; use Move up/down to arrange tracks. There are 75 frames per second and a maximum of 99 tracks. Play selected track opens its source at the indicated position.

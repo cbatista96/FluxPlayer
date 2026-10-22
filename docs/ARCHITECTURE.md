@@ -51,6 +51,10 @@ Scheduled captures are explicit bounded jobs. Each attempt completes before anot
 
 ## Data and compatibility
 
+Subtitle track additions, removals and selection events only enqueue a coalesced dispatcher refresh; native callbacks never query the player directly. Collection replacement suppresses selection write-back, preserving the actual native selection and a single Disabled entry. External subtitle paths are converted to absolute file URIs before `AddSlave`, which requires a scheme.
+
+The subtitle timing editor transforms text cues on demand using decimal scale/offset arithmetic. Parsing and SRT output are bounded to 16 MB and 100,000 cues. Exports finish in a temporary file before publication, and the editor requires a different path from the original. Live native delay and exported timing are independent; loading an exported copy clears live delay. This tool does not introduce a per-frame scan or idle timer.
+
 TagLibSharp is used only by explicit tag edits, without decoding media properties. Each save finishes before cancellation is honored and reopens the file to verify selected fields. This avoids the empty-field behavior of LibVLC 3's [metadata writer](https://github.com/videolan/vlc/blob/3.0.21/modules/meta_engine/taglib.cpp#L1172). Batch editing skips sources loaded in the player, processes one file at a time and reports each result. Successful writes refresh indexed metadata and file stamps, with one library notification at job completion. Editing does not add a playback filter or background scanner.
 
 Settings and library files belong to the current Windows user. Write changes through the service layer and preserve migration paths. Legacy preset names and query aliases remain accepted as compatibility data even though the public interface and documentation are English.

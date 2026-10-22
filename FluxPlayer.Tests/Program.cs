@@ -88,6 +88,45 @@ internal static class Program
             Assert(SubtitleDocument.Read(ass).Single().Text == "Hello world", "ASS"); return Task.CompletedTask;
         });
 
+        await Test("Subtitle correction: offset, two anchors, drift, zero clipping, export, limits and cancellation", () =>
+        {
+            string folder = Path.Combine(Root, "subtitle-editor-" + Guid.NewGuid().ToString("N")); Directory.CreateDirectory(folder);
+            var cues = new[] { new SubtitleCue(0, 500, "Opening ñ"), new SubtitleCue(1000, 2000, "Second"), new SubtitleCue(10_000, 11_000, "Later") };
+            var timing = SubtitleTiming.FromAnchors(new(1000, 1500), new(10_000, 11_400));
+            Assert(timing is { Scale: 1.1m, OffsetMs: 400 } && timing.Map(1000) == 1500 && timing.Map(10_000) == 11_400, "Anchor alignment");
+            var shifted = SubtitleEditingService.Retime(cues, new(1m, -1250));
+            Assert(shifted.RemovedBeforeStart == 1 && shifted.Cues[0] is { StartMs: 0, EndMs: 750 } && shifted.Cues[1].StartMs == 8750, "Negative offset clips and omits before zero");
+            var adjusted = SubtitleEditingService.Retime(cues, timing);
+            string output = Path.Combine(folder, "corrected.srt"); SubtitleEditingService.WriteSrt(output, adjusted.Cues);
+            Assert(SubtitleDocument.Read(output).SequenceEqual(adjusted.Cues), "SRT Unicode millisecond round trip");
+            Assert(SubtitleEditingService.FormatTime(100 * 3_600_000L + 7) == "100:00:00,007", "Long timestamps do not wrap at 24 hours");
+            bool refused = false; try { SubtitleEditingService.WriteSrt(output, cues); } catch (IOException) { refused = true; }
+            Assert(refused && SubtitleDocument.Read(output).SequenceEqual(adjusted.Cues), "Existing copy preserved");
+            foreach (var invalid in new[] { new SubtitleTiming(0), new SubtitleTiming(2.1m), new SubtitleTiming(1, long.MaxValue) })
+            {
+                refused = false; try { SubtitleEditingService.Retime(cues, invalid); } catch (ArgumentException) { refused = true; }
+                Assert(refused, "Invalid scale and offset rejected");
+            }
+            foreach (var anchors in new[] { (new SubtitleAnchor(1000, 1000), new SubtitleAnchor(1000, 2000)), (new SubtitleAnchor(1000, 2000), new SubtitleAnchor(5000, 1000)), (new SubtitleAnchor(1000, 1000), new SubtitleAnchor(5000, 50_000)), (new SubtitleAnchor(-1, 0), new SubtitleAnchor(5000, 5000)) })
+            {
+                refused = false; try { SubtitleTiming.FromAnchors(anchors.Item1, anchors.Item2); } catch (ArgumentException) { refused = true; }
+                Assert(refused, "Invalid anchors rejected");
+            }
+            using var cancellation = new CancellationTokenSource(); cancellation.Cancel();
+            refused = false; try { SubtitleEditingService.WriteSrt(Path.Combine(folder, "canceled.srt"), cues, token: cancellation.Token); } catch (OperationCanceledException) { refused = true; }
+            Assert(refused && !File.Exists(Path.Combine(folder, "canceled.srt")) && !Directory.EnumerateFiles(folder).Any(path => Path.GetFileName(path).StartsWith(".flux-subtitle-")), "Canceled export leaves no partial file");
+            string excessive = Path.Combine(folder, "too-many.srt");
+            File.WriteAllText(excessive, string.Concat(Enumerable.Repeat("1\n00:00:01,000 --> 00:00:02,000\nText\n\n", SubtitleEditingService.MaximumCues + 1)));
+            refused = false; try { SubtitleDocument.Read(excessive); } catch (InvalidDataException) { refused = true; }
+            Assert(refused, "Excessive cue count rejected instead of silently truncating an export");
+            foreach (var invalid in new[] { Array.Empty<SubtitleCue>(), new[] { new SubtitleCue(1000, 1000, "Invalid") }, new[] { new SubtitleCue(0, 1000, "bad\0text") } })
+            {
+                refused = false; try { SubtitleEditingService.WriteSrt(Path.Combine(folder, "invalid.srt"), invalid); } catch (ArgumentException) { refused = true; }
+                Assert(refused && !File.Exists(Path.Combine(folder, "invalid.srt")), "Invalid export rejected before writing");
+            }
+            return Task.CompletedTask;
+        });
+
         await Test("CUE: relative paths, 75 frames per second and tracks", () =>
         {
             string cue = Path.Combine(Root, "test.cue");
@@ -449,7 +488,7 @@ internal static class Program
             {
                 string video = Path.Combine(Root, "video-test.mkv");
                 var start = new ProcessStartInfo(ConversionService.FindExecutable()!) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardError = true };
-                foreach (string value in new[] { "-hide_banner", "-loglevel", "error", "-y", "-f", "lavfi", "-i", "testsrc2=size=320x180:rate=25", "-i", wav, "-t", "6", "-c:v", "libx264", "-preset", "ultrafast", "-c:a", "aac", video }) start.ArgumentList.Add(value);
+                foreach (string value in new[] { "-hide_banner", "-loglevel", "error", "-y", "-f", "lavfi", "-i", "testsrc2=size=320x180:rate=25", "-i", wav, "-i", Path.Combine(Root, "test.srt"), "-t", "8", "-c:v", "libx264", "-preset", "ultrafast", "-c:a", "aac", "-c:s", "srt", video }) start.ArgumentList.Add(value);
                 using var ffmpeg = Process.Start(start)!; var errors = ffmpeg.StandardError.ReadToEndAsync(); await ffmpeg.WaitForExitAsync(); Assert(ffmpeg.ExitCode == 0, await errors);
                 var metadata = await engine.ReadMetadataAsync(video); Assert(metadata is { HasAudio: true, HasVideo: true }, "Video tracks");
                 await using var library = new LibraryService(Path.Combine(Root, "vm-library"));
@@ -459,6 +498,16 @@ internal static class Program
                 vm.AddFilesToPlaylist(new[] { video }, true);
                 await Until(() => Task.FromResult(vm.IsPlaying && vm.ActiveMode == PlayerMode.Video), 8000);
                 await Until(() => Task.FromResult(renderer.CurrentBitmap != null && engine.MediaPlayer.VoutCount > 0 && engine.GetTime() > 50), 5000);
+                await Until(() => Task.FromResult(vm.SubtitleTracks.Count(track => track.Id >= 0) == 1), 3000);
+                Assert(vm.SubtitleTracks.Count(track => track.Id == -1) == 1, "One disabled subtitle entry");
+                vm.SelectedSubtitleTrack = vm.SubtitleTracks.Single(track => track.Id == -1);
+                await Task.Delay(250);
+                Assert(engine.MediaPlayer.Spu == -1 && vm.SelectedSubtitleTrack?.Id == -1, "Refresh preserves disabled subtitle selection");
+                string externalSubtitle = Path.Combine(Root, "external ñ #1.srt");
+                SubtitleEditingService.WriteSrt(externalSubtitle, new[] { new SubtitleCue(0, 7000, "External subtitle ñ") }, true);
+                Assert(vm.LoadExternalSubtitle(externalSubtitle), "Attach external subtitle");
+                await Until(() => Task.FromResult(vm.SubtitleTracks.Count(track => track.Id >= 0) == 2 && vm.SelectedSubtitleTrack?.Id == engine.MediaPlayer.Spu), 4000);
+                Assert(vm.LoadedSubtitlePath == externalSubtitle && vm.SelectedSubtitleTrack?.Id >= 0, "External track selection refreshes after initial playback parsing");
                 string captureFolder = Path.Combine(Root, "snapshots-" + Guid.NewGuid().ToString("N"));
                 foreach (string extension in new[] { ".png", ".jpg", ".bmp" })
                 {

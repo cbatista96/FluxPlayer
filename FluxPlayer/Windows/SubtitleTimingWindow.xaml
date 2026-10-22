@@ -1,0 +1,88 @@
+<ui:FluentWindow x:Class="FluxPlayer.Windows.SubtitleTimingWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    Title="Subtitle timing · FluxPlayer" Width="1060" Height="780" MinWidth="900" MinHeight="720"
+    WindowStartupLocation="CenterOwner" ExtendsContentIntoTitleBar="True">
+    <ui:FluentWindow.Resources>
+        <Style x:Key="CueCell" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+            <Setter Property="ToolTip" Value="{Binding Text, RelativeSource={RelativeSource Self}}"/>
+        </Style>
+    </ui:FluentWindow.Resources>
+    <Grid Margin="24,18,24,20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <StackPanel Margin="0,0,0,16">
+            <TextBlock Text="Subtitle timing" FontSize="25" FontWeight="SemiBold"/>
+            <TextBlock Text="Adjust the current subtitle delay live, or correct an external file and save a separate SRT copy. Exported text does not retain ASS/VTT styling."
+                TextWrapping="Wrap" Margin="0,6,0,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+        </StackPanel>
+        <Grid Grid.Row="1" Margin="0,0,0,16">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+            <Button x:Name="OpenButton" Content="Open subtitles…" Click="Open_Click" Padding="14,8"/>
+            <Button x:Name="LoadOriginalButton" Grid.Column="1" Content="Load original in player" Click="LoadOriginal_Click" Padding="14,8" Margin="8,0,14,0" IsEnabled="False"/>
+            <TextBlock x:Name="SourceText" Grid.Column="2" Text="SRT · VTT · ASS · SSA" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+        </Grid>
+        <Border Grid.Row="2" Padding="14,12" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" Margin="0,0,0,16">
+            <Grid>
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock Text="Live delay" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="−100 ms" Click="Earlier_Click" Padding="12,7"/>
+                        <TextBox x:Name="LiveDelayBox" Width="110" Margin="8,0" Padding="10,7" AutomationProperties.Name="Live subtitle delay in milliseconds"/>
+                        <Button Content="Apply delay" Click="LiveDelay_Click" Padding="12,7"/>
+                        <Button Content="+100 ms" Click="Later_Click" Padding="12,7" Margin="8,0,0,0"/>
+                        <Button Content="Reset" Click="ResetLive_Click" Padding="12,7" Margin="8,0,0,0"/>
+                    </StackPanel>
+                </StackPanel>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="20,0,0,0">
+                    <TextBlock Text="Video playhead" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                    <TextBlock Text="{Binding CurrentTime}" FontSize="20" FontWeight="SemiBold" HorizontalAlignment="Right"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+        <StackPanel x:Name="CorrectionPanel" Grid.Row="3" Margin="0,0,0,14">
+            <TextBlock Text="Correction for the exported copy" FontWeight="SemiBold" Margin="0,0,0,8"/>
+            <StackPanel Orientation="Horizontal">
+                <StackPanel Width="160" Margin="0,0,12,0">
+                    <TextBlock Text="Offset (ms)" Margin="0,0,0,5"/>
+                    <TextBox x:Name="OffsetBox" Text="0" Padding="10,7" AutomationProperties.Name="Export subtitle offset in milliseconds"/>
+                </StackPanel>
+                <StackPanel Width="160" Margin="0,0,12,0">
+                    <TextBlock Text="Time scale (%)" Margin="0,0,0,5"/>
+                    <TextBox x:Name="ScaleBox" Text="100" Padding="10,7" AutomationProperties.Name="Export subtitle time scale percent"/>
+                </StackPanel>
+                <Button Content="Update table" Click="Update_Click" Padding="16,8" VerticalAlignment="Bottom"/>
+                <Button Content="Reset correction" Click="ResetCorrection_Click" Padding="14,8" VerticalAlignment="Bottom" Margin="8,0,0,0"/>
+            </StackPanel>
+            <WrapPanel Margin="0,12,0,0">
+                <Button Content="Set first anchor at playhead" Click="FirstAnchor_Click" Padding="12,7" Margin="0,0,8,6"/>
+                <Button Content="Set second anchor at playhead" Click="SecondAnchor_Click" Padding="12,7" Margin="0,0,8,6"/>
+                <Button Content="Seek selected original cue" Click="Seek_Click" Padding="12,7" Margin="0,0,0,6"/>
+            </WrapPanel>
+            <TextBlock x:Name="AnchorText" Text="Select a cue and capture its matching video time. Two anchors calculate drift and offset." TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+        </StackPanel>
+        <DataGrid x:Name="CuesGrid" Grid.Row="4" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single"
+            EnableRowVirtualization="True" EnableColumnVirtualization="True" RowHeight="36" HeadersVisibility="Column" GridLinesVisibility="None"
+            MouseDoubleClick="Seek_Click" AutomationProperties.Name="Subtitle timing comparison">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Original start" Binding="{Binding OriginalStart}" Width="135" ElementStyle="{StaticResource CueCell}"/>
+                <DataGridTextColumn Header="Adjusted start" Binding="{Binding AdjustedStart}" Width="135" ElementStyle="{StaticResource CueCell}"/>
+                <DataGridTextColumn Header="Adjusted end" Binding="{Binding AdjustedEnd}" Width="135" ElementStyle="{StaticResource CueCell}"/>
+                <DataGridTextColumn Header="Text" Binding="{Binding Text}" Width="*" ElementStyle="{StaticResource CueCell}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <StackPanel Grid.Row="5" Margin="0,16,0,0">
+            <StackPanel Orientation="Horizontal">
+                <Button x:Name="SaveButton" Content="Save corrected SRT copy…" Click="Save_Click" IsEnabled="False" Padding="18,9"/>
+                <Button x:Name="LoadSavedButton" Content="Load saved copy in player" Click="LoadSaved_Click" IsEnabled="False" Padding="14,9" Margin="8,0,0,0"/>
+            </StackPanel>
+            <TextBlock x:Name="StatusText" Text="Open a subtitle file to begin. Positive delay shows subtitles later." TextWrapping="Wrap" Margin="0,10,0,0"/>
+        </StackPanel>
+    </Grid>
+</ui:FluentWindow>

@@ -40,6 +40,7 @@ public partial class MediaService : IDisposable
     public event EventHandler<MediaPlayerLengthChangedEventArgs>? LengthChanged;
     public event EventHandler? EncounteredError;
     public event EventHandler<MediaPlayerVoutEventArgs>? VoutChanged;
+    public event EventHandler? TracksChanged;
 
     public MediaService(
         bool hardwareDecoding = true,
@@ -133,6 +134,9 @@ public partial class MediaService : IDisposable
             Stopped?.Invoke(s, EventArgs.Empty);
         };
         MediaPlayer.LengthChanged += (s, e) => LengthChanged?.Invoke(s, e);
+        MediaPlayer.ESAdded += (s, _) => TracksChanged?.Invoke(s, EventArgs.Empty);
+        MediaPlayer.ESDeleted += (s, _) => TracksChanged?.Invoke(s, EventArgs.Empty);
+        MediaPlayer.ESSelected += (s, _) => TracksChanged?.Invoke(s, EventArgs.Empty);
         MediaPlayer.EncounteredError += (s, e) =>
         {
             WriteDiagnostic("EncounteredError");
@@ -412,9 +416,11 @@ public partial class MediaService : IDisposable
 
     public void SetSubtitleTrack(int id) => MediaPlayer.SetSpu(id);
 
-    public void LoadSubtitle(string path)
+    public bool LoadSubtitle(string path)
     {
-        MediaPlayer.AddSlave(MediaSlaveType.Subtitle, path, true);
+        if (_disposed || MediaPlayer.Media == null || MediaFormats.IsNetwork(path) || !File.Exists(path)) return false;
+        // AddSlave expects an MRL with a scheme, including for Windows paths and Unicode filenames.
+        return MediaPlayer.AddSlave(MediaSlaveType.Subtitle, new Uri(Path.GetFullPath(path)).AbsoluteUri, true);
     }
 
     public void ApplyEqualizer(float[] bands, float preamp = 0f)

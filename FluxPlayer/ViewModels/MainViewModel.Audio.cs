@@ -44,6 +44,7 @@ public partial class MainViewModel
     partial void OnHasMediaChanged(bool value)
     {
         if (value) return;
+        LoadedSubtitlePath = null;
         NowPlayingTitle = "Open your music"; NowPlayingArtist = "Local files and internet radio";
         NowPlayingAlbum = AudioTechnical = LyricLine = ""; AlbumArtwork = null; _lyrics = null;
         Interlocked.Increment(ref _artworkGeneration);
@@ -69,6 +70,7 @@ public partial class MainViewModel
 
     private void ResetNowPlaying(MediaItem item)
     {
+        LoadedSubtitlePath = null;
         NowPlayingTitle = item.Title;
         NowPlayingArtist = item.Artist;
         NowPlayingAlbum = item.Album;
@@ -251,6 +253,8 @@ public partial class MainViewModel
 
     public async Task ShutdownAsync()
     {
+        _shuttingDown = true;
+        _mediaService.TracksChanged -= OnTracksChanged;
         Interlocked.Increment(ref _durationParseToken);
         Interlocked.Increment(ref _mediaChangeToken);
         Interlocked.Increment(ref _artworkGeneration);

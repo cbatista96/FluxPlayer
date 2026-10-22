@@ -13,7 +13,7 @@ public static partial class SubtitleDocument
 {
     public static SubtitleCue[] Read(string path)
     {
-        if (new FileInfo(path).Length > 16_000_000) throw new InvalidDataException("The subtitle file exceeds 16 MB.");
+        if (new FileInfo(path).Length > SubtitleEditingService.MaximumFileBytes) throw new InvalidDataException("The subtitle file exceeds 16 MB.");
         string text = File.ReadAllText(path).Replace("\r\n", "\n");
         var cues = new List<SubtitleCue>();
         if (System.IO.Path.GetExtension(path).ToLowerInvariant() is ".ass" or ".ssa")
@@ -33,7 +33,10 @@ public static partial class SubtitleDocument
                     cues.Add(new(start, end, HtmlTags().Replace(match.Groups[3].Value, "").Replace('\n', ' ').Trim()));
             }
         }
-        return cues.Where(c => c.StartMs >= 0 && c.EndMs >= c.StartMs).OrderBy(c => c.StartMs).Take(100_000).ToArray();
+        if (cues.Count > SubtitleEditingService.MaximumCues) throw new InvalidDataException("The subtitle file exceeds 100,000 cues.");
+        if (cues.Any(cue => cue.StartMs > FluxPlayer.Models.SubtitleTiming.MaximumTimeMs || cue.EndMs > FluxPlayer.Models.SubtitleTiming.MaximumTimeMs))
+            throw new InvalidDataException("Subtitle timestamps must be within 999 hours.");
+        return cues.Where(c => c.StartMs >= 0 && c.EndMs > c.StartMs).OrderBy(c => c.StartMs).ToArray();
     }
 
     private static bool TryTime(string input, out long ms)

@@ -19,6 +19,7 @@ public partial class MainViewModel : ObservableObject
     private AppSettings _settings;
     private int _mediaChangeToken;
     private int _durationParseToken;
+    private bool _refreshingTracks;
 
     [ObservableProperty] private string _windowTitle = "FluxPlayer";
     [ObservableProperty] private bool _isPlaying = false;
@@ -159,6 +160,7 @@ public partial class MainViewModel : ObservableObject
         _mediaService.EndReached += OnEndReached;
         _mediaService.EncounteredError += OnEncounteredError;
         _mediaService.VoutChanged += OnVoutChanged;
+        _mediaService.TracksChanged += OnTracksChanged;
         _mediaService.Playing += (_, _) => RunOnUi(() =>
         {
             IsPlaying = true;
@@ -588,12 +590,12 @@ public partial class MainViewModel : ObservableObject
 
     partial void OnSelectedSubtitleTrackChanged(TrackInfo? value)
     {
-        if (value != null) _mediaService.SetSubtitleTrack(value.Id);
+        if (!_refreshingTracks && value != null && _mediaService.MediaPlayer.Spu != value.Id) _mediaService.SetSubtitleTrack(value.Id);
     }
 
     partial void OnSelectedAudioTrackChanged(TrackInfo? value)
     {
-        if (value != null) _mediaService.SetAudioTrack(value.Id);
+        if (!_refreshingTracks && value != null && _mediaService.GetAudioTrack() != value.Id) _mediaService.SetAudioTrack(value.Id);
     }
 
     [RelayCommand]
@@ -605,7 +607,7 @@ public partial class MainViewModel : ObservableObject
             Filter = "Subtitles|*.srt;*.ass;*.ssa;*.vtt;*.sub|All files|*.*"
         };
         if (ShowFileDialog(dialog) == true)
-            _mediaService.LoadSubtitle(dialog.FileName);
+            if (!LoadExternalSubtitle(dialog.FileName)) ErrorOccurred?.Invoke(this, "The subtitle file could not be loaded. Start playback and try again.");
     }
 
     partial void OnIsEqualizerEnabledChanged(bool value) => PushEqualizer();
@@ -977,20 +979,21 @@ public partial class MainViewModel : ObservableObject
                 _mediaService.SetVideoTrack(firstEnabledVideoTrack.Id);
         }
 
-        SubtitleTracks.Clear();
-        SubtitleTracks.Add(new TrackInfo(-1, "Disabled"));
-        foreach (var t in _mediaService.GetSubtitleTracks())
-            SubtitleTracks.Add(t);
         var selectedSpu = _mediaService.MediaPlayer.Spu;
-        SelectedSubtitleTrack = SubtitleTracks.FirstOrDefault(t => t.Id == selectedSpu) ?? SubtitleTracks.FirstOrDefault();
-
-        AudioTracks.Clear();
-        foreach (var t in _mediaService.GetAudioTracks())
-            AudioTracks.Add(t);
         var currentAudioTrack = _mediaService.GetAudioTrack();
-        SelectedAudioTrack = AudioTracks.FirstOrDefault(t => t.Id == currentAudioTrack)
-            ?? AudioTracks.FirstOrDefault(t => t.Id >= 0)
-            ?? AudioTracks.FirstOrDefault();
+        var subtitles = _mediaService.GetSubtitleTracks().Where(track => track.Id >= 0).DistinctBy(track => track.Id).ToArray();
+        var audio = _mediaService.GetAudioTracks().DistinctBy(track => track.Id).ToArray();
+        _refreshingTracks = true;
+        try
+        {
+            SubtitleTracks.Clear(); SubtitleTracks.Add(new TrackInfo(-1, "Disabled"));
+            foreach (var track in subtitles) SubtitleTracks.Add(track);
+            SelectedSubtitleTrack = SubtitleTracks.FirstOrDefault(track => track.Id == selectedSpu) ?? SubtitleTracks.FirstOrDefault();
+            AudioTracks.Clear(); foreach (var track in audio) AudioTracks.Add(track);
+            SelectedAudioTrack = AudioTracks.FirstOrDefault(track => track.Id == currentAudioTrack)
+                ?? AudioTracks.FirstOrDefault(track => track.Id >= 0) ?? AudioTracks.FirstOrDefault();
+        }
+        finally { _refreshingTracks = false; }
     }
 
     private void ResetTimeDisplay()

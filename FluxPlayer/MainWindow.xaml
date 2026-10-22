@@ -353,6 +353,7 @@
                             <MenuItem Header="Edit tags for the current file…" Click="EditTagsButton_Click" />
                             <MenuItem Header="Batch tag editor…" Click="BatchTagsButton_Click" />
                             <MenuItem Header="Search external subtitles…" Click="SearchSubtitlesButton_Click" />
+                            <MenuItem Header="Subtitle timing editor…" Click="SubtitleTiming_Click" />
                             <MenuItem Header="Open CUE sheet…" Click="OpenCueButton_Click" />
                             <MenuItem Header="Create or edit CUE sheet…" Click="EditCueButton_Click" />
                             <MenuItem Header="Scheduled snapshots…" Click="ScheduledSnapshots_Click" />
@@ -571,7 +572,7 @@
                             </Button>
                             <Button Style="{StaticResource SeekGlyphButton}" Margin="3,0" Tag="-1" controls:ButtonFx.IconEffect="SpinCCW" controls:ButtonFx.KeyActions="SeekBackward|SeekBackwardLarge" Command="{Binding SeekBackwardCommand}">
                                 <Button.ToolTip>
-                                    <ToolTip Content="{Binding SeekStepSeconds}" ContentStringFormat="Retroceder {0} s" />
+                                    <ToolTip Content="{Binding SeekStepSeconds}" ContentStringFormat="Seek backward {0} s" />
                                 </Button.ToolTip>
                             </Button>
                             <Button Style="{StaticResource PlayButton}" Margin="8,0" Command="{Binding PlayPauseCommand}" controls:ButtonFx.KeyActions="PlayPause" ToolTip="{Binding IsPlaying, Converter={StaticResource PlayTooltip}}">
@@ -579,7 +580,7 @@
                             </Button>
                             <Button Style="{StaticResource SeekGlyphButton}" Margin="3,0" controls:ButtonFx.IconEffect="SpinCW" controls:ButtonFx.KeyActions="SeekForward|SeekForwardLarge" Command="{Binding SeekForwardCommand}">
                                 <Button.ToolTip>
-                                    <ToolTip Content="{Binding SeekStepSeconds}" ContentStringFormat="Adelantar {0} s" />
+                                    <ToolTip Content="{Binding SeekStepSeconds}" ContentStringFormat="Seek forward {0} s" />
                                 </Button.ToolTip>
                             </Button>
                             <Button Style="{StaticResource TransportButton}" Margin="3,0" Command="{Binding NextCommand}" ToolTip="Next" controls:HotkeyHint.Action="NextTrack" controls:ButtonFx.IconEffect="NudgeRight">
@@ -822,7 +823,7 @@
 
                         <Slider x:Name="VolumeBar" Style="{StaticResource VolumeSlider}" Minimum="0" Maximum="{Binding MaxVolume}" Value="{Binding Volume}" VerticalAlignment="Center" Margin="2,0,0,0">
                             <Slider.ToolTip>
-                                <ToolTip Content="{Binding Volume}" ContentStringFormat="Volumen: {0:0}%" />
+                                <ToolTip Content="{Binding Volume}" ContentStringFormat="Volume: {0:0}%" />
                             </Slider.ToolTip>
                         </Slider>
 
@@ -856,7 +857,7 @@
                         </Button>
                         <Button x:Name="SeekBackBtn" Style="{StaticResource SeekGlyphButton}" Margin="2,0" Tag="-1" controls:ButtonFx.IconEffect="SpinCCW" controls:ButtonFx.KeyActions="SeekBackward|SeekBackwardLarge" Command="{Binding SeekBackwardCommand}">
                             <Button.ToolTip>
-                                <ToolTip Content="{Binding SeekStepSeconds}" ContentStringFormat="Retroceder {0} s" />
+                                <ToolTip Content="{Binding SeekStepSeconds}" ContentStringFormat="Seek backward {0} s" />
                             </Button.ToolTip>
                         </Button>
                         <Button Style="{StaticResource PlayButton}" Margin="8,0" Command="{Binding PlayPauseCommand}" controls:ButtonFx.KeyActions="PlayPause" ToolTip="{Binding IsPlaying, Converter={StaticResource PlayTooltip}}">
@@ -864,7 +865,7 @@
                         </Button>
                         <Button x:Name="SeekFwdBtn" Style="{StaticResource SeekGlyphButton}" Margin="2,0" controls:ButtonFx.IconEffect="SpinCW" controls:ButtonFx.KeyActions="SeekForward|SeekForwardLarge" Command="{Binding SeekForwardCommand}">
                             <Button.ToolTip>
-                                <ToolTip Content="{Binding SeekStepSeconds}" ContentStringFormat="Adelantar {0} s" />
+                                <ToolTip Content="{Binding SeekStepSeconds}" ContentStringFormat="Seek forward {0} s" />
                             </Button.ToolTip>
                         </Button>
                         <Button Style="{StaticResource TransportButton}" Margin="2,0" controls:ButtonFx.IconEffect="NudgeRight" Command="{Binding NextCommand}" ToolTip="Next" controls:HotkeyHint.Action="NextTrack">

@@ -473,14 +473,14 @@
     "Area": "Video and subtitles",
     "Description": "Embedded and external subtitles supported by LibVLC.",
     "Status": "implemented",
-    "Evidence": "MediaService, MainWindow.Features, SubtitleDocument and ThumbnailService"
+    "Evidence": "MediaService and coalesced ES track refresh; native embedded SubRip/external SRT selection tests, Disabled preservation and file URI handling for Unicode/spaces/#."
   },
   {
     "Id": "F0069",
     "Area": "Video and subtitles",
     "Description": "Subtitle track selection, auto loading, language preference and timing offset.",
     "Status": "implemented",
-    "Evidence": "MediaService, MainWindow.Features, SubtitleDocument and ThumbnailService"
+    "Evidence": "MediaService and coalesced ES track refresh; native embedded SubRip/external SRT selection tests, Disabled preservation and file URI handling for Unicode/spaces/#."
   },
   {
     "Id": "F0070",
@@ -555,9 +555,9 @@
   {
     "Id": "F0080",
     "Area": "Video and subtitles",
-    "Description": "Live subtitle synchronization editor.",
-    "Status": "pending",
-    "Evidence": ""
+    "Description": "Live subtitle delay controls, cue navigation, two-anchor drift correction and corrected SRT copy export.",
+    "Status": "implemented",
+    "Evidence": "SubtitleTiming / SubtitleEditingService / SubtitleTimingWindow; anchor, clipping, limits, cancellation and export tests, native offsets and manual save/load verification."
   },
   {
     "Id": "F0081",
