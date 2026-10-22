@@ -148,7 +148,10 @@ public class AppSettings
     public int RemoteControlPort { get; set; } = 8765;
     public string UiPreset { get; set; } = "Glass";
 
+    // NaN preserves automatic placement until the first valid window geometry is saved.
+    [JsonNumberHandling(JsonNumberHandling.AllowNamedFloatingPointLiterals)]
     public double WindowLeft { get; set; } = double.NaN;
+    [JsonNumberHandling(JsonNumberHandling.AllowNamedFloatingPointLiterals)]
     public double WindowTop { get; set; } = double.NaN;
     public double WindowWidth { get; set; } = 1280;
     public double WindowHeight { get; set; } = 760;

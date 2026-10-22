@@ -25,8 +25,19 @@ public partial class App : Application
 
         try
         {
-            var profileDir = System.IO.Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FluxPlayer");
+            AppProfile.Current = AppProfile.Parse(e.Args, AppContext.BaseDirectory,
+                portableMarker: System.IO.File.Exists(System.IO.Path.Combine(AppContext.BaseDirectory, "portable.flag")));
+            System.IO.Directory.CreateDirectory(AppProfile.Current.DataDirectory);
+        }
+        catch (Exception ex) when (ex is ArgumentException or System.IO.IOException or UnauthorizedAccessException or NotSupportedException)
+        {
+            MessageBox.Show(ex.Message, "FluxPlayer startup options", MessageBoxButton.OK, MessageBoxImage.Error);
+            Shutdown(2); return;
+        }
+
+        try
+        {
+            var profileDir = AppProfile.Current.CacheDirectory;
             System.IO.Directory.CreateDirectory(profileDir);
             System.Runtime.ProfileOptimization.SetProfileRoot(profileDir);
             System.Runtime.ProfileOptimization.StartProfile("startup.jitprofile");
@@ -74,10 +85,10 @@ public partial class App : Application
         var mainWindow = Services.GetRequiredService<MainWindow>();
         mainWindow.Show();
 
-        if (e.Args.Length > 0)
+        if (AppProfile.Current.Sources.Length > 0)
         {
             var vm = Services.GetRequiredService<MainViewModel>();
-            var validFiles = e.Args
+            var validFiles = AppProfile.Current.Sources
                 .Where(path => System.IO.File.Exists(path) || MediaFormats.IsNetwork(path))
                 .ToArray();
             if (validFiles.Length > 0)
@@ -127,9 +138,7 @@ public partial class App : Application
         };
     }
 
-    private static string CrashLogPath => System.IO.Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "FluxPlayer", "logs", "crash.log");
+    private static string CrashLogPath => System.IO.Path.Combine(AppProfile.Current.CacheDirectory, "logs", "crash.log");
 
     private static void LogCrash(string kind, Exception? ex)
     {

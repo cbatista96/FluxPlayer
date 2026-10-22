@@ -1,0 +1,681 @@
+[
+  {
+    "Id": "F0001",
+    "Area": "Workspaces and interface",
+    "Description": "Audio and video workspaces.",
+    "Status": "implemented",
+    "Evidence": "MainWindow, Controls and Windows"
+  },
+  {
+    "Id": "F0002",
+    "Area": "Workspaces and interface",
+    "Description": "Automatic mode selection using decoded audio/video tracks, with extension-based hints before parsing.",
+    "Status": "implemented",
+    "Evidence": "MainWindow, Controls and Windows"
+  },
+  {
+    "Id": "F0003",
+    "Area": "Workspaces and interface",
+    "Description": "Manual Automatic / Audio / Video preference.",
+    "Status": "implemented",
+    "Evidence": "MainWindow, Controls and Windows"
+  },
+  {
+    "Id": "F0004",
+    "Area": "Workspaces and interface",
+    "Description": "Separate saved audio window dimensions.",
+    "Status": "implemented",
+    "Evidence": "MainWindow, Controls and Windows"
+  },
+  {
+    "Id": "F0005",
+    "Area": "Workspaces and interface",
+    "Description": "Compact music layout with artwork, metadata, transport and playlist.",
+    "Status": "implemented",
+    "Evidence": "MainWindow, Controls and Windows"
+  },
+  {
+    "Id": "F0006",
+    "Area": "Workspaces and interface",
+    "Description": "English interface, dialogs, tooltips and accessibility names.",
+    "Status": "implemented",
+    "Evidence": "MainWindow, Controls and Windows"
+  },
+  {
+    "Id": "F0007",
+    "Area": "Workspaces and interface",
+    "Description": "Dark Mica, light Mica, black and acrylic themes with system-dependent materials.",
+    "Status": "implemented",
+    "Evidence": "MainWindow, Controls and Windows"
+  },
+  {
+    "Id": "F0008",
+    "Area": "Workspaces and interface",
+    "Description": "Fullscreen playback and automatic control hiding.",
+    "Status": "implemented",
+    "Evidence": "MainWindow, Controls and Windows"
+  },
+  {
+    "Id": "F0009",
+    "Area": "Workspaces and interface",
+    "Description": "Mini player using the same playback session.",
+    "Status": "implemented",
+    "Evidence": "MainWindow, Controls and Windows"
+  },
+  {
+    "Id": "F0010",
+    "Area": "Workspaces and interface",
+    "Description": "On-screen playback and volume feedback.",
+    "Status": "implemented",
+    "Evidence": "MainWindow, Controls and Windows"
+  },
+  {
+    "Id": "F0011",
+    "Area": "Workspaces and interface",
+    "Description": "Configurable keyboard shortcuts and mouse actions.",
+    "Status": "implemented",
+    "Evidence": "MainWindow, Controls and Windows"
+  },
+  {
+    "Id": "F0012",
+    "Area": "Workspaces and interface",
+    "Description": "Presentation control lock.",
+    "Status": "implemented",
+    "Evidence": "MainWindow, Controls and Windows"
+  },
+  {
+    "Id": "F0013",
+    "Area": "Workspaces and interface",
+    "Description": "Tray controls and system media transport integration.",
+    "Status": "implemented",
+    "Evidence": "MainWindow, Controls and Windows"
+  },
+  {
+    "Id": "F0014",
+    "Area": "Workspaces and interface",
+    "Description": "Sleep timer.",
+    "Status": "implemented",
+    "Evidence": "MainWindow, Controls and Windows"
+  },
+  {
+    "Id": "F0015",
+    "Area": "Workspaces and interface",
+    "Description": "Fully configurable HUD layout.",
+    "Status": "pending",
+    "Evidence": ""
+  },
+  {
+    "Id": "F0016",
+    "Area": "Workspaces and interface",
+    "Description": "Advanced touch gestures.",
+    "Status": "pending",
+    "Evidence": ""
+  },
+  {
+    "Id": "F0017",
+    "Area": "Workspaces and interface",
+    "Description": "Extension/plugin API.",
+    "Status": "pending",
+    "Evidence": ""
+  },
+  {
+    "Id": "F0018",
+    "Area": "Playback and formats",
+    "Description": "LibVLC playback of supported audio/video files and network sources.",
+    "Status": "implemented",
+    "Evidence": "MediaService, MediaFormats and MainViewModel"
+  },
+  {
+    "Id": "F0019",
+    "Area": "Playback and formats",
+    "Description": "File picker, drag and drop, folder loading and recent files.",
+    "Status": "implemented",
+    "Evidence": "MediaService, MediaFormats and MainViewModel"
+  },
+  {
+    "Id": "F0020",
+    "Area": "Playback and formats",
+    "Description": "Local/remote source detection, including UNC paths.",
+    "Status": "implemented",
+    "Evidence": "MediaService, MediaFormats and MainViewModel"
+  },
+  {
+    "Id": "F0021",
+    "Area": "Playback and formats",
+    "Description": "Play, pause, stop, seek, previous and next.",
+    "Status": "implemented",
+    "Evidence": "MediaService, MediaFormats and MainViewModel"
+  },
+  {
+    "Id": "F0022",
+    "Area": "Playback and formats",
+    "Description": "Playback speed, repeat and shuffle.",
+    "Status": "implemented",
+    "Evidence": "MediaService, MediaFormats and MainViewModel"
+  },
+  {
+    "Id": "F0023",
+    "Area": "Playback and formats",
+    "Description": "A–B loop and video frame advance.",
+    "Status": "implemented",
+    "Evidence": "MediaService, MediaFormats and MainViewModel"
+  },
+  {
+    "Id": "F0024",
+    "Area": "Playback and formats",
+    "Description": "Playback position persistence per file.",
+    "Status": "implemented",
+    "Evidence": "MediaService, MediaFormats and MainViewModel"
+  },
+  {
+    "Id": "F0025",
+    "Area": "Playback and formats",
+    "Description": "Configurable intro/outro skipping.",
+    "Status": "implemented",
+    "Evidence": "MediaService, MediaFormats and MainViewModel"
+  },
+  {
+    "Id": "F0026",
+    "Area": "Playback and formats",
+    "Description": "Queue a track to play next without reordering the playlist.",
+    "Status": "implemented",
+    "Evidence": "MediaService, MediaFormats and MainViewModel"
+  },
+  {
+    "Id": "F0027",
+    "Area": "Playback and formats",
+    "Description": "Adaptive caching and playback fallback profiles.",
+    "Status": "implemented",
+    "Evidence": "MediaService, MediaFormats and MainViewModel"
+  },
+  {
+    "Id": "F0028",
+    "Area": "Playback and formats",
+    "Description": "Plugin cache generation for local packaging.",
+    "Status": "implemented",
+    "Evidence": "MediaService, MediaFormats and MainViewModel"
+  },
+  {
+    "Id": "F0029",
+    "Area": "Playback and formats",
+    "Description": "Optional local engine diagnostics.",
+    "Status": "implemented",
+    "Evidence": "MediaService, MediaFormats and MainViewModel"
+  },
+  {
+    "Id": "F0030",
+    "Area": "Playback and formats",
+    "Description": "Dedicated GPU-specific renderer selection policy.",
+    "Status": "pending",
+    "Evidence": ""
+  },
+  {
+    "Id": "F0031",
+    "Area": "Playback and formats",
+    "Description": "Exhaustive codec/container/hardware compatibility matrix.",
+    "Status": "pending",
+    "Evidence": ""
+  },
+  {
+    "Id": "F0032",
+    "Area": "Playback and formats",
+    "Description": "Native DSD and verified bit-perfect exclusive output.",
+    "Status": "pending",
+    "Evidence": ""
+  },
+  {
+    "Id": "F0033",
+    "Area": "Audio",
+    "Description": "Artwork and title/artist/album/genre metadata.",
+    "Status": "implemented",
+    "Evidence": "MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools"
+  },
+  {
+    "Id": "F0034",
+    "Area": "Audio",
+    "Description": "Metadata editing through LibVLC for formats that support saving tags.",
+    "Status": "implemented",
+    "Evidence": "MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools"
+  },
+  {
+    "Id": "F0035",
+    "Area": "Audio",
+    "Description": "Synchronized local LRC lyrics and plain text lyrics.",
+    "Status": "implemented",
+    "Evidence": "MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools"
+  },
+  {
+    "Id": "F0036",
+    "Area": "Audio",
+    "Description": "CUE sheet chapters and native chapter navigation.",
+    "Status": "implemented",
+    "Evidence": "MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools"
+  },
+  {
+    "Id": "F0037",
+    "Area": "Audio",
+    "Description": "Ten-band equalizer with preamplifier and 30 presets.",
+    "Status": "implemented",
+    "Evidence": "MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools"
+  },
+  {
+    "Id": "F0038",
+    "Area": "Audio",
+    "Description": "Equalizer peak compensation to reduce clipping risk from boosted bands.",
+    "Status": "implemented",
+    "Evidence": "MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools"
+  },
+  {
+    "Id": "F0039",
+    "Area": "Audio",
+    "Description": "Migration of presets saved by the earlier localized interface.",
+    "Status": "implemented",
+    "Evidence": "MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools"
+  },
+  {
+    "Id": "F0040",
+    "Area": "Audio",
+    "Description": "ReplayGain track/album options, preamplification and peak protection.",
+    "Status": "implemented",
+    "Evidence": "MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools"
+  },
+  {
+    "Id": "F0041",
+    "Area": "Audio",
+    "Description": "Output device selection, audio tracks, channel options and audio delay.",
+    "Status": "implemented",
+    "Evidence": "MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools"
+  },
+  {
+    "Id": "F0042",
+    "Area": "Audio",
+    "Description": "LibVLC normalization and compressor controls.",
+    "Status": "implemented",
+    "Evidence": "MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools"
+  },
+  {
+    "Id": "F0043",
+    "Area": "Audio",
+    "Description": "Optional FFmpeg conversion to FLAC, WAV, MP3, Opus, Vorbis, AAC, ALAC and WavPack.",
+    "Status": "implemented",
+    "Evidence": "MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools"
+  },
+  {
+    "Id": "F0044",
+    "Area": "Audio",
+    "Description": "Sequential conversion, progress, cancellation and optional loudness normalization.",
+    "Status": "implemented",
+    "Evidence": "MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools"
+  },
+  {
+    "Id": "F0045",
+    "Area": "Audio",
+    "Description": "Conversion writes to a temporary file and refuses to overwrite an existing destination.",
+    "Status": "implemented",
+    "Evidence": "MediaService.Audio, MainViewModel.Audio, EqualizerPresets and media tools"
+  },
+  {
+    "Id": "F0046",
+    "Area": "Audio",
+    "Description": "Real 20-band and 31-band DSP equalizers. The current engine has ten bands.",
+    "Status": "pending",
+    "Evidence": ""
+  },
+  {
+    "Id": "F0047",
+    "Area": "Audio",
+    "Description": "Audio profiles per output device.",
+    "Status": "pending",
+    "Evidence": ""
+  },
+  {
+    "Id": "F0048",
+    "Area": "Audio",
+    "Description": "Headphone crossfeed.",
+    "Status": "pending",
+    "Evidence": ""
+  },
+  {
+    "Id": "F0049",
+    "Area": "Audio",
+    "Description": "Verified gapless transitions and crossfade.",
+    "Status": "pending",
+    "Evidence": ""
+  },
+  {
+    "Id": "F0050",
+    "Area": "Audio",
+    "Description": "Advanced DSP chain and measured output quality matrix.",
+    "Status": "pending",
+    "Evidence": ""
+  },
+  {
+    "Id": "F0051",
+    "Area": "Audio",
+    "Description": "Online lyric providers and lyric editing.",
+    "Status": "pending",
+    "Evidence": ""
+  },
+  {
+    "Id": "F0052",
+    "Area": "Library and playlists",
+    "Description": "Persistent local JSON index.",
+    "Status": "implemented",
+    "Evidence": "LibraryService, LibraryQuery, PlaylistService and LibraryWindow"
+  },
+  {
+    "Id": "F0053",
+    "Area": "Library and playlists",
+    "Description": "Folder scanning outside the UI dispatcher.",
+    "Status": "implemented",
+    "Evidence": "LibraryService, LibraryQuery, PlaylistService and LibraryWindow"
+  },
+  {
+    "Id": "F0054",
+    "Area": "Library and playlists",
+    "Description": "Watched folders with file change updates.",
+    "Status": "implemented",
+    "Evidence": "LibraryService, LibraryQuery, PlaylistService and LibraryWindow"
+  },
+  {
+    "Id": "F0055",
+    "Area": "Library and playlists",
+    "Description": "Favorites, playback counts and last played dates.",
+    "Status": "implemented",
+    "Evidence": "LibraryService, LibraryQuery, PlaylistService and LibraryWindow"
+  },
+  {
+    "Id": "F0056",
+    "Area": "Library and playlists",
+    "Description": "Search by text and fields, quoted phrases and exclusions.",
+    "Status": "implemented",
+    "Evidence": "LibraryService, LibraryQuery, PlaylistService and LibraryWindow"
+  },
+  {
+    "Id": "F0057",
+    "Area": "Library and playlists",
+    "Description": "Format, genre, duration, size, play count and date rules.",
+    "Status": "implemented",
+    "Evidence": "LibraryService, LibraryQuery, PlaylistService and LibraryWindow"
+  },
+  {
+    "Id": "F0058",
+    "Area": "Library and playlists",
+    "Description": "Saved smart playlists evaluated against the current library.",
+    "Status": "implemented",
+    "Evidence": "LibraryService, LibraryQuery, PlaylistService and LibraryWindow"
+  },
+  {
+    "Id": "F0059",
+    "Area": "Library and playlists",
+    "Description": "Library JSON backup export and import.",
+    "Status": "implemented",
+    "Evidence": "LibraryService.ImportBackupAsync / Library tools: validated merge, preserved state and opt-in folder monitoring; regression tests and manual restore flow."
+  },
+  {
+    "Id": "F0060",
+    "Area": "Library and playlists",
+    "Description": "M3U/M3U8, PLS and XSPF import/export.",
+    "Status": "implemented",
+    "Evidence": "LibraryService, LibraryQuery, PlaylistService and LibraryWindow"
+  },
+  {
+    "Id": "F0061",
+    "Area": "Library and playlists",
+    "Description": "Unicode paths and relative playlist entries.",
+    "Status": "implemented",
+    "Evidence": "LibraryService, LibraryQuery, PlaylistService and LibraryWindow"
+  },
+  {
+    "Id": "F0062",
+    "Area": "Library and playlists",
+    "Description": "Playlist reorder, clear, play-next queue and persistence.",
+    "Status": "implemented",
+    "Evidence": "LibraryService, LibraryQuery, PlaylistService and LibraryWindow"
+  },
+  {
+    "Id": "F0063",
+    "Area": "Library and playlists",
+    "Description": "Bounded initial duration parsing rather than decoding the full library at startup.",
+    "Status": "implemented",
+    "Evidence": "LibraryService, LibraryQuery, PlaylistService and LibraryWindow"
+  },
+  {
+    "Id": "F0064",
+    "Area": "Library and playlists",
+    "Description": "On-demand exact duplicate detection using actual size and SHA-256, with progress and cancellation.",
+    "Status": "implemented",
+    "Evidence": "DuplicateFinder / DuplicateFilesWindow; automated content/cancellation tests and manual UI review."
+  },
+  {
+    "Id": "F0065",
+    "Area": "Library and playlists",
+    "Description": "File organization and bulk renaming.",
+    "Status": "pending",
+    "Evidence": ""
+  },
+  {
+    "Id": "F0066",
+    "Area": "Library and playlists",
+    "Description": "Remote library synchronization.",
+    "Status": "pending",
+    "Evidence": ""
+  },
+  {
+    "Id": "F0067",
+    "Area": "Library and playlists",
+    "Description": "Arbitrary nested collections and advanced tagging workflows.",
+    "Status": "pending",
+    "Evidence": ""
+  },
+  {
+    "Id": "F0068",
+    "Area": "Video and subtitles",
+    "Description": "Embedded and external subtitles supported by LibVLC.",
+    "Status": "implemented",
+    "Evidence": "MediaService, MainWindow.Features, SubtitleDocument and ThumbnailService"
+  },
+  {
+    "Id": "F0069",
+    "Area": "Video and subtitles",
+    "Description": "Subtitle track selection, auto loading, language preference and timing offset.",
+    "Status": "implemented",
+    "Evidence": "MediaService, MainWindow.Features, SubtitleDocument and ThumbnailService"
+  },
+  {
+    "Id": "F0070",
+    "Area": "Video and subtitles",
+    "Description": "Subtitle display options exposed through the current renderer.",
+    "Status": "implemented",
+    "Evidence": "MediaService, MainWindow.Features, SubtitleDocument and ThumbnailService"
+  },
+  {
+    "Id": "F0071",
+    "Area": "Video and subtitles",
+    "Description": "Text search in external SRT, VTT and ASS subtitle files with seek-to-result.",
+    "Status": "implemented",
+    "Evidence": "MediaService, MainWindow.Features, SubtitleDocument and ThumbnailService"
+  },
+  {
+    "Id": "F0072",
+    "Area": "Video and subtitles",
+    "Description": "Bookmarks and chapter navigation.",
+    "Status": "implemented",
+    "Evidence": "MediaService, MainWindow.Features, SubtitleDocument and ThumbnailService"
+  },
+  {
+    "Id": "F0073",
+    "Area": "Video and subtitles",
+    "Description": "Timeline thumbnail previews generated on demand.",
+    "Status": "implemented",
+    "Evidence": "MediaService, MainWindow.Features, SubtitleDocument and ThumbnailService"
+  },
+  {
+    "Id": "F0074",
+    "Area": "Video and subtitles",
+    "Description": "Aspect ratio and video adjustment controls.",
+    "Status": "implemented",
+    "Evidence": "MediaService, MainWindow.Features, SubtitleDocument and ThumbnailService"
+  },
+  {
+    "Id": "F0075",
+    "Area": "Video and subtitles",
+    "Description": "Deinterlacing options.",
+    "Status": "implemented",
+    "Evidence": "MediaService, MainWindow.Features, SubtitleDocument and ThumbnailService"
+  },
+  {
+    "Id": "F0076",
+    "Area": "Video and subtitles",
+    "Description": "Video snapshots.",
+    "Status": "implemented",
+    "Evidence": "MediaService, MainWindow.Features, SubtitleDocument and ThumbnailService"
+  },
+  {
+    "Id": "F0077",
+    "Area": "Video and subtitles",
+    "Description": "Ambient light sampled from the displayed frame.",
+    "Status": "implemented",
+    "Evidence": "MediaService, MainWindow.Features, SubtitleDocument and ThumbnailService"
+  },
+  {
+    "Id": "F0078",
+    "Area": "Video and subtitles",
+    "Description": "A–B clip export through LibVLC, with copy and transcode paths.",
+    "Status": "implemented",
+    "Evidence": "MediaService, MainWindow.Features, SubtitleDocument and ThumbnailService"
+  },
+  {
+    "Id": "F0079",
+    "Area": "Video and subtitles",
+    "Description": "Automatic subtitle provider downloads.",
+    "Status": "pending",
+    "Evidence": ""
+  },
+  {
+    "Id": "F0080",
+    "Area": "Video and subtitles",
+    "Description": "Live subtitle synchronization editor.",
+    "Status": "pending",
+    "Evidence": ""
+  },
+  {
+    "Id": "F0081",
+    "Area": "Video and subtitles",
+    "Description": "Saved subtitle style profiles.",
+    "Status": "pending",
+    "Evidence": ""
+  },
+  {
+    "Id": "F0082",
+    "Area": "Video and subtitles",
+    "Description": "Bilingual subtitle display.",
+    "Status": "pending",
+    "Evidence": ""
+  },
+  {
+    "Id": "F0083",
+    "Area": "Video and subtitles",
+    "Description": "OCR of burned-in subtitles.",
+    "Status": "pending",
+    "Evidence": ""
+  },
+  {
+    "Id": "F0084",
+    "Area": "Video and subtitles",
+    "Description": "Scheduled snapshots.",
+    "Status": "pending",
+    "Evidence": ""
+  },
+  {
+    "Id": "F0085",
+    "Area": "Video and subtitles",
+    "Description": "Complete HDR/color management validation.",
+    "Status": "pending",
+    "Evidence": ""
+  },
+  {
+    "Id": "F0086",
+    "Area": "Network and distribution",
+    "Description": "Open supported stream URLs through LibVLC.",
+    "Status": "implemented",
+    "Evidence": "MediaFormats, MediaService, CI and build scripts"
+  },
+  {
+    "Id": "F0087",
+    "Area": "Network and distribution",
+    "Description": "Source-only public repository and Windows build/test CI.",
+    "Status": "implemented",
+    "Evidence": "MediaFormats, MediaService, CI and build scripts"
+  },
+  {
+    "Id": "F0088",
+    "Area": "Network and distribution",
+    "Description": "Local self-contained build profile and Inno Setup source.",
+    "Status": "implemented",
+    "Evidence": "MediaFormats, MediaService, CI and build scripts"
+  },
+  {
+    "Id": "F0089",
+    "Area": "Network and distribution",
+    "Description": "Chromecast/DLNA sender.",
+    "Status": "pending",
+    "Evidence": ""
+  },
+  {
+    "Id": "F0090",
+    "Area": "Network and distribution",
+    "Description": "Mobile web remote control.",
+    "Status": "pending",
+    "Evidence": ""
+  },
+  {
+    "Id": "F0091",
+    "Area": "Network and distribution",
+    "Description": "Published releases, downloadable builds and release automation.",
+    "Status": "pending",
+    "Evidence": ""
+  },
+  {
+    "Id": "F0092",
+    "Area": "Network and distribution",
+    "Description": "Signed executable distribution and automatic updates.",
+    "Status": "pending",
+    "Evidence": ""
+  },
+  {
+    "Id": "F0093",
+    "Area": "Library and playlists",
+    "Description": "Automatic duplicate consolidation and metadata merge workflows.",
+    "Status": "pending",
+    "Evidence": ""
+  },
+  {
+    "Id": "F0094",
+    "Area": "Workspaces and interface",
+    "Description": "Portable data folder selected by --portable or portable.flag.",
+    "Status": "implemented",
+    "Evidence": "AppProfile and startup services; isolated persistence tests and portable UI test."
+  },
+  {
+    "Id": "F0095",
+    "Area": "Workspaces and interface",
+    "Description": "Independent named profiles selected at startup with --profile.",
+    "Status": "implemented",
+    "Evidence": "AppProfile / SettingsService / LibraryService; separate settings persistence tests."
+  },
+  {
+    "Id": "F0096",
+    "Area": "Workspaces and interface",
+    "Description": "Explicit profile directory selected with --data-directory and reflected in Settings.",
+    "Status": "implemented",
+    "Evidence": "AppProfile / SettingsPanel; argument validation and option terminator tests."
+  },
+  {
+    "Id": "F0097",
+    "Area": "Library and playlists",
+    "Description": "Remove selected records from the library without deleting media files.",
+    "Status": "implemented",
+    "Evidence": "LibraryService.RemoveEntriesAsync / Library tools / duplicate results; media preservation and reopened-index tests."
+  }
+]

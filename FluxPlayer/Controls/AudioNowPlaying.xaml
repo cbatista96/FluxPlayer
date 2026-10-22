@@ -21,7 +21,7 @@
                 <TextBlock Text="{Binding LyricLine}" FontSize="12" Margin="0,7,0,0" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource FxAccentTextBrush}" />
             </StackPanel>
             <StackPanel Grid.Column="2" VerticalAlignment="Top">
-                <Button Command="{Binding ToggleFavoriteCommand}" Style="{StaticResource TransportButton}" Width="36" Height="36" AutomationProperties.Name="Marcar o quitar favorito" ToolTip="Favorite" Tag="{Binding IsCurrentFavorite, Converter={StaticResource ActiveTag}}">
+                <Button Command="{Binding ToggleFavoriteCommand}" Style="{StaticResource TransportButton}" Width="36" Height="36" AutomationProperties.Name="Toggle favorite" ToolTip="Favorite" Tag="{Binding IsCurrentFavorite, Converter={StaticResource ActiveTag}}">
                     <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="17" />
                 </Button>
                 <Button Command="{Binding ToggleEqualizerCommand}" Style="{StaticResource TransportButton}" Width="36" Height="36" Margin="0,6,0,0" AutomationProperties.Name="Open equalizer" ToolTip="Equalizer (E)">

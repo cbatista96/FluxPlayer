@@ -21,6 +21,7 @@ public partial class LibraryWindow : FluentWindow
     private CancellationTokenSource? _operation;
     private bool _ready, _closed;
     private int _filterGeneration;
+    private DuplicateFilesWindow? _duplicatesWindow;
 
     public LibraryWindow(MainViewModel vm)
     {
@@ -147,6 +148,84 @@ public partial class LibraryWindow : FluentWindow
         if (dialog.ShowDialog(this) != true) return;
         try { await _vm.Library.ExportBackupAsync(dialog.FileName); StatusText.Text = "Library backup saved."; }
         catch (IOException ex) { StatusText.Text = ex.Message; }
+    }
+
+    private void LibraryTools_Click(object sender, RoutedEventArgs e)
+    {
+        var menu = new ContextMenu();
+        void Add(string text, RoutedEventHandler handler)
+        { var item = new MenuItem { Header = text }; item.Click += handler; menu.Items.Add(item); }
+        Add("Export library backup…", Backup_Click);
+        Add("Restore backup (merge)…", RestoreBackup_Click);
+        menu.Items.Add(new Separator());
+        Add("Find exact duplicates…", (_, _) =>
+        {
+            if (_duplicatesWindow == null)
+            {
+                _duplicatesWindow = new DuplicateFilesWindow(this, _vm);
+                _duplicatesWindow.Closed += (_, _) => _duplicatesWindow = null;
+                _duplicatesWindow.Show();
+            }
+            else _duplicatesWindow.Activate();
+        });
+        Add("Remove selected from library", async (_, _) =>
+        {
+            int removed = await _vm.Library.RemoveEntriesAsync(SelectedPaths());
+            await RefreshAsync();
+            StatusText.Text = $"Removed {removed:N0} index entries. Files remain on disk; watched folders may add them again.";
+        });
+        menu.PlacementTarget = (UIElement)sender; menu.IsOpen = true;
+    }
+
+    private async void RestoreBackup_Click(object sender, RoutedEventArgs e)
+    {
+        if (_operation != null) return;
+        var dialog = new OpenFileDialog { Title = "Restore library backup", Filter = "FluxPlayer library backup|*.json" };
+        if (dialog.ShowDialog(this) != true) return;
+        var options = new FluentWindow
+        {
+            Owner = this,
+            Title = "Restore library backup",
+            Width = 520,
+            Height = 250,
+            MinHeight = 250,
+            ResizeMode = ResizeMode.NoResize,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            ExtendsContentIntoTitleBar = true
+        };
+        var panel = new StackPanel { Margin = new Thickness(24) };
+        panel.Children.Add(new System.Windows.Controls.TextBlock
+        {
+            Text = "Merge files and smart playlists into this library. Current favorites and playback counts are preserved.",
+            TextWrapping = TextWrapping.Wrap,
+            Margin = new Thickness(0, 0, 0, 16)
+        });
+        var watches = new CheckBox { Content = "Also restore monitoring for available folders", IsChecked = false };
+        panel.Children.Add(watches);
+        var restore = new System.Windows.Controls.Button
+        {
+            Content = "Merge backup",
+            IsDefault = true,
+            Padding = new Thickness(20, 8, 20, 8),
+            HorizontalAlignment = HorizontalAlignment.Right,
+            Margin = new Thickness(0, 20, 0, 0)
+        };
+        restore.Click += (_, _) => options.DialogResult = true; panel.Children.Add(restore);
+        options.SourceInitialized += (_, _) => ThemeService.Apply(_vm.CurrentTheme, options);
+        options.Content = ToolWindowChrome.Wrap(options, panel);
+        if (options.ShowDialog() != true) return;
+        using var cancellation = new CancellationTokenSource(); _operation = cancellation; CancelButton.Visibility = Visibility.Visible;
+        try
+        {
+            StatusText.Text = "Validating and merging backup…";
+            var result = await _vm.Library.ImportBackupAsync(dialog.FileName, watches.IsChecked == true, cancellation.Token);
+            await RefreshAsync();
+            StatusText.Text = $"Backup merged: {result.AddedFiles:N0} new files, {result.MergedFiles:N0} existing files, {result.SmartLists:N0} smart playlists, {result.WatchedFolders:N0} folder watches.";
+        }
+        catch (OperationCanceledException) { if (!_closed) StatusText.Text = "Backup restore canceled."; }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException)
+        { if (!_closed) StatusText.Text = ex.Message; }
+        finally { _operation = null; CancelButton.Visibility = Visibility.Collapsed; }
     }
 
     private async void WatchedFolders_Click(object sender, RoutedEventArgs e)

@@ -212,9 +212,7 @@ public partial class SettingsPanel : UserControl
         OutroSkipBox.Text = _settings.OutroSkipSeconds.ToString();
         BuildFeatureFlagsList();
 
-        var configPath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "FluxPlayer", "settings.json");
+        var configPath = Path.Combine(AppProfile.Current.DataDirectory, "settings.json");
         SettingsPathLabel.Text = $"Settings: {configPath}";
     }
 
@@ -338,7 +336,7 @@ public partial class SettingsPanel : UserControl
         foreach (var item in _featureItems.Where(i => i.IsToggle))
             _settings.FeatureFlags[item.Key] = item.IsEnabled;
 
-        _settingsService.Save(_settings);
+        if (!SaveOrNotify(_settings)) return;
         SettingsSaved?.Invoke(this, EventArgs.Empty);
         CloseRequested?.Invoke(this, EventArgs.Empty);
     }
@@ -501,17 +499,24 @@ public partial class SettingsPanel : UserControl
     private void ClearRecentBtn_Click(object sender, RoutedEventArgs e)
     {
         _settings.RecentFiles.Clear();
-        _settingsService.Save(_settings);
+        if (!SaveOrNotify(_settings)) return;
         MessageBox.Show("Recent file history cleared.",
             "FluxPlayer", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
     private void OpenConfigFolderBtn_Click(object sender, RoutedEventArgs e)
     {
-        var folder = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "FluxPlayer");
+        var folder = AppProfile.Current.DataDirectory;
         Directory.CreateDirectory(folder);
         Process.Start(new ProcessStartInfo(folder) { UseShellExecute = true });
+    }
+
+    private bool SaveOrNotify(AppSettings settings)
+    {
+        if (_settingsService.Save(settings)) return true;
+        MessageBox.Show("Unable to save settings.\n\n" + _settingsService.LastError,
+            "FluxPlayer settings", MessageBoxButton.OK, MessageBoxImage.Error);
+        return false;
     }
 
     private void ResetSettingsBtn_Click(object sender, RoutedEventArgs e)
@@ -521,7 +526,7 @@ public partial class SettingsPanel : UserControl
             "Reset settings", MessageBoxButton.YesNo, MessageBoxImage.Warning);
         if (result == MessageBoxResult.Yes)
         {
-            _settingsService.Save(new AppSettings());
+            if (!SaveOrNotify(new AppSettings())) return;
             Reload();
         }
     }

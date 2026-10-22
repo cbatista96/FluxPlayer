@@ -151,6 +151,99 @@ internal static class Program
             return Task.CompletedTask;
         });
 
+        await Test("Library backup restore: validated merge, statistics, watches, invalid input and persistence", async () =>
+        {
+            string folder = Path.Combine(Root, "restore-" + Guid.NewGuid().ToString("N"));
+            string media = Path.Combine(folder, "media"); Directory.CreateDirectory(media);
+            string first = Path.Combine(media, "first.wav"), second = Path.Combine(media, "second.wav");
+            File.Copy(wav, first); File.Copy(wav, second);
+            string backup = Path.Combine(folder, "library.json");
+            var metadata = new MediaMetadata("Restored title", "Artist", "Album", "Jazz", "", 8000, true, false, "PCM");
+            await using (var source = new LibraryService(Path.Combine(folder, "source")))
+            {
+                await source.ScanFolderAsync(media, true);
+                await source.RecordPlaybackAsync(first, metadata);
+                await source.ToggleFavoriteAsync(first);
+                await source.SaveSmartListAsync(new SmartList("Jazz", "genre:jazz", 1, 0));
+                await source.ExportBackupAsync(backup);
+            }
+            string targetPath = Path.Combine(folder, "target");
+            await using (var target = new LibraryService(targetPath))
+            {
+                await target.RecordPlaybackAsync(first, metadata with { Title = "Current title" });
+                await target.RecordPlaybackAsync(first, metadata with { Title = "Current title" });
+                var restored = await target.ImportBackupAsync(backup);
+                Assert(restored.AddedFiles == 1 && restored.MergedFiles == 1 && restored.SmartLists == 1, "Merge counts");
+                var current = (await target.SnapshotAsync()).Single(e => e.Path == first);
+                Assert(current.Favorite && current.PlayCount == 2 && current.Title == "Current title", "Preserve current state");
+                Assert((await target.FoldersAsync()).Length == 0, "Monitoring is opt-in");
+                var repeated = await target.ImportBackupAsync(backup, true);
+                Assert(repeated.AddedFiles == 0 && repeated.SmartLists == 0 && repeated.WatchedFolders == 1, "Idempotent restore");
+                Assert((await target.FoldersAsync()).Single() == media, "Restore folder monitoring explicitly");
+                await target.StopWatchingAsync(media);
+                string before = JsonSerializer.Serialize(await target.SnapshotAsync());
+                string invalid = Path.Combine(folder, "invalid.json");
+                File.WriteAllText(invalid, JsonSerializer.Serialize(new
+                {
+                    Version = 1,
+                    Folders = Array.Empty<string>(),
+                    Entries = new[] { current with { Path = Path.Combine(media, "new.wav") }, current with { Path = "relative.wav" } }
+                }));
+                bool rejected = false;
+                try { await target.ImportBackupAsync(invalid); } catch (InvalidDataException) { rejected = true; }
+                Assert(rejected && JsonSerializer.Serialize(await target.SnapshotAsync()) == before, "Invalid backup is atomic");
+                File.WriteAllText(invalid, "{\"Version\":99,\"Folders\":[],\"Entries\":[]}");
+                rejected = false; try { await target.ImportBackupAsync(invalid); } catch (InvalidDataException) { rejected = true; }
+                Assert(rejected, "Reject unsupported backup version");
+                Assert(await target.RemoveEntriesAsync(new[] { first, first }) == 1 && File.Exists(first), "Index removal preserves media");
+            }
+            await using var reopened = new LibraryService(targetPath);
+            Assert((await reopened.SnapshotAsync()).Single().Path == second, "Removal persisted");
+            Assert((await reopened.SmartListsAsync()).Single().Name == "Jazz", "Restored smart playlist persisted");
+        });
+
+        await Test("Duplicate analysis: content hashes, stale sizes, missing files, cancellation and originals", async () =>
+        {
+            string folder = Path.Combine(Root, "duplicates-" + Guid.NewGuid().ToString("N")); Directory.CreateDirectory(folder);
+            string a = Path.Combine(folder, "A ñ.wav"), b = Path.Combine(folder, "B.wav"), c = Path.Combine(folder, "C.wav"), d = Path.Combine(folder, "D.wav");
+            File.WriteAllBytes(a, new byte[] { 1, 2, 3, 4 }); File.Copy(a, b);
+            File.WriteAllBytes(c, new byte[] { 1, 2, 3, 5 }); File.WriteAllBytes(d, new byte[] { 1, 2 });
+            var entries = new[] { a, b, c, d, Path.Combine(folder, "missing.wav") }.Select(path => new LibraryEntry { Path = path, Size = 999 }).ToArray();
+            var result = await DuplicateFinder.FindAsync(entries);
+            Assert(result.Groups.Length == 1 && result.Groups[0].Paths.SequenceEqual(new[] { a, b }), "Exact content grouping");
+            Assert(result.HashedFiles == 3 && result.SkippedFiles == 1 && result.Groups[0].Size == 4, "Actual sizes and candidate filtering");
+            Assert(File.ReadAllBytes(a).SequenceEqual(new byte[] { 1, 2, 3, 4 }) && File.Exists(b), "Originals preserved");
+            using var cancellation = new CancellationTokenSource(); cancellation.Cancel();
+            bool canceled = false; try { await DuplicateFinder.FindAsync(entries, token: cancellation.Token); } catch (OperationCanceledException) { canceled = true; }
+            Assert(canceled, "Scan cancellation");
+        });
+
+        await Test("Portable and named profiles: isolated data, option parsing and settings persistence", () =>
+        {
+            string root = Path.Combine(Root, "profiles-" + Guid.NewGuid().ToString("N"));
+            var portable = AppProfile.Parse(new[] { "--portable", wav }, root, root, root);
+            Assert(portable.DataDirectory == Path.Combine(root, "Data") && portable.Sources.Single() == wav, "Portable data location");
+            Assert(AppProfile.Parse(Array.Empty<string>(), root, root, root, true).DataDirectory == portable.DataDirectory, "Portable marker");
+            var first = AppProfile.Parse(new[] { "--profile", "Music" }, root, root, root);
+            var second = AppProfile.Parse(new[] { "--profile", "Video" }, root, root, root);
+            var firstSettings = new SettingsService(first.DataDirectory); var secondSettings = new SettingsService(second.DataDirectory);
+            firstSettings.Save(new AppSettings { Volume = 23 }); secondSettings.Save(new AppSettings { Volume = 71 });
+            Assert(firstSettings.Load().Volume == 23 && secondSettings.Load().Volume == 71, "Independent settings");
+            Assert(double.IsNaN(firstSettings.Load().WindowLeft), "Unset window geometry remains serializable");
+            string blocked = Path.Combine(root, "blocked"); Directory.CreateDirectory(Path.Combine(blocked, "settings.json"));
+            var blockedSettings = new SettingsService(blocked);
+            Assert(!blockedSettings.Save(new AppSettings()) && blockedSettings.LastError != null, "Report failed saves");
+            Assert(Directory.Exists(Path.Combine(blocked, "settings.json")) && !Directory.EnumerateFiles(blocked).Any(), "Failed save preserves destination and cleans temporary data");
+            var explicitPath = AppProfile.Parse(new[] { "--data-directory", Path.Combine(root, "custom"), "--", "--portable" }, root, root, root);
+            Assert(explicitPath.Sources.Single() == "--portable", "Option terminator");
+            foreach (var invalid in new[] { new[] { "--profile" }, new[] { "--profile", "../outside" }, new[] { "--profile", "CON" }, new[] { "--portable", "--profile", "Music" } })
+            {
+                bool refused = false; try { AppProfile.Parse(invalid, root, root, root); } catch (ArgumentException) { refused = true; }
+                Assert(refused, "Reject invalid or conflicting profile options");
+            }
+            return Task.CompletedTask;
+        });
+
         // CI verifies managed services without requiring an interactive audio device.
         if (managedOnly) return;
 
@@ -158,6 +251,8 @@ internal static class Program
         using var renderer = new VlcWpfRenderer(engine.MediaPlayer, new System.Windows.Controls.Image());
         await Test("Native engine: PCM detection and duration independent of file extension", async () =>
         {
+            Assert(engine.GetAudioDevices().Any(device => device.Id == "Default"), "Selectable output device");
+            engine.SelectAudioDevice("Default");
             var meta = await engine.ReadMetadataAsync(wav);
             Assert(meta is { HasAudio: true, HasVideo: false } && Math.Abs(meta.DurationMs - 8000) < 100, "PCM");
             string disguised = Path.Combine(Root, "audio-with-video-extension.mp4"); File.Copy(wav, disguised, true);
@@ -186,6 +281,7 @@ internal static class Program
                     await ConversionService.ConvertAsync(wav, output, profile, 8000, false, null, CancellationToken.None);
                     var metadata = await engine.ReadMetadataAsync(output);
                     Assert(metadata is { HasAudio: true, HasVideo: false } && metadata.DurationMs > 7000, profile.Name);
+                    engine.PlaybackSettings.ReplayGainMode = i % 2 == 0 ? "album" : "track";
                     engine.SetVolume(0); engine.PlayFile(output);
                     await Until(() => Task.FromResult(engine.IsPlaying && engine.GetTime() > 100), 5000);
                     engine.Stop();
@@ -210,7 +306,7 @@ internal static class Program
                 await using var library = new LibraryService(Path.Combine(Root, "vm-library"));
                 File.Copy(Path.GetFullPath(Path.Combine(Root, "../../FluxPlayer/Assets/logo.png")), Path.Combine(Root, "cover.png"), true);
                 File.WriteAllText(Path.ChangeExtension(wav, ".lrc"), "[00:00.00]Opening line\n[00:02.00]Synchronized line");
-                var vm = new MainViewModel(engine, new SettingsService(), new AppSettings { Volume = 0, AutoPlay = true, FileOpenBehavior = "OpenOnlyOne", RememberPlaylist = false }, library);
+                var vm = new MainViewModel(engine, new SettingsService(Path.Combine(Root, "vm-settings")), new AppSettings { Volume = 0, AutoPlay = true, FileOpenBehavior = "OpenOnlyOne", RememberPlaylist = false }, library);
                 vm.AddFilesToPlaylist(new[] { video }, true);
                 await Until(() => Task.FromResult(vm.IsPlaying && vm.ActiveMode == PlayerMode.Video), 8000);
                 vm.AddFilesToPlaylist(new[] { wav }, true);

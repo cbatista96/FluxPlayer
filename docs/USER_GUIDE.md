@@ -59,6 +59,25 @@ Fields include `title`, `artist`, `album`, `genre`, `format`, `folder`, `duratio
 
 Playlists can be imported or exported as M3U/M3U8, PLS and XSPF. Relative file entries are resolved against the playlist folder.
 
+**Library tools > Restore backup (merge)** validates a FluxPlayer JSON backup before merging it. Existing favorites, higher play counts and analyzed metadata are retained. Folder monitoring is restored only if you select that option and the folders are available. Unsupported or invalid backup records are rejected before the merge starts.
+
+**Library tools > Find exact duplicates** compares actual file sizes first, then streams SHA-256 hashes for equal-size candidates. The result groups matching files and supports playback or removal from the library index. It never deletes files on disk. A watched folder can add an index entry back during a later scan. Scanning runs only when requested and supports cancellation.
+
+## Portable mode and profiles
+
+Launch with `--portable` to keep settings, library state and caches in a `Data` folder beside the executable. Alternatively, create an empty `portable.flag` beside the executable to use portable mode when launching it normally. This location must be writable.
+
+Use `--profile Music` or `--profile Video` for independent named profiles under the user's FluxPlayer data folder. Each profile keeps its own settings, library, history, playlists and diagnostics. Names use letters, digits, hyphens or underscores. `--data-directory "D:\\FluxPlayerData"` selects an explicit data location. Choose one location switch per launch; it can be followed by media paths.
+
+```powershell
+.\FluxPlayer.exe --portable
+.\FluxPlayer.exe --profile Music "D:\Music\song.flac"
+.\FluxPlayer.exe --profile Video
+.\FluxPlayer.exe --data-directory "D:\FluxPlayerData"
+```
+
+The Settings page shows the current profile's settings path. Its Open configuration folder action opens that same location. Profile selection occurs at startup, so changing profiles means launching another instance with the desired option.
+
 ## Subtitles and video tools
 
 Load external subtitles or choose an embedded track from the video controls. Adjust subtitle and audio delay when timing differs from the picture. External subtitle text search supports SRT, VTT and ASS and lets you jump to a matching cue. Automatic subtitle downloads, OCR and bilingual subtitles remain planned.

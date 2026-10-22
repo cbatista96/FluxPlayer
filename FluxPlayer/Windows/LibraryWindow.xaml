@@ -34,7 +34,7 @@
             </ComboBox>
             <CheckBox x:Name="WatchNewFolder" Grid.Column="3" Content="Watch when adding" IsChecked="True" VerticalAlignment="Center" Margin="14,0,0,0" />
             <StackPanel Grid.Row="1" Grid.ColumnSpan="4" Orientation="Horizontal" Margin="0,10,0,0">
-                <ComboBox x:Name="SmartListCombo" Width="240" DisplayMemberPath="Name" SelectionChanged="SmartList_Changed" AutomationProperties.Name="Listas inteligentes guardadas" />
+                <ComboBox x:Name="SmartListCombo" Width="240" DisplayMemberPath="Name" SelectionChanged="SmartList_Changed" AutomationProperties.Name="Saved smart playlists" />
                 <Button Content="Save view as playlist…" Click="SaveSmartList_Click" Margin="10,0,0,0" Padding="12,5" />
                 <Button Content="Remove saved playlist" Click="RemoveSmartList_Click" Margin="8,0,0,0" Padding="12,5" />
             </StackPanel>
@@ -63,7 +63,7 @@
                 <Button Content="Read tags" Click="Analyze_Click" Margin="8,0,0,0" Padding="14,7" />
                 <Button Content="Edit tags" Click="EditTags_Click" Margin="8,0,0,0" Padding="14,7" />
                 <Button Content="Export playlist" Click="Export_Click" Margin="8,0,0,0" Padding="14,7" />
-                <Button Content="Library backup" Click="Backup_Click" Margin="8,0,0,0" Padding="14,7" />
+                <Button Content="Library tools" Click="LibraryTools_Click" Margin="8,0,0,0" Padding="14,7" />
                 <Button x:Name="CancelButton" Content="Cancel task" Click="Cancel_Click" Visibility="Collapsed" Margin="8,0,0,0" Padding="14,7" />
             </WrapPanel>
             <TextBlock x:Name="StatusText" Text="Loading library…" FontSize="11" Margin="0,10,0,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />

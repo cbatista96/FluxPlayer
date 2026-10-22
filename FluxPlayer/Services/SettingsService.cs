@@ -6,9 +6,11 @@ namespace FluxPlayer.Services;
 
 public class SettingsService
 {
-    private static readonly string SettingsPath = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "FluxPlayer", "settings.json");
+    private readonly string SettingsPath;
+    public string? LastError { get; private set; }
+
+    public SettingsService(string? dataDirectory = null) =>
+        SettingsPath = Path.Combine(dataDirectory ?? AppProfile.Current.DataDirectory, "settings.json");
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -44,7 +46,7 @@ public class SettingsService
         return defaults;
     }
 
-    public void Save(AppSettings settings)
+    public bool Save(AppSettings settings)
     {
         try
         {
@@ -52,22 +54,20 @@ public class SettingsService
             var dir = Path.GetDirectoryName(SettingsPath)!;
             Directory.CreateDirectory(dir);
             var json = JsonSerializer.Serialize(settings, JsonOptions);
-            var temporaryPath = SettingsPath + ".tmp";
+            var temporaryPath = SettingsPath + "." + Guid.NewGuid().ToString("N") + ".tmp";
             try
             {
+                // Finish the write before publishing it. A partial write must never replace valid settings.
                 File.WriteAllText(temporaryPath, json);
-                if (File.Exists(SettingsPath))
-                    File.Replace(temporaryPath, SettingsPath, null);
-                else
-                    File.Move(temporaryPath, SettingsPath);
-            }
-            catch
-            {
-
-                if (File.Exists(temporaryPath))
+                try
+                {
+                    if (File.Exists(SettingsPath)) File.Replace(temporaryPath, SettingsPath, null);
+                    else File.Move(temporaryPath, SettingsPath);
+                }
+                catch (Exception e) when (e is IOException or PlatformNotSupportedException)
+                {
                     File.Move(temporaryPath, SettingsPath, true);
-                else
-                    throw;
+                }
             }
             finally
             {
@@ -78,8 +78,14 @@ public class SettingsService
                 }
                 catch { }
             }
+            LastError = null;
+            return true;
         }
-        catch { }
+        catch (Exception e)
+        {
+            LastError = e.Message;
+            return false;
+        }
     }
 
     private static void Normalize(AppSettings settings)

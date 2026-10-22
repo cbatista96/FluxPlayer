@@ -19,6 +19,9 @@ The managed suite covers:
 6. Library query fields, phrases, exclusions and comparisons.
 7. Folder scanning, file watching, favorites, statistics, smart lists, backup export and persistence.
 8. English defaults and migration of existing equalizer presets.
+9. Backup restoration, repeated merge behavior, preserved statistics, opt-in folder monitoring, invalid input rejection and index-only removal.
+10. Duplicate hashing, stale indexed sizes, equal-size different content, missing files, cancellation and preservation of originals.
+11. Portable/named profile parsing, isolated settings, option validation and persistence of unset window geometry.
 
 GitHub Actions builds on Windows and runs these checks without publishing artifacts or creating releases. Its test invocation deliberately avoids native playback, which requires an interactive output environment.
 

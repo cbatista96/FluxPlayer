@@ -630,10 +630,7 @@ public partial class MediaService : IDisposable
     {
         try
         {
-            var logDir = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                "FluxPlayer",
-                "logs");
+            var logDir = Path.Combine(AppProfile.Current.DataDirectory, "logs");
             Directory.CreateDirectory(logDir);
 
             var logPath = Path.Combine(logDir, $"engine-{DateTime.Now:yyyyMMdd}.log");

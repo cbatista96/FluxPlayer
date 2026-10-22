@@ -336,7 +336,7 @@
                 <Button Style="{StaticResource TransportButton}" Width="36" Height="36" Click="LibraryButton_Click" ToolTip="Media library" AutomationProperties.Name="Open media library">
                     <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="15" />
                 </Button>
-                <Button x:Name="MediaToolsButton" Style="{StaticResource TransportButton}" Width="36" Height="36" Click="MediaToolsButton_Click" ToolTip="Audio and video tools" AutomationProperties.Name="Herramientas multimedia">
+                <Button x:Name="MediaToolsButton" Style="{StaticResource TransportButton}" Width="36" Height="36" Click="MediaToolsButton_Click" ToolTip="Audio and video tools" AutomationProperties.Name="Audio and video tools">
                     <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="15" />
                     <Button.ContextMenu>
                         <ContextMenu x:Name="MediaToolsMenu" Opened="MediaToolsMenu_Opened">

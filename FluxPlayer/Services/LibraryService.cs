@@ -24,8 +24,7 @@ public sealed class LibraryService : IAsyncDisposable
     public event EventHandler? Changed;
     public LibraryService(string? dataDirectory = null)
     {
-        _path = System.IO.Path.Combine(dataDirectory ?? System.IO.Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "FluxPlayer"), "library.json");
+        _path = System.IO.Path.Combine(dataDirectory ?? AppProfile.Current.DataDirectory, "library.json");
         _saveTimer = new Timer(_ => _ = SaveSafeAsync(), null, Timeout.Infinite, Timeout.Infinite);
         _watchTimer = new Timer(_ => _ = RefreshWatchedAsync(), null, Timeout.Infinite, Timeout.Infinite);
         _load = Task.Run(LoadAsync);
@@ -41,7 +40,8 @@ public sealed class LibraryService : IAsyncDisposable
             await using var file = File.OpenRead(_path);
             var store = await JsonSerializer.DeserializeAsync<Store>(file);
             if (store == null || store.Version != 1) return;
-            foreach (var entry in store.Entries.Take(200_000)) if (entry.Path.Length > 0) _entries[entry.Path] = entry;
+            foreach (var entry in store.Entries.Take(200_000))
+                if (!string.IsNullOrWhiteSpace(entry.Path)) _entries[entry.Path] = entry with { Kind = NormalizeKind(entry.Kind) };
             foreach (var folder in store.Folders) if (Directory.Exists(folder)) _folders.Add(folder);
             foreach (var list in store.Lists ?? Array.Empty<SmartList>()) _lists[list.Name] = list;
             ConfigureWatchers();
@@ -55,6 +55,10 @@ public sealed class LibraryService : IAsyncDisposable
         await _load; await _gate.WaitAsync();
         try { return _entries.Values.ToArray(); } finally { _gate.Release(); }
     }
+
+    private static string NormalizeKind(string? kind) =>
+        string.Equals(kind, "Video", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(kind, "V\u00eddeo", StringComparison.OrdinalIgnoreCase) ? "Video" : "Audio";
 
     public async Task<string[]> FoldersAsync()
     {
@@ -264,6 +268,113 @@ public sealed class LibraryService : IAsyncDisposable
             await SaveSafeAsync();
         }
         File.Copy(_path, destination, true);
+    }
+
+    public sealed record ImportResult(int AddedFiles, int MergedFiles, int SmartLists, int WatchedFolders);
+
+    /// <summary>Merges a validated backup without replacing current favorites or reducing playback counts.</summary>
+    public Task<ImportResult> ImportBackupAsync(string source, bool restoreWatchedFolders = false,
+        CancellationToken token = default) => Task.Run(async () =>
+    {
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(token, _lifetime.Token);
+        await _load.ConfigureAwait(false);
+        Store store;
+        await using (var file = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read,
+            64 * 1024, FileOptions.Asynchronous | FileOptions.SequentialScan))
+        {
+            if (file.Length > 256L * 1024 * 1024) throw new InvalidDataException("The backup exceeds 256 MiB.");
+            try
+            {
+                store = await JsonSerializer.DeserializeAsync<Store>(file,
+                    new JsonSerializerOptions { MaxDepth = 16 }, linked.Token).ConfigureAwait(false)
+                    ?? throw new InvalidDataException("The backup is empty.");
+            }
+            catch (JsonException e) { throw new InvalidDataException("The backup is not valid library JSON.", e); }
+        }
+        if (store.Version != 1 || store.Entries == null || store.Folders == null || store.Entries.Length > 200_000)
+            throw new InvalidDataException("The backup version or entry count is not supported.");
+
+        // Validate every record before mutating the current index. A bad record cannot cause a partial merge.
+        var imported = new Dictionary<string, LibraryEntry>(StringComparer.OrdinalIgnoreCase);
+        foreach (var entry in store.Entries)
+        {
+            linked.Token.ThrowIfCancellationRequested();
+            if (entry == null || string.IsNullOrWhiteSpace(entry.Path) || entry.Path.Length > 32767
+                || (!MediaFormats.IsNetwork(entry.Path) && !System.IO.Path.IsPathFullyQualified(entry.Path))
+                || entry.DurationMs < 0 || entry.Size < 0 || entry.PlayCount < 0
+                || new[] { entry.Title, entry.Artist, entry.Album, entry.Genre }.Any(s => s == null || s.Length > 4096))
+                throw new InvalidDataException("The backup contains an invalid media entry.");
+            string path;
+            try { path = MediaFormats.IsNetwork(entry.Path) ? entry.Path : System.IO.Path.GetFullPath(entry.Path); }
+            catch (Exception e) when (e is ArgumentException or NotSupportedException)
+            { throw new InvalidDataException("The backup contains an invalid media path.", e); }
+            if (!imported.TryAdd(path, entry with { Path = path, Kind = NormalizeKind(entry.Kind) }))
+                throw new InvalidDataException("The backup contains duplicate media paths.");
+        }
+        var lists = store.Lists ?? Array.Empty<SmartList>();
+        if (lists.Length > 5000 || lists.Any(l => l == null || string.IsNullOrWhiteSpace(l.Name) || l.Name.Length > 120
+            || l.Query == null || l.Query.Length > 4096 || l.Kind is < 0 or > 2 || l.Collection is < 0 or > 5))
+            throw new InvalidDataException("The backup contains an invalid smart playlist.");
+        if (store.Folders.Length > 64 || store.Folders.Any(f => string.IsNullOrWhiteSpace(f)
+            || f.Length > 32767 || !System.IO.Path.IsPathFullyQualified(f)))
+            throw new InvalidDataException("The backup contains invalid watched folders.");
+        var folders = restoreWatchedFolders ? store.Folders.Select(System.IO.Path.GetFullPath)
+            .Where(Directory.Exists).Distinct(StringComparer.OrdinalIgnoreCase).ToArray() : Array.Empty<string>();
+
+        int added = 0, merged = 0, addedLists = 0;
+        await _gate.WaitAsync(linked.Token).ConfigureAwait(false);
+        try
+        {
+            ObjectDisposedException.ThrowIf(_disposed, this);
+            if (_entries.Count + imported.Keys.Count(path => !_entries.ContainsKey(path)) > 200_000
+                || _folders.Union(folders, StringComparer.OrdinalIgnoreCase).Count() > 64
+                || _lists.Keys.Union(lists.Select(l => l.Name), StringComparer.OrdinalIgnoreCase).Count() > 5000)
+                throw new InvalidDataException("The merged library would exceed its entry or watched-folder limit.");
+            foreach (var pair in imported)
+            {
+                if (_entries.TryGetValue(pair.Key, out var current))
+                {
+                    var metadata = current.MetadataRead ? current : pair.Value;
+                    _entries[pair.Key] = metadata with
+                    {
+                        Favorite = current.Favorite || pair.Value.Favorite,
+                        PlayCount = Math.Max(current.PlayCount, pair.Value.PlayCount),
+                        AddedUtc = current.AddedUtc < pair.Value.AddedUtc ? current.AddedUtc : pair.Value.AddedUtc,
+                        LastPlayedUtc = Nullable.Compare(current.LastPlayedUtc, pair.Value.LastPlayedUtc) >= 0
+                            ? current.LastPlayedUtc : pair.Value.LastPlayedUtc
+                    };
+                    merged++;
+                }
+                else { _entries.Add(pair.Key, pair.Value); added++; }
+            }
+            foreach (var list in lists) if (_lists.TryAdd(list.Name, list)) addedLists++;
+            foreach (string folder in folders) _folders.Add(folder);
+            if (folders.Length > 0) ConfigureWatchers();
+            MarkDirty();
+        }
+        finally { _gate.Release(); }
+        await SaveSafeAsync().ConfigureAwait(false);
+        if (LastError != null) throw new IOException(LastError);
+        Changed?.Invoke(this, EventArgs.Empty);
+        return new ImportResult(added, merged, addedLists, folders.Length);
+    }, token);
+
+    /// <summary>Removes index records only. Media files on disk are never modified.</summary>
+    public async Task<int> RemoveEntriesAsync(IEnumerable<string> paths, CancellationToken token = default)
+    {
+        var selected = paths.Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
+        await _load.ConfigureAwait(false);
+        await _gate.WaitAsync(token).ConfigureAwait(false);
+        int removed = 0;
+        try
+        {
+            ObjectDisposedException.ThrowIf(_disposed, this);
+            foreach (string path in selected) if (_entries.Remove(path)) removed++;
+            if (removed > 0) MarkDirty();
+        }
+        finally { _gate.Release(); }
+        if (removed > 0) Changed?.Invoke(this, EventArgs.Empty);
+        return removed;
     }
 
     public async ValueTask DisposeAsync()

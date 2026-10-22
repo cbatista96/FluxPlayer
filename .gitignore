@@ -16,6 +16,9 @@ TestResults/
 # Local builds and installers: this repository publishes source only
 publish/
 artifacts/
+Data/
+Profiles/
+portable.flag
 installer/output/
 installer/assets/
 *.exe

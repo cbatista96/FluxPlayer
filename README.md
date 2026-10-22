@@ -27,11 +27,12 @@ An audio workspace with artwork, lyrics and a playlist. A video workspace with s
 | **Music workspace** | Artwork, metadata, synchronized LRC lyrics, CUE chapters, favorites, playlist controls and a floating equalizer. |
 | **Playback** | Local files and supported network sources, seeking, speed control, repeat, shuffle, A–B looping and frame stepping. |
 | **Audio tools** | Ten equalizer bands, preamplifier, 30 presets, peak compensation, ReplayGain options, device selection and audio delay. |
-| **Library** | A local index, watched folders, favorites, playback statistics, saved smart playlists, field queries and JSON backup. |
+| **Library** | A local index, watched folders, favorites, playback statistics, smart playlists, field queries, backup restore and exact duplicate detection. |
 | **Playlists** | Import and export M3U/M3U8, PLS and XSPF; reorder tracks and queue an item to play next. |
 | **Video tools** | Subtitle loading and timing, subtitle text search, bookmarks, timeline thumbnails, snapshots, ambient light and A–B clip export. |
 | **Windows integration** | Mica and acrylic themes, mini player, tray controls, configurable shortcuts and system media controls. |
 | **Optional conversion** | An on-demand FFmpeg audio converter with progress and cancellation. FFmpeg is installed separately. |
+| **Portable and profiles** | A portable data folder, named profiles and an explicit data directory, each with independent settings and library state. |
 
 Playback compatibility comes from the selected LibVLC runtime and its plugins. Supported containers, codecs, streams and hardware decoding depend on the input and environment; the project does not claim universal format compatibility, DRM playback or native bit-perfect DSD output. See the [feature checklist](FEATURES.md) for the current scope.
 
