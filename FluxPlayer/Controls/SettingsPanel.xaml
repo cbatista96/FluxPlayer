@@ -153,6 +153,7 @@
                                 <ListBoxItem Content="Locations" Tag="" local:ButtonFx.IconEffect="Bounce" />
                                 <ListBoxItem Content="Accessibility" Tag="" local:ButtonFx.IconEffect="Pop" />
                                 <ListBoxItem Content="Features" Tag="" local:ButtonFx.IconEffect="Wiggle" />
+                                <ListBoxItem Content="Tools" Tag="" />
                                 <ListBoxItem Content="About" Tag="" local:ButtonFx.IconEffect="SpinCW" />
                             </ListBox>
                         </ScrollViewer>
@@ -1481,6 +1482,11 @@
                             </Border>
                         </StackPanel>
 
+                        <StackPanel x:Name="PageTools" Visibility="Collapsed">
+                            <TextBlock Text="Tools" Style="{StaticResource SectionHdr}" />
+                            <TextBlock Text="Audio, video, library and media utilities. Opening a tool saves your current preferences." Style="{StaticResource OptSub}" Margin="0,0,0,18" />
+                            <StackPanel x:Name="ToolActions" />
+                        </StackPanel>
                         <StackPanel x:Name="PageAbout" Visibility="Collapsed">
                             <TextBlock Text="About" Style="{StaticResource SectionHdr}" />
 

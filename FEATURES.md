@@ -1,12 +1,12 @@
 # Feature checklist
 
-**79 implemented · 27 pending · 106 tracked capabilities.**
+**80 implemented · 27 pending · 107 tracked capabilities.**
 
 Each capability appears exactly once. Completing it moves the same stable ID from Pending to Implemented. A setting or catalog entry alone does not complete a feature. Source references describe the implementation; validation limits are documented in [Testing](docs/TESTING.md).
 
 Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Sync-PublicFeatures.ps1`; CI rejects an outdated checklist.
 
-## Implemented (79)
+## Implemented (80)
 
 ### Workspaces and interface
 
@@ -27,6 +27,7 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [x] **F0094** Portable data folder selected by --portable or portable.flag. — AppProfile and startup services; isolated persistence tests and portable UI test.
 - [x] **F0095** Independent named profiles selected at startup with --profile. — AppProfile / SettingsService / LibraryService; separate settings persistence tests.
 - [x] **F0096** Explicit profile directory selected with --data-directory and reflected in Settings. — AppProfile / SettingsPanel; argument validation and option terminator tests.
+- [x] **F0107** One title-bar Settings entry, a central Tools settings page sharing playback actions, and Fluent favorite indicators in the library. — SettingsPanel.Tools, MainWindow and LibraryWindow; desktop inspection of the single gear, Tools page, equalizer launch and rounded library favorite control. Build and managed checks pass.
 
 ### Playback and formats
 

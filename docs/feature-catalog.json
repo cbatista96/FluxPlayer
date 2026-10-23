@@ -740,5 +740,12 @@
     "Description": "Explicit 2.1/5.1/7.1 speaker layouts, arbitrary channel matrices, per-channel gain/delay and verified physical surround output.",
     "Status": "pending",
     "Evidence": "Earlier speaker-layout choices did not configure native output and now migrate to Original. Basic channel routing and a six-channel PCM-to-stereo downmix are verified separately."
+  },
+  {
+    "Id": "F0107",
+    "Area": "Workspaces and interface",
+    "Description": "One title-bar Settings entry, a central Tools settings page sharing playback actions, and Fluent favorite indicators in the library.",
+    "Status": "implemented",
+    "Evidence": "SettingsPanel.Tools, MainWindow and LibraryWindow; desktop inspection of the single gear, Tools page, equalizer launch and rounded library favorite control. Build and managed checks pass."
   }
 ]

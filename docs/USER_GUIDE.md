@@ -49,15 +49,15 @@ The audio settings include output device selection, ReplayGain options, audio de
 
 Earlier 2.1/5.1/7.1 settings were stored without configuring a speaker layout; they migrate to Original. Explicit speaker layouts, LFE management, arbitrary channel matrices, per-channel gain/delay and certified surround output remain pending. Actual routing is listed in **Signal path and information** and can depend on the source and output capabilities.
 
-Open **Audio and video tools > Audio output profiles** to save the player's current volume, full 10/15/20/31-band equalizer layout, preamp, gain compensation and audio delay for a selected output. Up to 64 profiles are keyed by output identifier; saving for one device leaves other profiles independent. Saved devices remain listed when disconnected. **Refresh devices** updates availability.
+Open **Settings > Tools > Audio output profiles** to save the player's current volume, full 10/15/20/31-band equalizer layout, preamp, gain compensation and audio delay for a selected output. Up to 64 profiles are keyed by output identifier; saving for one device leaves other profiles independent. Saved devices remain listed when disconnected. **Refresh devices** updates availability.
 
 Enable automatic application to recall a saved profile when selecting that output or starting FluxPlayer with it selected. With automatic application off, **Use output and saved profile** still applies it explicitly. Profile changes preserve mute and respect the global volume-boost limit. Changes made afterward do not overwrite a profile until **Save current settings** is chosen again. Removing a profile retains the current audio settings. The System default profile follows Windows' current default; automatic physical-device/hotplug profile switching remains pending. ReplayGain and other effects keep their global settings.
 
-Open **Audio and video tools > Batch tag editor** to edit the current queue, or select several library rows and choose **Edit tags**. Add or remove files from the job, then check only the title, artist, album or genre fields you want to replace. A checked empty field clears that tag; unchecked fields are preserved. **Apply checked fields** writes to the original files and shows saved, skipped and failed results. Loaded files, missing files and network sources are skipped. Cancellation finishes the current save and stops before the next file; completed changes remain. Close the editor to cancel an active job. Keep backups of files before making large changes.
+Open **Settings > Tools > Batch tag editor** to edit the current queue, or select several library rows and choose **Edit tags**. Add or remove files from the job, then check only the title, artist, album or genre fields you want to replace. A checked empty field clears that tag; unchecked fields are preserved. **Apply checked fields** writes to the original files and shows saved, skipped and failed results. Loaded files, missing files and network sources are skipped. Cancellation finishes the current save and stops before the next file; completed changes remain. Close the editor to cancel an active job. Keep backups of files before making large changes.
 
 ## Subtitle timing
 
-Open **Audio and video tools > Subtitle timing editor**. The **Live delay** controls affect the currently selected subtitle track; positive milliseconds display subtitles later. Load an external SRT, VTT, ASS or SSA file to compare its original and adjusted timestamps. Select a row and use **Seek selected original cue** to navigate using the current live delay.
+Open **Settings > Tools > Subtitle timing editor**. The **Live delay** controls affect the currently selected subtitle track; positive milliseconds display subtitles later. Load an external SRT, VTT, ASS or SSA file to compare its original and adjusted timestamps. Select a row and use **Seek selected original cue** to navigate using the current live delay.
 
 Export correction is separate from live delay. Set an offset and time scale, then choose **Update table**. For drift correction, pause the video at the matching time for an early cue, select that cue and capture the first anchor. Repeat with a later cue and the second anchor. The editor calculates a positive scale and offset from those two matches.
 
@@ -65,7 +65,7 @@ Export correction is separate from live delay. Set an offset and time scale, the
 
 ## Subtitle styles
 
-Open **Audio and video tools > Subtitle style profiles** to set a default font family, font size, text/outline colors, outline thickness, bold text, shadow and bottom margin. A size of 0 uses automatic sizing; other sizes and margins are in video pixels. Outline thickness is a percentage of the font size. Choose **Use this style**, or enter a name and **Save profile**. Up to 32 profiles are stored in the active data profile. A saved profile can be selected, edited or removed; removing it keeps the current default style.
+Open **Settings > Tools > Subtitle style profiles** to set a default font family, font size, text/outline colors, outline thickness, bold text, shadow and bottom margin. A size of 0 uses automatic sizing; other sizes and margins are in video pixels. Outline thickness is a percentage of the font size. Choose **Use this style**, or enter a name and **Save profile**. Up to 32 profiles are stored in the active data profile. A saved profile can be selected, edited or removed; removing it keeps the current default style.
 
 Restart FluxPlayer to apply a changed style. Embedded text styling and bitmap subtitles may override these defaults. Global italic and top/center placement overrides remain pending. Subtitles prefer the requested languages and then accept an unlabeled track; include `none` in the language list to stop that fallback. Disabling **Show subtitles by default** selects no subtitle track until you explicitly load or select one.
 
@@ -73,15 +73,15 @@ With the current WPF memory surface, an active subtitle on an opaque Windows har
 
 For local lyrics, place an LRC or text file beside the media with the same base name. An LRC file displays synchronized lines. A matching CUE sheet provides track chapters where supported.
 
-**Audio and video tools > Create or edit CUE sheet** opens the track editor. Add source files, add the current playback position, or load an existing sheet. Edit titles, artists, source paths and `minutes:seconds:frames` start positions in the table; use Move up/down to arrange tracks. There are 75 frames per second and a maximum of 99 tracks. Play selected track opens its source at the indicated position.
+**Settings > Tools > Create or edit CUE sheet** opens the track editor. Add source files, add the current playback position, or load an existing sheet. Edit titles, artists, source paths and `minutes:seconds:frames` start positions in the table; use Move up/down to arrange tracks. There are 75 frames per second and a maximum of 99 tracks. Play selected track opens its source at the indicated position.
 
 Save as suggests an edited copy. The writer uses relative source paths, checks increasing positions within each source and rejects invalid text or an accidental overwrite. This editor writes audio `FILE`, `TRACK`, `TITLE`, `PERFORMER` and `INDEX 01` entries. Advanced directives such as CD-TEXT, PREGAP and other indexes are not retained, so keep the original when editing a more complex sheet.
 
 ## External chapters
 
-Open **Audio and video tools > Chapter editor and external chapters**. Load an OGM simple chapter file (`.txt`/`.ogm`) or Matroska chapter XML, or copy the player's existing chapter points. Add a row or the current playback position, then edit titles and `hours:minutes:seconds.milliseconds` start times directly in the table. **Find** filters the draft by title or time; **Sort by time** orders it before validation. Saving and applying use the full draft, including rows hidden by Find.
+Open **Settings > Tools > Chapter editor and external chapters**. Load an OGM simple chapter file (`.txt`/`.ogm`) or Matroska chapter XML, or copy the player's existing chapter points. Add a row or the current playback position, then edit titles and `hours:minutes:seconds.milliseconds` start times directly in the table. **Find** filters the draft by title or time; **Sort by time** orders it before validation. Saving and applying use the full draft, including rows hidden by Find.
 
-**Apply to current media** updates navigation for this session. Use **Audio and video tools > Chapters** or **Seek selected in player** to jump to a point. The menu shows up to 200 entries; the editor can search all 10,000 supported points. Times must increase without duplicates and stay before the known end of the media. **Restore native chapters** restores source navigation while retaining the editor draft. Opening a different source clears session-only external chapter points.
+**Apply to current media** updates navigation for this session. Use **Settings > Tools > Chapters** or **Seek selected in player** to jump to a point. The menu shows up to 200 entries; the editor can search all 10,000 supported points. Times must increase without duplicates and stay before the known end of the media. **Restore native chapters** restores source navigation while retaining the editor draft. Opening a different source clears session-only external chapter points.
 
 **Save chapter copy** writes a new OGM text or flat Matroska XML document and refuses to overwrite existing files. Imported XML uses visible top-level chapters from the default or first edition, with times floored to milliseconds. Nested chapters, alternate languages/editions, ends, UIDs and other container metadata are not retained in the copy. Ordered and linked-segment chapters are rejected because they cannot describe one flat playback timeline. The original chapter document and media container remain unchanged.
 
@@ -134,7 +134,7 @@ Bookmarks, snapshots and A–B clip export are available through the video tools
 
 **F12** saves a native video frame in the selected PNG, JPEG or BMP format. Captures use unique names and refuse to replace an existing image. Image encoding and file I/O run outside the UI dispatcher. Capturing adds processing and storage work while the request runs.
 
-**Audio and video tools > Scheduled snapshots** starts an explicit capture job. Choose an interval, image limit, format and folder, then select Start capture job. It captures only while video is playing, skips paused/audio-only/busy intervals, and stops at the image limit. Stop or close the window to cancel; completed images remain available. No capture job runs merely because the tool is installed or its window is opened.
+**Settings > Tools > Scheduled snapshots** starts an explicit capture job. Choose an interval, image limit, format and folder, then select Start capture job. It captures only while video is playing, skips paused/audio-only/busy intervals, and stops at the image limit. Stop or close the window to cancel; completed images remain available. No capture job runs merely because the tool is installed or its window is opened.
 
 ## Convert audio
 
@@ -143,3 +143,7 @@ Install FFmpeg separately, select the converter from the audio tools, add source
 ## Local data
 
 Settings, bookmarks, recent files and library data are stored under the current user's FluxPlayer application-data folders. Engine diagnostics, when enabled, are local files and can include media paths or stream URLs. Review them before attaching a report. The repository and CI do not include personal settings or media files.
+
+## Settings and tools
+
+Use the single title-bar gear or Ctrl+, to open Settings. The Tools page contains the audio, video, chapter, subtitle, library and conversion utilities. Opening a tool saves current preferences; a failed save keeps Settings open. Dynamic output, chapter and ReplayGain choices use the same playback actions. Frequently used library, playlist, theme and equalizer shortcuts remain available. Future media tools should be registered in the shared tool menu so they also appear in Settings.

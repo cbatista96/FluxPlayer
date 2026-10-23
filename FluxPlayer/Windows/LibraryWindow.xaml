@@ -43,7 +43,11 @@
             <Grid>
                 <DataGrid x:Name="MediaGrid" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Extended" SelectionUnit="FullRow" EnableRowVirtualization="True" EnableColumnVirtualization="True" VirtualizingPanel.VirtualizationMode="Recycling" HeadersVisibility="Column" GridLinesVisibility="None" RowHeight="40" BorderThickness="0" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" MouseDoubleClick="Play_Click" PreviewKeyDown="Grid_KeyDown">
                     <DataGrid.Columns>
-                        <DataGridCheckBoxColumn Header="★" Binding="{Binding Favorite}" Width="36" />
+                        <DataGridTemplateColumn Header="★" Width="44" SortMemberPath="Favorite">
+                            <DataGridTemplateColumn.CellTemplate><DataTemplate>
+                                <CheckBox IsChecked="{Binding Favorite, Mode=OneWay}" IsHitTestVisible="False" Focusable="False" HorizontalAlignment="Center" VerticalAlignment="Center" AutomationProperties.Name="Favorite" />
+                            </DataTemplate></DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
                         <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="2*" MinWidth="180" />
                         <DataGridTextColumn Header="Artist" Binding="{Binding Artist}" Width="*" MinWidth="110" />
                         <DataGridTextColumn Header="Album" Binding="{Binding Album}" Width="*" MinWidth="110" />

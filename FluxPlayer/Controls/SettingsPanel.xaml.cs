@@ -37,7 +37,7 @@ public partial class SettingsPanel : UserControl
         _pages = new[] {
             PageGeneral, PagePlayback, PageVideo, PageAudio, PageSubtitles,
             PageHotkeys, PageMouse, PageLocations, PageAccessibility,
-            PageFeatures, PageAbout
+            PageFeatures, PageTools, PageAbout
         };
         FeatureFlagsList.ItemsSource = _featureItems;
         HotkeysList.ItemsSource = _hotkeyItems;
@@ -218,6 +218,7 @@ public partial class SettingsPanel : UserControl
 
     private void SaveBtn_Click(object sender, RoutedEventArgs e)
     {
+        _lastSaveSucceeded = false;
 
         _settings.Theme = ParseTheme(GetComboTag(ThemeComboSetting));
         _settings.Language = GetComboTag(LanguageCombo) ?? _settings.Language;
@@ -337,6 +338,7 @@ public partial class SettingsPanel : UserControl
             _settings.FeatureFlags[item.Key] = item.IsEnabled;
 
         if (!SaveOrNotify(_settings)) return;
+        _lastSaveSucceeded = true;
         SettingsSaved?.Invoke(this, EventArgs.Empty);
         CloseRequested?.Invoke(this, EventArgs.Empty);
     }

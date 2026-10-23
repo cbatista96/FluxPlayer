@@ -33,6 +33,8 @@ public partial class SettingsWindow : FluentWindow
 
     public void ReloadFromDisk() => EmbeddedSettingsPanel.Reload();
 
+    public void ConfigureTools(System.Windows.Controls.ContextMenu source, Action refresh) => EmbeddedSettingsPanel.ConfigureTools(source, refresh);
+
     public void SyncTheme(AppTheme theme)
     {
         ThemeService.Apply(theme, this);

@@ -88,3 +88,5 @@ For a user-facing change, verify the complete affected flow in both workspaces:
 - Compare startup and playback cost for changes affecting hot paths.
 
 Do not report a visual inspection, codec matrix or performance benchmark as passed merely because compilation or service tests passed.
+
+Settings navigation review verified a single title-bar gear, the central Tools page and successful equalizer launch after preference saving. The library favorite indicator uses the shared Fluent checkbox template instead of DataGrid's classic checkbox style. The original feature inventory count is unchanged; this is an interface correction, not completion of the remaining competitor feature list.

@@ -1569,6 +1569,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
 
         _settingsWindow = App.Services.GetRequiredService<SettingsWindow>();
         _settingsWindow.Owner = this;
+        _settingsWindow.ConfigureTools(MediaToolsMenu, () => MediaToolsMenu_Opened(this, new RoutedEventArgs()));
         _settingsWindow.SettingsSaved += OnSettingsSaved;
         _settingsWindow.Closed += (_, _) =>
         {
