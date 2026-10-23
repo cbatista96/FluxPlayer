@@ -26,7 +26,7 @@ public sealed partial class LyricsDocument
                 if (seconds < 60) lines.Add((minutes * 60_000 + (long)(seconds * 1000), lyric));
             }
         }
-        return new(lines.Select(l => (Math.Max(0, l.Item1 - offset), l.Item2)).OrderBy(l => l.Item1).ToArray());
+        return new(lines.Select(l => ((long)Math.Clamp((decimal)l.Item1 - offset, 0, LyricFile.MaximumTime), l.Item2)).OrderBy(l => l.Item1).ToArray());
     }
 
     public string LineAt(long ms)

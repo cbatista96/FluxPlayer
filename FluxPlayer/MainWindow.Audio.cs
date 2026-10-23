@@ -213,6 +213,14 @@ public partial class MainWindow
         _chapterEditorWindow.Closed += (_, _) => _chapterEditorWindow = null;
         _chapterEditorWindow.Show();
     }
+    private LyricsEditorWindow? _lyricsEditorWindow;
+    private void LyricsEditor_Click(object sender, RoutedEventArgs e)
+    {
+        if (_lyricsEditorWindow != null) { _lyricsEditorWindow.Activate(); return; }
+        _lyricsEditorWindow = new LyricsEditorWindow(this, _vm);
+        _lyricsEditorWindow.Closed += (_, _) => _lyricsEditorWindow = null;
+        _lyricsEditorWindow.Show();
+    }
     private void EditCueButton_Click(object sender, RoutedEventArgs e)
     {
         if (_cueEditorWindow != null) { _cueEditorWindow.Activate(); return; }

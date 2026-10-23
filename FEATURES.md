@@ -1,12 +1,12 @@
 # Feature checklist
 
-**80 implemented · 27 pending · 107 tracked capabilities.**
+**81 implemented · 27 pending · 108 tracked capabilities.**
 
 Each capability appears exactly once. Completing it moves the same stable ID from Pending to Implemented. A setting or catalog entry alone does not complete a feature. Source references describe the implementation; validation limits are documented in [Testing](docs/TESTING.md).
 
 Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Sync-PublicFeatures.ps1`; CI rejects an outdated checklist.
 
-## Implemented (80)
+## Implemented (81)
 
 ### Workspaces and interface
 
@@ -63,6 +63,7 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [x] **F0047** Saved volume, full 10/15/20/31-band EQ layout, preamp, gain compensation and audio delay per output, with recall when selecting an output or starting the player. — AudioOutputProfile / MainViewModel.AudioProfiles / AudioOutputProfilesWindow; independent endpoint persistence, live native delay/volume, mute, boost limit, opt-out, startup, failure isolation and manual headphone-profile review. Full native layout/profile recall and unrelated-settings reload are covered by the multiband scenario.
 - [x] **F0098** Create and edit CUE sheets with track titles, artists, sources, ordering and 75-fps start positions. — CueSheet.Write / CueSheetEditorWindow; frame and multi-file regression tests, plus manual edit/save verification with original preservation.
 - [x] **F0105** Independent native 15-band ISO graphic EQ from 25 Hz to 16 kHz, with factory presets and complete output-profile persistence. — Native multiband module and EqualizerLayout; measured PCM at 25 Hz, 1 kHz and 16 kHz, flat/gain/headroom checks, live layout round trip, persisted 15-band profiles and visual review of all controls.
+- [x] **F0108** Local synchronized LRC editor with timestamp insertion, session preview and new-copy UTF-8 export. — LyricFile, LyricsEditorWindow and session generation guards; validated timestamps, limits, Unicode, offset overflow, no overwrite/cancellation, native preview and source reset; desktop Tools access and Unicode editing reviewed.
 
 ### Library and playlists
 
@@ -127,7 +128,7 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [ ] **F0048** Headphone crossfeed.
 - [ ] **F0049** Verified gapless transitions and crossfade.
 - [ ] **F0050** Advanced DSP chain and measured output quality matrix.
-- [ ] **F0051** Online lyric providers and lyric editing.
+- [ ] **F0051** Online lyric providers and provider integrations. — Local LRC editing is implemented separately; no online provider is contacted.
 - [ ] **F0099** Preserve and edit advanced CUE directives such as CD-TEXT, PREGAP and additional indexes.
 - [ ] **F0106** Explicit 2.1/5.1/7.1 speaker layouts, arbitrary channel matrices, per-channel gain/delay and verified physical surround output. — Earlier speaker-layout choices did not configure native output and now migrate to Original. Basic channel routing and a six-channel PCM-to-stereo downmix are verified separately.
 

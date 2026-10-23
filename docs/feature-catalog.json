@@ -352,9 +352,9 @@
   {
     "Id": "F0051",
     "Area": "Audio",
-    "Description": "Online lyric providers and lyric editing.",
+    "Description": "Online lyric providers and provider integrations.",
     "Status": "pending",
-    "Evidence": ""
+    "Evidence": "Local LRC editing is implemented separately; no online provider is contacted."
   },
   {
     "Id": "F0052",
@@ -747,5 +747,12 @@
     "Description": "One title-bar Settings entry, a central Tools settings page sharing playback actions, and Fluent favorite indicators in the library.",
     "Status": "implemented",
     "Evidence": "SettingsPanel.Tools, MainWindow and LibraryWindow; desktop inspection of the single gear, Tools page, equalizer launch and rounded library favorite control. Build and managed checks pass."
+  },
+  {
+    "Id": "F0108",
+    "Area": "Audio",
+    "Description": "Local synchronized LRC editor with timestamp insertion, session preview and new-copy UTF-8 export.",
+    "Status": "implemented",
+    "Evidence": "LyricFile, LyricsEditorWindow and session generation guards; validated timestamps, limits, Unicode, offset overflow, no overwrite/cancellation, native preview and source reset; desktop Tools access and Unicode editing reviewed."
   }
 ]

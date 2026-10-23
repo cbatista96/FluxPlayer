@@ -147,3 +147,7 @@ Settings, bookmarks, recent files and library data are stored under the current 
 ## Settings and tools
 
 Use the single title-bar gear or Ctrl+, to open Settings. The Tools page contains the audio, video, chapter, subtitle, library and conversion utilities. Opening a tool saves current preferences; a failed save keeps Settings open. Dynamic output, chapter and ReplayGain choices use the same playback actions. Frequently used library, playlist, theme and equalizer shortcuts remain available. Future media tools should be registered in the shared tool menu so they also appear in Settings.
+
+## Edit synchronized lyrics
+
+Open Settings > Tools > Lyrics editor. Open a UTF-8 LRC file or load the current local media's same-name sidecar. Edit text and [minutes:seconds.milliseconds] stamps; Insert current time places a stamp at the caret. Repeated timestamps and integer offset metadata are supported. Apply to current media previews the validated draft for this session; opening another source restores its own lyrics. Save LRC copy writes a new .lrc file and refuses to overwrite any existing file, including the original. To discover the saved copy automatically on a later opening, keep it beside the media with the same base name. The editor supports 2 MB and 10,000 synchronized cues. It does not download lyrics, edit embedded lyrics, or retain enhanced word-level timing.

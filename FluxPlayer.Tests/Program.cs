@@ -87,6 +87,29 @@ internal static class Program
             Assert(lyrics.LineAt(1400) == "First line" && lyrics.LineAt(4900) == "Second line", "Offset"); return Task.CompletedTask;
         });
 
+        await Test("LRC editing: validation, timestamp precision, safe copies, bounds and cancellation", async () =>
+        {
+            string text = "[ar:Artist ñ]\n[offset:100]\n[00:01.250][00:02.500]First ñ\n[01:00.000]Last";
+            Assert(LyricFile.Validate(text).Lines.Count == 3, "Repeated stamps and metadata");
+            Assert(LyricFile.Timestamp(62501) == "[01:02.501]", "Millisecond precision");
+            Assert(LyricFile.Timestamp(LyricFile.MaximumTime) == "[99999:59.999]", "Large timestamp");
+            Assert(LyricFile.Validate("[offset:-9223372036854775808]\n[00:00.000]Safe").Lines[0].Time == LyricFile.MaximumTime, "Offset cannot wrap the timeline");
+            foreach (string invalid in new[] { "No timing", "[00:60.000]Invalid", "[100000:00.000]Too late", "[offset:bad]\n[00:01]Text", "[00:01]null\0", new string('x', LyricFile.MaximumBytes + 1), string.Concat(Enumerable.Repeat("[00:00]x\n", LyricFile.MaximumCues + 1)) })
+            {
+                bool rejected = false; try { LyricFile.Validate(invalid); } catch (InvalidDataException) { rejected = true; }
+                Assert(rejected, "Reject malformed or excessive input");
+            }
+            string folder = Path.Combine(Root, "lyrics-" + Guid.NewGuid().ToString("N")); Directory.CreateDirectory(folder);
+            string copy = Path.Combine(folder, "Lyrics ñ.lrc");
+            await LyricFile.WriteCopyAsync(copy, text); Assert(await LyricFile.ReadAsync(copy) == text, "UTF-8 round trip");
+            bool refused = false; try { await LyricFile.WriteCopyAsync(copy, "[00:00]Replacement"); } catch (IOException) { refused = true; }
+            Assert(refused && File.ReadAllText(copy) == text, "Existing original preserved");
+            using var canceled = new CancellationTokenSource(); canceled.Cancel();
+            string canceledPath = Path.Combine(folder, "canceled.lrc");
+            try { await LyricFile.WriteCopyAsync(canceledPath, text, canceled.Token); } catch (OperationCanceledException) { }
+            Assert(!File.Exists(canceledPath) && Directory.GetFiles(folder, "*.tmp").Length == 0, "Canceled export leaves no partial file");
+        });
+
         await Test("Subtitles: SRT/VTT/ASS, timing and style cleanup", () =>
         {
             string srt = Path.Combine(Root, "test.srt"); File.WriteAllText(srt, "1\n00:00:01,200 --> 00:00:02,500\nHello <b>world</b>\n\n2\n00:00:03,000 --> 00:00:04,000\nSecond\n");
@@ -643,6 +666,10 @@ internal static class Program
                 Assert(layoutEngine.SupportsExtendedEqualizer && vm.EqualizerBandCount == 31, "Native module is present and the layout is preserved");
                 vm.AddFilesToPlaylist(new[] { wav }, true);
                 await Until(() => Task.FromResult(layoutEngine.IsPlaying && layoutEngine.ExtendedEqualizerStatus is { Active: true, CurrentSettingsApplied: true }), 5000);
+                vm.ApplySessionLyrics("[00:00.000]Preview\n[00:02.000]Second line"); vm.UpdateAudioPosition(2500);
+                Assert(vm.LyricLine == "Second line", "Edited session lyrics follow playback time");
+                bool invalidLyrics = false; try { vm.ApplySessionLyrics("Invalid draft"); } catch (InvalidDataException) { invalidLyrics = true; }
+                Assert(invalidLyrics && vm.LyricLine == "Second line", "Invalid lyric drafts preserve active lyrics");
                 vm.SetEqualizerBand(17, 6);
                 await Until(() => Task.FromResult(layoutEngine.ExtendedEqualizerStatus is { Active: true, CurrentSettingsApplied: true }), 3000);
                 Assert(vm.EffectiveEqualizerPreamp is < -6 and > -6.6f, "Combined-response headroom is acknowledged by the actual plugin");
@@ -661,6 +688,9 @@ internal static class Program
                 vm.IsEqualizerEnabled = false;
                 await Until(() => Task.FromResult(layoutEngine.ExtendedEqualizerStatus is { Active: false }), 3000);
                 Assert(layoutEngine.IsPlaying, "Disabling DSP releases the native filter without stopping the source");
+                string nextLyricsSource = Path.Combine(Root, "No lyric sidecar.wav"); File.Copy(wav, nextLyricsSource, true);
+                vm.AddFilesToPlaylist(new[] { nextLyricsSource }, true);
+                Assert(vm.LyricLine == "", "Another source clears session lyric previews");
             }
             finally { vm.StopCommand.Execute(null); await vm.ShutdownAsync(); }
         });

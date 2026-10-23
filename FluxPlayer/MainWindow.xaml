@@ -342,6 +342,7 @@
                         <ContextMenu x:Name="MediaToolsMenu" Opened="MediaToolsMenu_Opened">
                             <MenuItem Header="Media library" Click="LibraryButton_Click" />
                             <MenuItem Header="Equalizer…" Click="EqualizerBtn_Click" />
+                            <MenuItem Header="Lyrics editor…" Click="LyricsEditor_Click" />
                             <MenuItem Header="Batch audio converter…" Click="ConverterButton_Click" />
                             <MenuItem x:Name="OutputDevicesMenu" Header="Output device" />
                             <MenuItem Header="Audio output profiles…" Click="AudioOutputProfiles_Click" />

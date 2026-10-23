@@ -27,6 +27,14 @@ public partial class MainViewModel
     public ObservableCollection<ChapterInfo> Chapters { get; } = new();
     public ObservableCollection<AudioDevice> OutputDevices { get; } = new();
     private LyricsDocument? _lyrics;
+    private int _lyricsGeneration;
+    public void ApplySessionLyrics(string text)
+    {
+        if (!HasMedia) throw new InvalidOperationException("Open media before applying session lyrics.");
+        var document = LyricFile.Validate(text);
+        Interlocked.Increment(ref _lyricsGeneration);
+        _lyrics = document; LyricLine = document.LineAt(Math.Max(0, Engine.GetTime()));
+    }
     private long _lastMetadataRefresh;
     private int _artworkGeneration;
     private string _artworkKey = "";
@@ -44,6 +52,7 @@ public partial class MainViewModel
     partial void OnHasMediaChanged(bool value)
     {
         if (value) return;
+        Interlocked.Increment(ref _lyricsGeneration);
         LoadedSubtitlePath = null;
         Chapters.Clear(); ExternalChapterPath = null;
         NowPlayingTitle = "Open your music"; NowPlayingArtist = "Local files and internet radio";
@@ -71,6 +80,7 @@ public partial class MainViewModel
 
     private void ResetNowPlaying(MediaItem item)
     {
+        Interlocked.Increment(ref _lyricsGeneration);
         LoadedSubtitlePath = null;
         NowPlayingTitle = item.Title;
         NowPlayingArtist = item.Artist;
@@ -164,9 +174,10 @@ public partial class MainViewModel
 
     private async Task LoadLocalLyricsAsync(string source)
     {
+        int generation = Interlocked.Increment(ref _lyricsGeneration);
         if (MediaFormats.IsNetwork(source)) return;
         var lyrics = await Task.Run(() => LyricsDocument.LoadSidecar(source));
-        if (CurrentItem?.FilePath != source) return;
+        if (CurrentItem?.FilePath != source || generation != _lyricsGeneration || _shuttingDown) return;
         _lyrics = lyrics;
         LyricLine = lyrics?.LineAt(0) ?? "";
     }
