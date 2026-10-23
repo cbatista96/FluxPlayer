@@ -62,6 +62,6 @@ public static partial class LyricFile
         finally { if (File.Exists(temporary)) File.Delete(temporary); }
     }
 
-    [GeneratedRegex(@"\[\d+:[^\]\r\n]*\]")] private static partial Regex Candidate();
-    [GeneratedRegex(@"^\[(\d{1,5}):(\d{1,2}(?:\.\d{1,3})?)\]$")] private static partial Regex Stamp();
+    [GeneratedRegex(@"\[[0-9]+:[^\]\r\n]*\]")] private static partial Regex Candidate();
+    [GeneratedRegex(@"^\[([0-9]{1,5}):([0-9]{1,2}(?:\.[0-9]{1,3})?)\]$")] private static partial Regex Stamp();
 }

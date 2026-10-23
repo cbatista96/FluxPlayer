@@ -22,7 +22,7 @@ public sealed partial class LyricsDocument
             foreach (Match match in matches)
             {
                 long minutes = long.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture);
-                double seconds = double.Parse(match.Groups[2].Value, CultureInfo.InvariantCulture);
+                decimal seconds = decimal.Parse(match.Groups[2].Value, CultureInfo.InvariantCulture);
                 if (seconds < 60) lines.Add((minutes * 60_000 + (long)(seconds * 1000), lyric));
             }
         }
@@ -50,8 +50,8 @@ public sealed partial class LyricsDocument
         catch (IOException) { return null; }
         catch (UnauthorizedAccessException) { return null; }
     }
-    [GeneratedRegex(@"\[(\d{1,5}):(\d{1,2}(?:\.\d{1,3})?)\]")]
+    [GeneratedRegex(@"\[([0-9]{1,5}):([0-9]{1,2}(?:\.[0-9]{1,3})?)\]")]
     private static partial Regex Timestamp();
-    [GeneratedRegex(@"\[offset:([+-]?\d+)\]", RegexOptions.IgnoreCase)]
+    [GeneratedRegex(@"\[offset:([+-]?[0-9]+)\]", RegexOptions.IgnoreCase)]
     private static partial Regex Offset();
 }

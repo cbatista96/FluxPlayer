@@ -92,6 +92,8 @@ internal static class Program
             string text = "[ar:Artist ñ]\n[offset:100]\n[00:01.250][00:02.500]First ñ\n[01:00.000]Last";
             Assert(LyricFile.Validate(text).Lines.Count == 3, "Repeated stamps and metadata");
             Assert(LyricFile.Timestamp(62501) == "[01:02.501]", "Millisecond precision");
+            for (int fraction = 0; fraction < 1000; fraction++)
+                Assert(LyricFile.Validate(LyricFile.Timestamp(1000 + fraction) + "Text").Lines[0].Time == 1000 + fraction, "All millisecond fractions round trip exactly");
             Assert(LyricFile.Timestamp(LyricFile.MaximumTime) == "[99999:59.999]", "Large timestamp");
             Assert(LyricFile.Validate("[offset:-9223372036854775808]\n[00:00.000]Safe").Lines[0].Time == LyricFile.MaximumTime, "Offset cannot wrap the timeline");
             foreach (string invalid in new[] { "No timing", "[00:60.000]Invalid", "[100000:00.000]Too late", "[offset:bad]\n[00:01]Text", "[00:01]null\0", new string('x', LyricFile.MaximumBytes + 1), string.Concat(Enumerable.Repeat("[00:00]x\n", LyricFile.MaximumCues + 1)) })
