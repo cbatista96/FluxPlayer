@@ -101,7 +101,9 @@ internal sealed class RemoteMediaRelay : IAsyncDisposable
         {
             try { context.Response.Close(); }
             catch (ObjectDisposedException) { }
-            catch (InvalidOperationException) { context.Response.Abort(); }
+            // Stop() closes the listener, so aborting a response that is still in flight
+            // can find the request queue handle already gone.
+            catch (InvalidOperationException) { try { context.Response.Abort(); } catch (ObjectDisposedException) { } }
         }
     }
     public ValueTask DisposeAsync() => new(_stop ??= Stop());

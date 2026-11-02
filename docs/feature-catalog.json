@@ -2971,8 +2971,8 @@
     "Id": "F0425",
     "Area": "Windows integration",
     "Description": "Persistent account-bound listening outbox with uncertain-send handling.",
-    "Status": "implemented_unverified",
-    "Evidence": "Compiled source; individual functional/backend acceptance remains pending. ListenOutbox: profile-local metadata, deduplication, Pending/Uncertain/Submitted states and claim-before-request. Uncertain sends do not automatically retry. docs/UNTESTED_EXPANSION_HUNDRED.md. Testing deferred for this new batch."
+    "Status": "implemented",
+    "Evidence": "ListenOutbox: profile-local metadata, bounded drafts, deduplication by provider/owner/track/start and Pending/Uncertain/Submitted states. Acceptance covers validation refusals, state transitions, removal, reopening the profile and history selection including the Last.fm fourteen-day window. Submitting to a real account is a separate provider capability. docs/TESTING.md."
   },
   {
     "Id": "F0426",
@@ -3314,15 +3314,15 @@
     "Id": "F0474",
     "Area": "Windows integration",
     "Description": "Session-activated monitor recall for audio and video modes.",
-    "Status": "implemented_unverified",
-    "Evidence": "Compiled source; individual functional/backend acceptance remains pending. DesktopMediaSession.Changed: selected audio/video monitor targets on mode changes, off by default and disabled on panel close. No physical display-capability detection. docs/UNTESTED_EXPANSION_HUNDRED.md. Testing deferred for this new batch."
+    "Status": "implemented",
+    "Evidence": "DesktopMediaSession.Changed: selected audio/video monitor targets on mode changes, off by default and stopped when the panel closes. Acceptance drives real mode changes and checks the recalled target each time. The physical move belongs to F0473. docs/TESTING.md."
   },
   {
     "Id": "F0475",
     "Area": "Windows integration",
     "Description": "Named window-placement presets for desktop and HTPC layouts.",
-    "Status": "implemented_unverified",
-    "Evidence": "Compiled source; individual functional/backend acceptance remains pending. WindowPlacementStore / DesktopMediaWindow: up to sixteen saved finite geometry/topmost presets and work-area clamping. Does not replace full playback/theme profiles. docs/UNTESTED_EXPANSION_HUNDRED.md. Testing deferred for this new batch."
+    "Status": "implemented",
+    "Evidence": "WindowPlacementStore: up to sixteen uniquely named finite geometry/topmost presets. Acceptance covers case-insensitive replacement, refusal of undersized, non-finite and unnamed placements, the seventeenth entry and reopening the profile. Does not replace full placement restoration. docs/TESTING.md."
   },
   {
     "Id": "F0476",

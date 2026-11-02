@@ -2,7 +2,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-    Title="Subtitle timing · FluxPlayer" Width="1060" Height="780" MinWidth="900" MinHeight="720"
+    Title="Subtitle timing · FluxPlayer" Width="1060" Height="780" MinWidth="900" MinHeight="660"
     WindowStartupLocation="CenterOwner" ExtendsContentIntoTitleBar="True">
     <ui:FluentWindow.Resources>
         <Style x:Key="CueCell" TargetType="TextBlock">

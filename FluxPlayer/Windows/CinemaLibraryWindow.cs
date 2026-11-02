@@ -31,7 +31,7 @@ public sealed class CinemaLibraryWindow : FeatureWorkbench
     private int _page, _wallGeneration;
     public CinemaLibraryWindow(Window owner, MainViewModel vm, string kind) : base(owner, vm, "Movies and series", "Local movie and episode records, artwork and viewing status. Add people profiles before assigning credits.")
     {
-        _vm = vm; Width = 1180; Height = 850; MinHeight = 720;
+        _vm = vm; Width = 1180; Height = 850; MinHeight = 660;
         _search = Text("Search titles, synopsis and attributes", "", 240);
         _kind = Choice("Media type", ["All video", "Movie", "Episode"], kind == "Movie" ? 1 : kind == "Episode" ? 2 : 0);
         _series = Field("Series", new ComboBox()); _season = Field("Season", new ComboBox());

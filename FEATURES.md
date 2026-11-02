@@ -1,13 +1,13 @@
 # Feature checklist
 
-**751 implemented · 423 implemented but untested · 6 pending · 1180 tracked capabilities.**
+**754 implemented · 420 implemented but untested · 6 pending · 1180 tracked capabilities.**
 
 Each capability appears exactly once. Completing it moves the same stable ID from Pending to Implemented. A setting or catalog entry alone does not complete a feature. Source references describe the implementation; validation limits are documented in [Testing](docs/TESTING.md).
 New code that has not been built or tested belongs to Implemented — untested, with unchecked boxes representing pending verification. It is excluded from the verified implementation count. Each regression report applies only to its documented source checkpoint.
 
 Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Sync-PublicFeatures.ps1`; CI rejects an outdated checklist.
 
-## Implemented (751)
+## Implemented (754)
 
 ### Workspaces and interface
 
@@ -448,6 +448,9 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [x] **F0268** Loopback TCP/IP JSON-line control. — BUILT WITH CURRENT SOURCE — ACCEPTANCE NOT VERIFIED. LocalControl.TcpLoop: explicit local TCP listener, shared connection slots, request-size/idle limits and token authentication. Verification deferred at user request. docs/UNTESTED_EXTERNAL_MEDIA_THIRTY.md.; Individual local acceptance: FluxPlayer.Tests acceptance suites, docs/LOCAL_BACKEND_ACCEPTANCE.md (scope and limits).
 - [x] **F0269** Opt-in registered-window-message transport controls. — BUILT WITH CURRENT SOURCE — ACCEPTANCE NOT VERIFIED. WindowMessageControl: fixed toggle/stop/next/previous numeric actions, zero lParam and removable HwndSource hook. This desktop-message channel does not use API bearer authentication. Verification deferred at user request. docs/UNTESTED_EXTERNAL_MEDIA_THIRTY.md.; Individual local acceptance: FluxPlayer.Tests acceptance suites, docs/LOCAL_BACKEND_ACCEPTANCE.md (scope and limits).
 - [x] **F0270** A command-line client for the running player's control pipe. — BUILT WITH CURRENT SOURCE — ACCEPTANCE NOT VERIFIED. tools/FluxPlayer-Control.ps1: explicit profile pipe, allowlisted method, JSON parameters and environment session token. Written only; not executed. Verification deferred at user request. docs/UNTESTED_EXTERNAL_MEDIA_THIRTY.md.; Individual local acceptance: FluxPlayer.Tests acceptance suites, docs/LOCAL_BACKEND_ACCEPTANCE.md (scope and limits).
+- [x] **F0425** Persistent account-bound listening outbox with uncertain-send handling. — ListenOutbox: profile-local metadata, bounded drafts, deduplication by provider/owner/track/start and Pending/Uncertain/Submitted states. Acceptance covers validation refusals, state transitions, removal, reopening the profile and history selection including the Last.fm fourteen-day window. Submitting to a real account is a separate provider capability. docs/TESTING.md.
+- [x] **F0474** Session-activated monitor recall for audio and video modes. — DesktopMediaSession.Changed: selected audio/video monitor targets on mode changes, off by default and stopped when the panel closes. Acceptance drives real mode changes and checks the recalled target each time. The physical move belongs to F0473. docs/TESTING.md.
+- [x] **F0475** Named window-placement presets for desktop and HTPC layouts. — WindowPlacementStore: up to sixteen uniquely named finite geometry/topmost presets. Acceptance covers case-insensitive replacement, refusal of undersized, non-finite and unnamed placements, the seventeenth entry and reopening the profile. Does not replace full placement restoration. docs/TESTING.md.
 
 ### Playlists and library
 
@@ -832,7 +835,7 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [x] **F0351** Selected-release back-cover copies from Cover Art Archive. — FluxPlayer.Tests/PublicMetadataAcceptanceChecks.cs; individual functional results in docs/local-completion-test-results.json, with actual controls/native runtime, real isolated servers or live public metadata as scoped in docs/LOCAL_SESSION_ACCEPTANCE.md.
 - [x] **F0352** Reviewed MusicBrainz-to-local tag application. — FluxPlayer.Tests/PublicMetadataAcceptanceChecks.cs; individual functional results in docs/local-completion-test-results.json, with actual controls/native runtime, real isolated servers or live public metadata as scoped in docs/LOCAL_SESSION_ACCEPTANCE.md.
 
-## Implemented — untested (423)
+## Implemented — untested (420)
 
 ### Workspaces and interface
 
@@ -1207,7 +1210,6 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [ ] **F0422** Explicit ListenBrainz playing-now submissions. — Compiled source; individual functional/backend acceptance remains pending. ListenBrainzConnection.Submit(now): identified account and manually chosen metadata, without a background now-playing uploader. docs/UNTESTED_EXPANSION_HUNDRED.md. Testing deferred for this new batch.
 - [ ] **F0423** Reviewed manual historical-listen submissions to ListenBrainz. — Compiled source; individual functional/backend acceptance remains pending. ListeningConnectionWindow / ListenDraft: declared listened time, valid past start, local stage and separate selected-row submission. docs/UNTESTED_EXPANSION_HUNDRED.md. Testing deferred for this new batch.
 - [ ] **F0424** Reviewed eligible local-history staging for ListenBrainz. — Compiled source; individual functional/backend acceptance remains pending. ListenOutbox.FromHistory / ListeningConnectionWindow: up to 100 retained audio sessions passing conservative duration/listening thresholds; no automatic upload. docs/UNTESTED_EXPANSION_HUNDRED.md. Testing deferred for this new batch.
-- [ ] **F0425** Persistent account-bound listening outbox with uncertain-send handling. — Compiled source; individual functional/backend acceptance remains pending. ListenOutbox: profile-local metadata, deduplication, Pending/Uncertain/Submitted states and claim-before-request. Uncertain sends do not automatically retry. docs/UNTESTED_EXPANSION_HUNDRED.md. Testing deferred for this new batch.
 - [ ] **F0426** Read-only recent ListenBrainz listen browsing. — Compiled source; individual functional/backend acceptance remains pending. ListenBrainzConnection.Browse Recent: bounded user listens endpoint and readable metadata rows; no full-history scraping. docs/UNTESTED_EXPANSION_HUNDRED.md. Testing deferred for this new batch.
 - [ ] **F0427** Read-only ListenBrainz playing-now browsing. — Compiled source; individual functional/backend acceptance remains pending. ListenBrainzConnection.Browse Playing now: explicit user playing-now snapshot. docs/UNTESTED_EXPANSION_HUNDRED.md. Testing deferred for this new batch.
 - [ ] **F0428** ListenBrainz top-artist statistics browsing. — Compiled source; individual functional/backend acceptance remains pending. ListenBrainzConnection.Browse Top artists: all-time user statistics, bounded results and listen counts. docs/UNTESTED_EXPANSION_HUNDRED.md. Testing deferred for this new batch.
@@ -1226,8 +1228,6 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [ ] **F0471** Opt-in XInput transport, seek and volume controls. — Compiled source; individual functional/backend acceptance remains pending. DesktopMediaSession.Gamepad/PollPad: selected controller 0–3, edge-triggered mapping and 75 ms polling only while enabled, with player/panel focus gating. docs/UNTESTED_EXPANSION_HUNDRED.md. Testing deferred for this new batch.
 - [ ] **F0472** Playback-scoped Windows display/sleep requests and active-player screensaver handling. — Compiled source; individual functional/backend acceptance remains pending. DesktopMediaSession.SetAwake/Hook: continuous execution flags while playing, release while paused/disabled/closed and handling of owner-window screensaver/monitor-power commands. Not a system-wide screensaver policy. docs/UNTESTED_EXPANSION_HUNDRED.md. Testing deferred for this new batch.
 - [ ] **F0473** Explicit fullscreen placement on a selected monitor. — Compiled source; individual functional/backend acceptance remains pending. MainWindow.MoveExpansionMonitor/EnterExpansionFullscreen: available monitor selection, native window placement and existing video fullscreen path. No display-mode or refresh-rate change. docs/UNTESTED_EXPANSION_HUNDRED.md. Testing deferred for this new batch.
-- [ ] **F0474** Session-activated monitor recall for audio and video modes. — Compiled source; individual functional/backend acceptance remains pending. DesktopMediaSession.Changed: selected audio/video monitor targets on mode changes, off by default and disabled on panel close. No physical display-capability detection. docs/UNTESTED_EXPANSION_HUNDRED.md. Testing deferred for this new batch.
-- [ ] **F0475** Named window-placement presets for desktop and HTPC layouts. — Compiled source; individual functional/backend acceptance remains pending. WindowPlacementStore / DesktopMediaWindow: up to sixteen saved finite geometry/topmost presets and work-area clamping. Does not replace full playback/theme profiles. docs/UNTESTED_EXPANSION_HUNDRED.md. Testing deferred for this new batch.
 - [ ] **F0476** Opt-in native track-change desktop notifications. — Compiled source; individual functional/backend acceptance remains pending. DesktopMediaSession.Changed / MainWindow.ExpansionNotification: existing player tray icon, bounded title/artist text and explicit enable/preview. Windows notification policy still applies. docs/UNTESTED_EXPANSION_HUNDRED.md. Testing deferred for this new batch.
 - [ ] **F0477** Explicit Windows sleep requests. — Compiled source; individual functional/backend acceptance remains pending. DesktopMediaSession.Suspend(false) / DesktopMediaWindow: confirmed user action, no forced suspension, OS policy-dependent result. Not invoked during development. docs/UNTESTED_EXPANSION_HUNDRED.md. Testing deferred for this new batch.
 - [ ] **F0478** Explicit Windows hibernation requests. — Compiled source; individual functional/backend acceptance remains pending. DesktopMediaSession.Suspend(true) / DesktopMediaWindow: confirmed user action and system-managed hibernation availability. Does not change power configuration. docs/UNTESTED_EXPANSION_HUNDRED.md. Testing deferred for this new batch.

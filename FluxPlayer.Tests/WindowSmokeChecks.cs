@@ -74,6 +74,7 @@ internal static class WindowSmokeChecks
             var opened = new List<string>();
             var skipped = new List<string>();
             var broken = new List<string>();
+            var cramped = new List<string>();
             try
             {
                 foreach (var type in types)
@@ -86,10 +87,21 @@ internal static class WindowSmokeChecks
                         window!.ShowActivated = false;
                         window.ShowInTaskbar = false;
                         window.Owner ??= host;
+                        // Wait for the first render: the Fluent title bar finishes wiring
+                        // itself there, and closing before that leaves it holding no handle.
+                        var rendered = new TaskCompletionSource();
+                        window.ContentRendered += (_, _) => rendered.TrySetResult();
                         window.Show();
                         window.UpdateLayout();
+                        await Task.WhenAny(rendered.Task, Task.Delay(TimeSpan.FromSeconds(5)));
+                        Check(rendered.Task.IsCompleted, type.Name + " never rendered its content");
                         await Dispatcher.Yield(DispatcherPriority.Background);
                         opened.Add(type.Name);
+                        // A 1366x768 laptop keeps about 1366x728 of work area once the
+                        // taskbar is there; a window that cannot shrink into it is unusable.
+                        if (window.MinWidth > 1024 || window.MinHeight > 700)
+                            cramped.Add($"{type.Name} ({window.MinWidth:0}x{window.MinHeight:0})");
+
                     }
                     catch (Exception e) when (e is not OutOfMemoryException)
                     {
@@ -115,6 +127,7 @@ internal static class WindowSmokeChecks
             }
             Console.WriteLine($"Window smoke: opened {opened.Count} of {types.Length}" + (skipped.Count == 0 ? "" : "; not constructible: " + string.Join(", ", skipped)));
             Check(broken.Count == 0, "Windows failed to open: " + string.Join(" | ", broken));
+            Check(cramped.Count == 0, "Windows that cannot fit a small laptop screen: " + string.Join(", ", cramped));
             Check(listener.Failures.Count == 0, "Binding failures while opening windows: " + string.Join(" | ", listener.Failures.Take(10)));
             Check(opened.Count == types.Length, $"Only {opened.Count} of {types.Length} windows could be constructed: {string.Join(", ", skipped)}. Teach TrySample about the missing argument instead of losing the coverage.");
         });

@@ -5,7 +5,9 @@ $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $PSScriptRoot
 $catalogPath = Join-Path $projectRoot 'docs/feature-catalog.json'
 $outputPath = Join-Path $projectRoot 'FEATURES.md'
-$items = @(Get-Content -LiteralPath $catalogPath -Raw -Encoding utf8 | ConvertFrom-Json)
+# Windows PowerShell 5.1 returns the parsed array as a single object; the extra pipe
+# enumerates it there and changes nothing under PowerShell 7.
+$items = @(Get-Content -LiteralPath $catalogPath -Raw -Encoding utf8 | ConvertFrom-Json | ForEach-Object { $_ })
 if ($items.Count -eq 0) { throw 'The feature catalog must not be empty.' }
 $ids = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
 foreach ($item in $items) {
