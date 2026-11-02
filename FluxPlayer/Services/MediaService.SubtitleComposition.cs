@@ -9,6 +9,8 @@ public partial class MediaService
     private readonly CancellationTokenSource _subtitleCompositionLifetime = new();
     private CancellationTokenSource? _subtitleTransition;
     private readonly List<string> _externalSubtitleSources = new();
+    /// <summary>The newest external subtitle file attached to the current media, if any.</summary>
+    public string? LastExternalSubtitle => _externalSubtitleSources.Count > 0 ? _externalSubtitleSources[^1] : null;
     private long _sourceGeneration;
     private volatile bool _opaqueVideoSurface;
     public bool UsesSubtitleSoftwareFallback { get; private set; }

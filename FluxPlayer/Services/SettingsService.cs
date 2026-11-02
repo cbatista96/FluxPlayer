@@ -108,8 +108,10 @@ public class SettingsService
             if (name.Length is >= 1 and <= 80 && !name.Any(char.IsControl) && layout != null) libraryViews[name] = layout;
         }
         settings.LibraryColumnViews = libraryViews;
-        // The public source currently ships a single English interface.
-        settings.Language = "English";
+        settings.Language = Localizer.Normalize(settings.Language);
+        settings.WhisperExecutable = (settings.WhisperExecutable ?? "").Length > 1024 ? "" : settings.WhisperExecutable ?? "";
+        settings.WhisperModel = (settings.WhisperModel ?? "").Length > 1024 ? "" : settings.WhisperModel ?? "";
+        settings.WhisperLanguage = WhisperSubtitles.Languages.Contains(settings.WhisperLanguage ?? "") ? settings.WhisperLanguage! : "auto";
         settings.PlaybackHistoryLimit = Math.Clamp(settings.PlaybackHistoryLimit, 1, PlaybackHistoryService.MaximumEntries);
         settings.PlaybackHistoryDays = Math.Clamp(settings.PlaybackHistoryDays, 1, 3650);
         settings.AudioChannels = AudioChannelRouting.Normalize(settings.AudioChannels);

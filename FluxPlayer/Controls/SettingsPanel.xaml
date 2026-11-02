@@ -192,6 +192,7 @@
                                     </StackPanel>
                                     <ComboBox x:Name="LanguageCombo" Grid.Column="1" Width="160" VerticalContentAlignment="Center">
                                         <ComboBoxItem Content="English" Tag="English" />
+                                        <ComboBoxItem Content="Español" Tag="Spanish" />
                                     </ComboBox>
                                 </Grid>
                             </Border>

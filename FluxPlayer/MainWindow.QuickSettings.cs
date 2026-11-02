@@ -23,8 +23,9 @@ public partial class MainWindow
                 _ => CtxLibraryActions
             };
             var clone = (MenuItem)SettingsAction.Clone(entry.Item, item => item.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent, item)));
-            parent.Items.Add(clone); _quickActions.Add((parent, clone));
+            AddQuickAction(parent, clone); _quickActions.Add((parent, clone));
         }
+        RefreshFilterMenu();
         CtxPlaybackModeMenu.Items.Clear();
         foreach (MenuItem mode in PlayerModeMenu.Items.OfType<MenuItem>())
         {

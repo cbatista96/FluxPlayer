@@ -161,7 +161,7 @@ public partial class MainWindow
             case "SleepTimer": CycleSleepTimer(); return true;
             case "ToggleControlLock": SetControlsLocked(!_controlsLocked); return true;
         }
-        return false;
+        return ExecutePotAction(action);
     }
 
     private bool HandleMediaKey(KeyEventArgs e)

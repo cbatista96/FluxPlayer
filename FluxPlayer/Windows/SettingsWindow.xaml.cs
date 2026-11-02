@@ -42,4 +42,8 @@ public partial class SettingsWindow : FluentWindow
     }
 
     public void ShowAboutPage() => EmbeddedSettingsPanel.ShowAboutPage();
+
+    public void ShowPage(FluxPlayer.Controls.SettingsCategory category, string? section = null) => EmbeddedSettingsPanel.ShowPage(category, section);
+
+    public void ApplyLanguage() => EmbeddedSettingsPanel.ApplyLanguage();
 }

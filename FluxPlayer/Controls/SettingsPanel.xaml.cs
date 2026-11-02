@@ -75,6 +75,39 @@ public partial class SettingsPanel : UserControl
         }
     }
 
+    /// <summary>Shows the page that holds every option of <paramref name="category"/>, optionally scrolled to one section.</summary>
+    public void ShowPage(SettingsCategory category, string? section = null)
+    {
+        int idx = category switch
+        {
+            SettingsCategory.General => 0, SettingsCategory.Playback => 1, SettingsCategory.Video => 2, SettingsCategory.Audio => 3,
+            SettingsCategory.Subtitles => 4, SettingsCategory.Library => 5, SettingsCategory.Files => 6,
+            SettingsCategory.Keyboard => 7, SettingsCategory.Mouse => 8, _ => -1
+        };
+        if (idx < 0 || idx >= CategoryList.Items.Count) return;
+        CategoryList.SelectedIndex = idx;
+        CategoryList.ScrollIntoView(CategoryList.Items[idx]);
+        if (string.IsNullOrWhiteSpace(section)) return;
+        // The tool sections are generated after the page is built, so wait for layout before looking for the heading.
+        Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Loaded, () =>
+        {
+            if (FindHeading(_pages[idx], section) is { } heading) heading.BringIntoView();
+        });
+    }
+
+    private static TextBlock? FindHeading(DependencyObject root, string section)
+    {
+        string translated = Localizer.T(section);
+        foreach (object child in LogicalTreeHelper.GetChildren(root))
+        {
+            if (child is TextBlock block && (block.Text == section || block.Text == translated)) return block;
+            if (child is DependencyObject node && FindHeading(node, section) is { } found) return found;
+        }
+        return null;
+    }
+
+    public void ApplyLanguage() => Localizer.Apply(this);
+
     private void CategoryList_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (_pages == null) return;
@@ -410,7 +443,7 @@ public partial class SettingsPanel : UserControl
             ("ToggleControlLock", "Lock / unlock controls"),
         };
 
-        foreach (var (k, name) in actions)
+        foreach (var (k, name) in actions.Concat(PotActionCatalog.All))
         {
             _settings.Keybindings.TryGetValue(k, out string? bound);
             _hotkeyItems.Add(new HotkeyItem

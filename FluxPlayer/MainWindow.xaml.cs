@@ -67,6 +67,9 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         InitializeExternalExperience();
         DataContext = _vm;
         _runtimeSettings = _vm.CurrentSettings;
+        Localizer.Use(_runtimeSettings.Language);
+        Localizer.Changed += (_, _) => Dispatcher.BeginInvoke(ApplyInterfaceLanguage);
+        Loaded += (_, _) => ApplyInterfaceLanguage();
 
         if (_vm.MediaPlayer != null)
             _videoRenderer = new VlcWpfRenderer(_vm.Engine, VideoImage);
@@ -1587,6 +1590,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
             _backdropDirty = true;
         };
         _settingsWindow.ReloadFromDisk();
+        _settingsWindow.ApplyLanguage();
         _settingsWindow.Show();
     }
 
@@ -1596,6 +1600,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         var settings = App.Services.GetRequiredService<SettingsService>().Load();
         _vm.ReloadSettingsFromDisk();
         _runtimeSettings = settings;
+        Localizer.Use(settings.Language);
 
         if (_vm.CurrentTheme != settings.Theme)
         {
@@ -2244,6 +2249,9 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         CtxSubDelayPlusItem.InputGestureText = GestureText("SubtitleDelayPlus");
         CtxSubDelayMinusItem.InputGestureText = GestureText("SubtitleDelayMinus");
         RefreshFeatureMenus();
+        RefreshSettingChecks(MainContextMenu);
+        RefreshChoiceChecks();
+        ApplyInterfaceLanguage();
     }
 
     private string GestureText(string action)

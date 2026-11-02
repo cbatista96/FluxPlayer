@@ -119,6 +119,9 @@ public class AppSettings
     public bool SubtitleItalicText { get; set; } = false;
     public bool ShowSubtitlesByDefault { get; set; } = true;
     public string PreferredSubtitleLanguage { get; set; } = "en";
+    public string WhisperExecutable { get; set; } = "";
+    public string WhisperModel { get; set; } = "";
+    public string WhisperLanguage { get; set; } = "auto";
     public int SubtitleDelayStepMs { get; set; } = 100;
     public bool ApplyShadowToSubtitle { get; set; } = true;
     public Dictionary<string, SubtitleStyle> SubtitleStyleProfiles { get; set; } = new(StringComparer.OrdinalIgnoreCase);

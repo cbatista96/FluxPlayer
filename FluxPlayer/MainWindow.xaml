@@ -7,37 +7,88 @@
     <Window.ContextMenu>
         <ContextMenu x:Name="MainContextMenu" Opened="MainContextMenu_Opened">
             <MenuItem Header="Open file..." controls:HotkeyHint.Action="OpenFile" Click="CtxOpenFile_Click">
-                <MenuItem.Icon>
-                    <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="14" />
-                </MenuItem.Icon>
+                <MenuItem.Icon><TextBlock Text="&#xE8E5;" FontFamily="Segoe Fluent Icons" FontSize="14" /></MenuItem.Icon>
             </MenuItem>
-            <MenuItem Header="Open network URL..." controls:HotkeyHint.Action="OpenUrl" Click="CtxOpenUrl_Click">
-                <MenuItem.Icon>
-                    <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="14" />
-                </MenuItem.Icon>
+
+            <MenuItem x:Name="CtxOpenMenu" Header="Open">
+                <MenuItem.Icon><TextBlock Text="&#xE838;" FontFamily="Segoe Fluent Icons" FontSize="14" /></MenuItem.Icon>
+                <MenuItem Header="File(s)..." controls:HotkeyHint.Action="OpenFile" Click="CtxOpenFile_Click" />
+                <MenuItem Header="Network URL..." controls:HotkeyHint.Action="OpenUrl" Click="CtxOpenUrl_Click" />
+                <MenuItem Header="Folder..." Click="BrowseMediaFolder_Click" />
+                <MenuItem Header="File or URL from the clipboard" Click="CtxOpenClipboard_Click" />
+                <Separator />
+                <MenuItem Header="Recent files" Click="CtxRecent_Click" />
+                <MenuItem Header="Reopen the last file" Click="CtxReopenLast_Click" />
+                <Separator />
+                <MenuItem Header="Load subtitle..." Click="CtxLoadSub_Click" />
+                <MenuItem Header="Load external audio..." Click="ExternalAudio_Click" />
+                <Separator />
+                <MenuItem Header="Configure opening files..." Tag="General|Player presentation" Click="CtxConfigure_Click" />
             </MenuItem>
-            <MenuItem Header="Recent files" Click="CtxRecent_Click">
-                <MenuItem.Icon>
-                    <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="14" />
-                </MenuItem.Icon>
+
+            <MenuItem x:Name="CtxBroadcastMenu" Header="Broadcast">
+                <MenuItem.Icon><TextBlock Text="&#xE774;" FontFamily="Segoe Fluent Icons" FontSize="14" /></MenuItem.Icon>
+                <MenuItem Header="Camera and capture..." Click="Capture_Click" />
+                <MenuItem Header="Television, guide and recordings..." Click="Television_Click" />
+                <MenuItem Header="Online sources (yt-dlp)..." Click="OnlineSource_Click" />
+                <MenuItem Header="Cast to a device..." Click="Casting_Click" />
+                <Separator />
+                <MenuItem Header="Configure capture..." Tag="Video|Capture" Click="CtxConfigure_Click" />
             </MenuItem>
+
+            <MenuItem x:Name="CtxLibraryActions" Header="Library and favorites">
+                <MenuItem.Icon><TextBlock Text="&#xE8F1;" FontFamily="Segoe Fluent Icons" FontSize="14" /></MenuItem.Icon>
+                <MenuItem Header="Open the library..." Click="LibraryButton_Click" />
+                <MenuItem Header="Saved playlists..." Click="SavedPlaylists_Click" />
+                <Separator x:Name="CtxLibraryActionSeparator" />
+                <MenuItem x:Name="CtxLibraryConfigItem" Header="Configure library..." Tag="Library" Click="CtxConfigure_Click" />
+            </MenuItem>
+
             <MenuItem Header="Close playback" Click="CtxClose_Click">
-                <MenuItem.Icon>
-                    <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="14" />
-                </MenuItem.Icon>
+                <MenuItem.Icon><TextBlock Text="&#xE711;" FontFamily="Segoe Fluent Icons" FontSize="14" /></MenuItem.Icon>
             </MenuItem>
             <Separator />
 
             <MenuItem x:Name="CtxPlaybackRoot" Header="Play">
-                <MenuItem.Icon>
-                    <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="14" />
-                </MenuItem.Icon>
-                <MenuItem x:Name="CtxPlaybackModeMenu" Header="Playback mode" />
+                <MenuItem.Icon><TextBlock Text="&#xE768;" FontFamily="Segoe Fluent Icons" FontSize="14" /></MenuItem.Icon>
                 <MenuItem Header="Play / pause" controls:HotkeyHint.Action="PlayPause" Click="CtxPlayPause_Click" />
                 <MenuItem Header="Previous" controls:HotkeyHint.Action="PreviousTrack" Click="CtxPrev_Click" />
                 <MenuItem Header="Next" controls:HotkeyHint.Action="NextTrack" Click="CtxNext_Click" />
                 <Separator />
-                <MenuItem Header="Speed">
+                <MenuItem x:Name="CtxBookmarksMenu" Header="Chapter / bookmark">
+                    <MenuItem Header="Add bookmark here" controls:HotkeyHint.Action="AddBookmark" Click="CtxBookmarkAdd_Click" />
+                    <MenuItem Header="Next bookmark" controls:HotkeyHint.Action="NextBookmark" Click="CtxBookmarkNext_Click" />
+                    <MenuItem Header="Previous bookmark" controls:HotkeyHint.Action="PreviousBookmark" Click="CtxBookmarkPrev_Click" />
+                    <Separator x:Name="CtxBookmarkListSeparator" />
+                    <MenuItem x:Name="CtxBookmarkClearItem" Header="Clear all bookmarks" Click="CtxBookmarkClear_Click" />
+                </MenuItem>
+                <MenuItem x:Name="CtxGoToMenu" Header="Go to">
+                    <MenuItem Header="Next frame" controls:HotkeyHint.Action="FrameForward" Click="CtxFrameFwd_Click" />
+                    <Separator />
+                    <MenuItem x:Name="CtxSeekBackItem" Header="Seek backward" Click="CtxSeekBack_Click" />
+                    <MenuItem x:Name="CtxSeekFwdItem" Header="Seek forward" Click="CtxSeekFwd_Click" />
+                    <Separator />
+                    <MenuItem Header="5 s back" Tag="-5" Click="CtxSeekStep_Click" />
+                    <MenuItem Header="5 s forward" Tag="5" Click="CtxSeekStep_Click" />
+                    <MenuItem Header="30 s back" Tag="-30" Click="CtxSeekStep_Click" />
+                    <MenuItem Header="30 s forward" Tag="30" Click="CtxSeekStep_Click" />
+                    <MenuItem Header="1 min back" Tag="-60" Click="CtxSeekStep_Click" />
+                    <MenuItem Header="1 min forward" Tag="60" Click="CtxSeekStep_Click" />
+                    <MenuItem Header="5 min back" Tag="-300" Click="CtxSeekStep_Click" />
+                    <MenuItem Header="5 min forward" Tag="300" Click="CtxSeekStep_Click" />
+                    <Separator />
+                    <MenuItem Header="Start point" Tag="start" Click="CtxSeekPoint_Click" />
+                    <MenuItem Header="Middle point" Tag="middle" Click="CtxSeekPoint_Click" />
+                    <MenuItem Header="30 s before the end" Tag="end" Click="CtxSeekPoint_Click" />
+                    <Separator />
+                    <MenuItem Header="Go to a specific time..." Click="CtxGoToTime_Click" />
+                    <MenuItem Header="Configure seek steps..." Tag="Playback|Chapters and navigation" Click="CtxConfigure_Click" />
+                </MenuItem>
+                <MenuItem Header="Playback speed">
+                    <MenuItem Header="Normal speed" controls:HotkeyHint.Action="SpeedReset" Click="CtxSpeedReset_Click" />
+                    <MenuItem Header="Slower" controls:HotkeyHint.Action="SpeedDown" Click="CtxSpeedDown_Click" />
+                    <MenuItem Header="Faster" controls:HotkeyHint.Action="SpeedUp" Click="CtxSpeedUp_Click" />
+                    <Separator />
                     <MenuItem Header="0.25x" Tag="0.25" Click="CtxSpeed_Click" />
                     <MenuItem Header="0.5x" Tag="0.5" Click="CtxSpeed_Click" />
                     <MenuItem Header="0.75x" Tag="0.75" Click="CtxSpeed_Click" />
@@ -47,171 +98,254 @@
                     <MenuItem Header="1.75x" Tag="1.75" Click="CtxSpeed_Click" />
                     <MenuItem Header="2x" Tag="2.0" Click="CtxSpeed_Click" />
                     <MenuItem Header="3x" Tag="3.0" Click="CtxSpeed_Click" />
+                    <Separator />
+                    <MenuItem Header="Keep the speed between files" IsCheckable="True" Tag="set:RememberPlaybackSpeed" Click="CtxSetting_Click" />
                 </MenuItem>
-                <MenuItem x:Name="CtxSeekBackItem" Header="Seek backward" Click="CtxSeekBack_Click" />
-                <MenuItem x:Name="CtxSeekFwdItem" Header="Seek forward" Click="CtxSeekFwd_Click" />
-                <MenuItem Header="Next frame" controls:HotkeyHint.Action="FrameForward" Click="CtxFrameFwd_Click" />
+                <MenuItem Header="Repeat A-B">
+                    <MenuItem Header="A-B loop" controls:HotkeyHint.Action="ToggleAbLoop" Click="CtxAbLoop_Click" />
+                    <MenuItem Header="Export A-B clip..." Click="CtxExportClip_Click" />
+                </MenuItem>
+                <MenuItem Header="Repeat">
+                    <MenuItem x:Name="CtxRepeatOffItem" Header="Repeat disabled" IsCheckable="True" Click="CtxRepeatOff_Click" />
+                    <MenuItem x:Name="CtxRepeatOneItem" Header="Repeat one" IsCheckable="True" Click="CtxRepeatOne_Click" />
+                    <MenuItem x:Name="CtxRepeatAllItem" Header="Repeat all" IsCheckable="True" Click="CtxRepeatAll_Click" />
+                </MenuItem>
+                <MenuItem x:Name="CtxPlaybackModeMenu" Header="Playback mode" />
                 <Separator />
-                <MenuItem Header="A-B loop" controls:HotkeyHint.Action="ToggleAbLoop" Click="CtxAbLoop_Click" />
-                <MenuItem Header="Export A-B clip..." Click="CtxExportClip_Click" />
-                <MenuItem x:Name="CtxRepeatOffItem" Header="Repeat disabled" IsCheckable="True" Click="CtxRepeatOff_Click" />
-                <MenuItem x:Name="CtxRepeatOneItem" Header="Repeat one" IsCheckable="True" Click="CtxRepeatOne_Click" />
-                <MenuItem x:Name="CtxRepeatAllItem" Header="Repeat all" IsCheckable="True" Click="CtxRepeatAll_Click" />
                 <MenuItem x:Name="CtxShuffleItem" Header="Shuffle playback" IsCheckable="True" Click="CtxShuffle_Click" />
+                <MenuItem Header="Start playing automatically" IsCheckable="True" Tag="set:AutoPlay" Click="CtxSetting_Click" />
+                <MenuItem Header="Remember the last position" IsCheckable="True" Tag="set:ResumeLastPosition" Click="CtxSetting_Click" />
+                <MenuItem Header="Keep the playback history" IsCheckable="True" Tag="set:KeepPlaybackHistory" Click="CtxSetting_Click" />
                 <Separator x:Name="CtxPlaybackActionSeparator" />
-            </MenuItem>
-
-            <MenuItem x:Name="CtxBookmarksMenu" Header="Bookmarks">
-                <MenuItem.Icon>
-                    <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="14" />
-                </MenuItem.Icon>
-                <MenuItem Header="Add bookmark here" controls:HotkeyHint.Action="AddBookmark" Click="CtxBookmarkAdd_Click" />
-                <MenuItem Header="Next bookmark" controls:HotkeyHint.Action="NextBookmark" Click="CtxBookmarkNext_Click" />
-                <MenuItem Header="Previous bookmark" controls:HotkeyHint.Action="PreviousBookmark" Click="CtxBookmarkPrev_Click" />
-                <Separator x:Name="CtxBookmarkListSeparator" />
-                <MenuItem x:Name="CtxBookmarkClearItem" Header="Clear all bookmarks" Click="CtxBookmarkClear_Click" />
-            </MenuItem>
-
-            <MenuItem x:Name="CtxSleepMenu" Header="Sleep timer">
-                <MenuItem.Icon>
-                    <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="14" />
-                </MenuItem.Icon>
-                <MenuItem Header="Disabled" Tag="0" Click="CtxSleep_Click" />
-                <Separator />
-                <MenuItem Header="15 minutes" Tag="15" Click="CtxSleep_Click" />
-                <MenuItem Header="30 minutes" Tag="30" Click="CtxSleep_Click" />
-                <MenuItem Header="45 minutes" Tag="45" Click="CtxSleep_Click" />
-                <MenuItem Header="1 hour" Tag="60" Click="CtxSleep_Click" />
-                <MenuItem Header="1 hour 30 minutes" Tag="90" Click="CtxSleep_Click" />
-                <MenuItem Header="2 hours" Tag="120" Click="CtxSleep_Click" />
-                <Separator />
-                <MenuItem Header="After the current file" Tag="end" Click="CtxSleep_Click" />
+                <MenuItem x:Name="CtxPlaybackConfigItem" Header="Configure playback..." Tag="Playback" Click="CtxConfigure_Click" />
             </MenuItem>
 
             <MenuItem x:Name="CtxSubtitlesRoot" Header="Subtitles">
-                <MenuItem.Icon>
-                    <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="14" />
-                </MenuItem.Icon>
-                <MenuItem Header="Load external subtitle..." Click="CtxLoadSub_Click" />
+                <MenuItem.Icon><TextBlock Text="&#xE8F2;" FontFamily="Segoe Fluent Icons" FontSize="14" /></MenuItem.Icon>
                 <MenuItem x:Name="CtxSubtitleTracks" Header="Subtitle track" />
                 <MenuItem Header="Show / hide" Click="CtxToggleSubs_Click" />
+                <MenuItem Header="Load subtitle..." Click="CtxLoadSub_Click" />
+                <MenuItem Header="Search, edit and synchronize subtitles..." Click="SearchSubtitlesButton_Click" />
+                <MenuItem Header="Copy the current subtitle" Tag="act:CopySubtitle" controls:HotkeyHint.Action="CopySubtitle" Click="CtxAction_Click" />
                 <Separator />
-                <MenuItem x:Name="CtxSubDelayPlusItem" Header="Delay subtitles" Click="CtxSubDelayPlus_Click" />
-                <MenuItem x:Name="CtxSubDelayMinusItem" Header="Advance subtitles" Click="CtxSubDelayMinus_Click" />
-                <MenuItem Header="Reset delay" Click="CtxSubDelayReset_Click" />
+                <MenuItem Header="Subtitle style">
+                    <MenuItem Header="Bold text" IsCheckable="True" Tag="set:SubtitleBoldText" Click="CtxSetting_Click" />
+                    <MenuItem Header="Italic text" IsCheckable="True" Tag="set:SubtitleItalicText" Click="CtxSetting_Click" />
+                    <MenuItem Header="Shadow" IsCheckable="True" Tag="set:ApplyShadowToSubtitle" Click="CtxSetting_Click" />
+                    <Separator />
+                    <MenuItem Header="Configure subtitle style..." Tag="Subtitles|Subtitle appearance" Click="CtxConfigure_Click" />
+                </MenuItem>
+                <MenuItem Header="Synchronize subtitle">
+                    <MenuItem x:Name="CtxSubDelayPlusItem" Header="Delay subtitles" Click="CtxSubDelayPlus_Click" />
+                    <MenuItem x:Name="CtxSubDelayMinusItem" Header="Advance subtitles" Click="CtxSubDelayMinus_Click" />
+                    <MenuItem Header="Reset delay" Click="CtxSubDelayReset_Click" />
+                    <Separator />
+                    <MenuItem Header="Delay +0.5 s" Tag="act:SubtitleSyncPlus500" controls:HotkeyHint.Action="SubtitleSyncPlus500" Click="CtxAction_Click" />
+                    <MenuItem Header="Delay -0.5 s" Tag="act:SubtitleSyncMinus500" controls:HotkeyHint.Action="SubtitleSyncMinus500" Click="CtxAction_Click" />
+                    <MenuItem Header="Delay +5 s" Tag="act:SubtitleSyncPlus5000" controls:HotkeyHint.Action="SubtitleSyncPlus5000" Click="CtxAction_Click" />
+                    <MenuItem Header="Delay -5 s" Tag="act:SubtitleSyncMinus5000" controls:HotkeyHint.Action="SubtitleSyncMinus5000" Click="CtxAction_Click" />
+                    <MenuItem Header="Delay +50 s" Tag="act:SubtitleSyncPlus50000" controls:HotkeyHint.Action="SubtitleSyncPlus50000" Click="CtxAction_Click" />
+                    <MenuItem Header="Delay -50 s" Tag="act:SubtitleSyncMinus50000" controls:HotkeyHint.Action="SubtitleSyncMinus50000" Click="CtxAction_Click" />
+                </MenuItem>
+                <Separator />
+                <MenuItem Header="Load subtitles automatically" IsCheckable="True" Tag="set:AutoLoadSubtitles" Click="CtxSetting_Click" />
+                <MenuItem Header="Show subtitles by default" IsCheckable="True" Tag="set:ShowSubtitlesByDefault" Click="CtxSetting_Click" />
                 <Separator x:Name="CtxSubtitleActionSeparator" />
+                <MenuItem x:Name="CtxSubtitlesConfigItem" Header="Configure subtitles..." Tag="Subtitles" Click="CtxConfigure_Click" />
             </MenuItem>
 
             <MenuItem x:Name="CtxVideoRoot" Header="Video">
-                <MenuItem.Icon>
-                    <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="14" />
-                </MenuItem.Icon>
+                <MenuItem.Icon><TextBlock Text="&#xE714;" FontFamily="Segoe Fluent Icons" FontSize="14" /></MenuItem.Icon>
                 <MenuItem Header="Take snapshot" controls:HotkeyHint.Action="TakeSnapshot" Click="CtxSnapshot_Click" />
+                <MenuItem Header="Copy the current frame" Tag="act:CopyFrame" controls:HotkeyHint.Action="CopyFrame" Click="CtxAction_Click" />
                 <MenuItem x:Name="CtxAmbientItem" Header="Ambient light" IsCheckable="True" controls:HotkeyHint.Action="ToggleAmbientLight" Click="CtxAmbient_Click" />
                 <Separator />
-                <MenuItem Header="Aspect ratio">
-                    <MenuItem Header="Auto" Tag="Auto" Click="CtxAspect_Click" />
-                    <MenuItem Header="16:9" Tag="16:9" Click="CtxAspect_Click" />
-                    <MenuItem Header="4:3" Tag="4:3" Click="CtxAspect_Click" />
-                    <MenuItem Header="21:9" Tag="21:9" Click="CtxAspect_Click" />
-                    <MenuItem Header="1:1" Tag="1:1" Click="CtxAspect_Click" />
-                    <MenuItem Header="Stretch" Tag="Stretch" Click="CtxAspect_Click" />
+                <MenuItem Header="Picture adjustments">
+                    <MenuItem Header="Increase brightness" Click="CtxBrightnessUp_Click" />
+                    <MenuItem Header="Decrease brightness" Click="CtxBrightnessDown_Click" />
+                    <MenuItem Header="Increase contrast" Click="CtxContrastUp_Click" />
+                    <MenuItem Header="Decrease contrast" Click="CtxContrastDown_Click" />
+                    <MenuItem Header="Reset picture" Click="CtxResetVideo_Click" />
+                    <Separator />
+                    <MenuItem Header="Brightness -1%" Tag="act:BrightnessDown1" controls:HotkeyHint.Action="BrightnessDown1" Click="CtxAction_Click" />
+                    <MenuItem Header="Brightness +1%" Tag="act:BrightnessUp1" controls:HotkeyHint.Action="BrightnessUp1" Click="CtxAction_Click" />
+                    <MenuItem Header="Contrast -1%" Tag="act:ContrastDown1" controls:HotkeyHint.Action="ContrastDown1" Click="CtxAction_Click" />
+                    <MenuItem Header="Contrast +1%" Tag="act:ContrastUp1" controls:HotkeyHint.Action="ContrastUp1" Click="CtxAction_Click" />
+                    <MenuItem Header="Saturation -1%" Tag="act:SaturationDown1" controls:HotkeyHint.Action="SaturationDown1" Click="CtxAction_Click" />
+                    <MenuItem Header="Saturation +1%" Tag="act:SaturationUp1" controls:HotkeyHint.Action="SaturationUp1" Click="CtxAction_Click" />
+                    <MenuItem Header="Hue -1%" Tag="act:HueDown1" controls:HotkeyHint.Action="HueDown1" Click="CtxAction_Click" />
+                    <MenuItem Header="Hue +1%" Tag="act:HueUp1" controls:HotkeyHint.Action="HueUp1" Click="CtxAction_Click" />
+                    <Separator />
+                    <MenuItem Header="Picture presets..." Click="PicturePresets_Click" />
                 </MenuItem>
-                <Separator />
-                <MenuItem Header="Increase brightness" Click="CtxBrightnessUp_Click" />
-                <MenuItem Header="Decrease brightness" Click="CtxBrightnessDown_Click" />
-                <MenuItem Header="Increase contrast" Click="CtxContrastUp_Click" />
-                <MenuItem Header="Decrease contrast" Click="CtxContrastDown_Click" />
-                <MenuItem Header="Reset picture" Click="CtxResetVideo_Click" />
+                <MenuItem Header="Crop picture..." Click="VideoCrop_Click" />
+                <MenuItem Header="Deinterlace" IsCheckable="True" Tag="set:DeinterlaceEnabled" Click="CtxSetting_Click" />
+                <MenuItem Header="Hardware decoding" IsCheckable="True" Tag="set:HardwareDecoding" Click="CtxSetting_Click" />
+                <MenuItem Header="Vertical sync" IsCheckable="True" Tag="set:VSync" Click="CtxSetting_Click" />
                 <Separator x:Name="CtxVideoActionSeparator" />
+                <MenuItem x:Name="CtxVideoConfigItem" Header="Configure video..." Tag="Video" Click="CtxConfigure_Click" />
             </MenuItem>
 
             <MenuItem x:Name="CtxAudioRoot" Header="Audio">
-                <MenuItem.Icon>
-                    <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="14" />
-                </MenuItem.Icon>
+                <MenuItem.Icon><TextBlock Text="&#xE767;" FontFamily="Segoe Fluent Icons" FontSize="14" /></MenuItem.Icon>
+                <MenuItem x:Name="CtxAudioTracks" Header="Audio track" />
+                <Separator />
                 <MenuItem x:Name="CtxVolumeUpItem" Header="Volume up" Click="CtxVolumeUp_Click" />
                 <MenuItem x:Name="CtxVolumeDownItem" Header="Volume down" Click="CtxVolumeDown_Click" />
                 <MenuItem x:Name="CtxMuteItem" Header="Mute" IsCheckable="True" controls:HotkeyHint.Action="ToggleMute" Click="CtxMute_Click" />
-                <MenuItem x:Name="CtxAudioTracks" Header="Audio track" />
                 <Separator />
                 <MenuItem Header="Equalizer..." controls:HotkeyHint.Action="ToggleEqualizer" Click="CtxEqualizer_Click" />
+                <MenuItem Header="Normalize volume" IsCheckable="True" Tag="set:NormalizeVolume" Click="CtxSetting_Click" />
+                <MenuItem Header="Allow volume above 100%" IsCheckable="True" Tag="set:BoostVolume" Click="CtxSetting_Click" />
                 <Separator />
-                <MenuItem x:Name="CtxAudioDelayPlusItem" Header="Delay audio" Click="CtxAudioDelayPlus_Click" />
-                <MenuItem x:Name="CtxAudioDelayMinusItem" Header="Advance audio" Click="CtxAudioDelayMinus_Click" />
+                <MenuItem Header="Synchronize audio">
+                    <MenuItem x:Name="CtxAudioDelayPlusItem" Header="Delay audio" Click="CtxAudioDelayPlus_Click" />
+                    <MenuItem x:Name="CtxAudioDelayMinusItem" Header="Advance audio" Click="CtxAudioDelayMinus_Click" />
+                </MenuItem>
                 <Separator x:Name="CtxAudioActionSeparator" />
+                <MenuItem x:Name="CtxAudioConfigItem" Header="Configure audio..." Tag="Audio" Click="CtxConfigure_Click" />
             </MenuItem>
 
-            <MenuItem x:Name="CtxLibraryActions" Header="Library">
-                <MenuItem.Icon><TextBlock Text="&#xE8F1;" FontFamily="Segoe Fluent Icons" FontSize="14" /></MenuItem.Icon>
+            <MenuItem x:Name="CtxFiltersRoot" Header="Filters">
+                <MenuItem.Icon><TextBlock Text="&#xE71C;" FontFamily="Segoe Fluent Icons" FontSize="14" /></MenuItem.Icon>
+                <Separator x:Name="CtxFiltersConfigSep" />
+                <MenuItem Header="Configure filters..." Tag="Audio|Spatial processing" Click="CtxConfigure_Click" />
             </MenuItem>
 
+            <MenuItem x:Name="CtxThemesMenu" Header="Themes">
+                <MenuItem.Icon><TextBlock Text="&#xE790;" FontFamily="Segoe Fluent Icons" FontSize="14" /></MenuItem.Icon>
+                <MenuItem Header="Dark Mica" Tag="DarkMica" IsCheckable="True" Click="ThemeMenuItem_Click" />
+                <MenuItem Header="Light Mica" Tag="LightMica" IsCheckable="True" Click="ThemeMenuItem_Click" />
+                <MenuItem Header="Full Black" Tag="FullBlack" IsCheckable="True" Click="ThemeMenuItem_Click" />
+                <MenuItem Header="Acrylic Blur" Tag="AcrylicBlur" IsCheckable="True" Click="ThemeMenuItem_Click" />
+                <Separator />
+                <MenuItem Header="Configure themes..." Tag="General|Appearance" Click="CtxConfigure_Click" />
+            </MenuItem>
+
+            <MenuItem x:Name="CtxMiscMenu" Header="Miscellaneous">
+                <MenuItem.Icon><TextBlock Text="&#xE712;" FontFamily="Segoe Fluent Icons" FontSize="14" /></MenuItem.Icon>
+                <MenuItem x:Name="CtxLanguageMenu" Header="Interface language" />
+                <MenuItem Header="Always on top">
+                    <MenuItem Header="Never" IsCheckable="True" Tag="set:AlwaysOnTopMode=Never" Click="CtxSetting_Click" />
+                    <MenuItem Header="While playing" IsCheckable="True" Tag="set:AlwaysOnTopMode=WhilePlaying" Click="CtxSetting_Click" />
+                    <MenuItem Header="Always" IsCheckable="True" Tag="set:AlwaysOnTopMode=Always" Click="CtxSetting_Click" />
+                    <MenuItem Header="In fullscreen" IsCheckable="True" Tag="set:AlwaysOnTopMode=Fullscreen" Click="CtxSetting_Click" />
+                </MenuItem>
+                <MenuItem Header="At the end of playback">
+                    <MenuItem Header="Stop" IsCheckable="True" Tag="set:DefaultPlaybackOnEnd=Stop" Click="CtxSetting_Click" />
+                    <MenuItem Header="Repeat" IsCheckable="True" Tag="set:DefaultPlaybackOnEnd=Repeat" Click="CtxSetting_Click" />
+                    <MenuItem Header="Next" IsCheckable="True" Tag="set:DefaultPlaybackOnEnd=Next" Click="CtxSetting_Click" />
+                    <MenuItem Header="Close" IsCheckable="True" Tag="set:DefaultPlaybackOnEnd=Close" Click="CtxSetting_Click" />
+                </MenuItem>
+                <MenuItem Header="When opening files">
+                    <MenuItem Header="Open similar files together" IsCheckable="True" Tag="set:FileOpenBehavior=OpenSimilarTogether" Click="CtxSetting_Click" />
+                    <MenuItem Header="Selected file only" IsCheckable="True" Tag="set:FileOpenBehavior=OpenOnlyOne" Click="CtxSetting_Click" />
+                    <MenuItem Header="Add to playlist" IsCheckable="True" Tag="set:FileOpenBehavior=AddToPlaylist" Click="CtxSetting_Click" />
+                </MenuItem>
+                <MenuItem x:Name="CtxSleepMenu" Header="Sleep timer">
+                    <MenuItem Header="Disabled" Tag="0" Click="CtxSleep_Click" />
+                    <Separator />
+                    <MenuItem Header="15 minutes" Tag="15" Click="CtxSleep_Click" />
+                    <MenuItem Header="30 minutes" Tag="30" Click="CtxSleep_Click" />
+                    <MenuItem Header="45 minutes" Tag="45" Click="CtxSleep_Click" />
+                    <MenuItem Header="1 hour" Tag="60" Click="CtxSleep_Click" />
+                    <MenuItem Header="1 hour 30 minutes" Tag="90" Click="CtxSleep_Click" />
+                    <MenuItem Header="2 hours" Tag="120" Click="CtxSleep_Click" />
+                    <Separator />
+                    <MenuItem Header="After the current file" Tag="end" Click="CtxSleep_Click" />
+                </MenuItem>
+                <Separator />
+                <MenuItem Header="Pause when minimized" IsCheckable="True" Tag="set:PauseOnMinimize" Click="CtxSetting_Click" />
+                <MenuItem Header="Pause when the window loses focus" IsCheckable="True" Tag="set:PauseOnLoseFocus" Click="CtxSetting_Click" />
+                <MenuItem Header="Pause when the screen is locked" IsCheckable="True" Tag="set:PauseWhenScreenLocked" Click="CtxSetting_Click" />
+                <MenuItem Header="Minimize to the tray" IsCheckable="True" Tag="set:MinimizeToTray" Click="CtxSetting_Click" />
+                <MenuItem Header="Show the tray icon" IsCheckable="True" Tag="set:ShowSystemTrayIcon" Click="CtxSetting_Click" />
+                <MenuItem Header="Allow several instances" IsCheckable="True" Tag="set:AllowMultipleInstances" Click="CtxSetting_Click" />
+                <MenuItem Header="Snap to window edges" IsCheckable="True" Tag="set:SnapToWindowEdges" Click="CtxSetting_Click" />
+                <MenuItem Header="Show tooltips" IsCheckable="True" Tag="set:ShowTooltips" Click="CtxSetting_Click" />
+                <Separator />
+                <MenuItem Header="Copy to the clipboard">
+                    <MenuItem Header="Current file name" Tag="name" Click="CtxCopyInfo_Click" />
+                    <MenuItem Header="Current file path" Tag="folder" Click="CtxCopyInfo_Click" />
+                    <MenuItem Header="Current file path and name" Tag="path" Click="CtxCopyInfo_Click" />
+                    <Separator />
+                    <MenuItem Header="Elapsed playback time" Tag="elapsed" Click="CtxCopyInfo_Click" />
+                    <MenuItem Header="Total playback time" Tag="total" Click="CtxCopyInfo_Click" />
+                </MenuItem>
+                <MenuItem Header="Move the current file to the Recycle Bin" Tag="act:DeleteToRecycleBin" controls:HotkeyHint.Action="DeleteToRecycleBin" Click="CtxAction_Click" />
+                <MenuItem Header="Mini player" controls:HotkeyHint.Action="MiniPlayer" Click="CtxMiniPlayer_Click" />
+                <MenuItem Header="Lock controls" controls:HotkeyHint.Action="ToggleControlLock" Click="CtxLock_Click" />
+                <Separator />
+                <MenuItem Header="Configure general..." Tag="General" Click="CtxConfigure_Click" />
+            </MenuItem>
             <Separator />
 
+            <MenuItem Header="Frame size">
+                <MenuItem.Icon><TextBlock Text="&#xE9A6;" FontFamily="Segoe Fluent Icons" FontSize="14" /></MenuItem.Icon>
+                <MenuItem Header="Crop picture..." Click="VideoCrop_Click" />
+                <MenuItem Header="Rotate picture 90°" Click="RotateVideo_Click" />
+                <MenuItem Header="Mirror picture" Click="MirrorVideo_Click" />
+                <MenuItem Header="Flip picture vertically" Click="FlipVideo_Click" />
+                <MenuItem Header="Reset orientation" Click="ResetOrientation_Click" />
+                <Separator />
+                <MenuItem Header="Configure frame size..." Tag="Video|Picture orientation" Click="CtxConfigure_Click" />
+            </MenuItem>
+
+            <MenuItem x:Name="CtxAspectMenu" Header="Aspect ratio">
+                <MenuItem.Icon><TextBlock Text="&#xE7F4;" FontFamily="Segoe Fluent Icons" FontSize="14" /></MenuItem.Icon>
+                <MenuItem Header="Auto" Tag="Auto" IsCheckable="True" Click="CtxAspect_Click" />
+                <MenuItem Header="16:9" Tag="16:9" IsCheckable="True" Click="CtxAspect_Click" />
+                <MenuItem Header="16:10" Tag="16:10" IsCheckable="True" Click="CtxAspect_Click" />
+                <MenuItem Header="4:3" Tag="4:3" IsCheckable="True" Click="CtxAspect_Click" />
+                <MenuItem Header="5:4" Tag="5:4" IsCheckable="True" Click="CtxAspect_Click" />
+                <MenuItem Header="21:9" Tag="21:9" IsCheckable="True" Click="CtxAspect_Click" />
+                <MenuItem Header="1:1" Tag="1:1" IsCheckable="True" Click="CtxAspect_Click" />
+                <MenuItem Header="Stretch" Tag="Stretch" IsCheckable="True" Click="CtxAspect_Click" />
+                <Separator />
+                <MenuItem Header="Next aspect ratio" Tag="act:CycleAspect" controls:HotkeyHint.Action="CycleAspect" Click="CtxAction_Click" />
+                <MenuItem Header="Custom aspect ratio..." Click="CustomAspect_Click" />
+                <MenuItem Header="Remember the aspect ratio" IsCheckable="True" Tag="set:RememberAspectRatio" Click="CtxSetting_Click" />
+                <Separator />
+                <MenuItem Header="Configure aspect ratio..." Tag="Video|Picture" Click="CtxConfigure_Click" />
+            </MenuItem>
+
             <MenuItem Header="Window size">
-                <MenuItem.Icon>
-                    <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="14" />
-                </MenuItem.Icon>
+                <MenuItem.Icon><TextBlock Text="&#xE8A7;" FontFamily="Segoe Fluent Icons" FontSize="14" /></MenuItem.Icon>
                 <MenuItem Header="50%" Tag="0.5" Click="CtxWindowSize_Click" />
                 <MenuItem Header="75%" Tag="0.75" Click="CtxWindowSize_Click" />
                 <MenuItem Header="100% (original)" Tag="1.0" Click="CtxWindowSize_Click" />
                 <MenuItem Header="150%" Tag="1.5" Click="CtxWindowSize_Click" />
                 <MenuItem Header="200%" Tag="2.0" Click="CtxWindowSize_Click" />
                 <Separator />
+                <MenuItem Header="30% of the desktop" Tag="0.30" Click="CtxWindowDesktop_Click" />
+                <MenuItem Header="45% of the desktop" Tag="0.45" Click="CtxWindowDesktop_Click" />
+                <MenuItem Header="60% of the desktop" Tag="0.60" Click="CtxWindowDesktop_Click" />
+                <MenuItem Header="75% of the desktop" Tag="0.75" Click="CtxWindowDesktop_Click" />
+                <Separator />
                 <MenuItem Header="Fit to video aspect ratio" Click="CtxFitVideo_Click" />
+                <Separator />
+                <MenuItem Header="Configure window size..." Tag="General|Player presentation" Click="CtxConfigure_Click" />
             </MenuItem>
 
             <MenuItem Header="Fullscreen" controls:HotkeyHint.Action="ToggleFullscreen" Click="CtxFullscreen_Click">
-                <MenuItem.Icon>
-                    <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="14" />
-                </MenuItem.Icon>
+                <MenuItem.Icon><TextBlock Text="&#xE740;" FontFamily="Segoe Fluent Icons" FontSize="14" /></MenuItem.Icon>
             </MenuItem>
-
-            <MenuItem Header="Mini player" controls:HotkeyHint.Action="MiniPlayer" Click="CtxMiniPlayer_Click">
-                <MenuItem.Icon>
-                    <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="14" />
-                </MenuItem.Icon>
-            </MenuItem>
-
-            <MenuItem Header="Lock controls" controls:HotkeyHint.Action="ToggleControlLock" Click="CtxLock_Click">
-                <MenuItem.Icon>
-                    <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="14" />
-                </MenuItem.Icon>
-            </MenuItem>
-
-            <Separator />
-
-            <MenuItem Header="Show / hide playlist" controls:HotkeyHint.Action="TogglePlaylist" Click="CtxTogglePlaylist_Click">
-                <MenuItem.Icon>
-                    <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="14" />
-                </MenuItem.Icon>
-            </MenuItem>
-            <MenuItem Header="Media information" controls:HotkeyHint.Action="ToggleMediaInfo" Click="CtxMediaInfo_Click">
-                <MenuItem.Icon>
-                    <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="14" />
-                </MenuItem.Icon>
-            </MenuItem>
-
             <Separator />
 
             <MenuItem Header="Preferences..." controls:HotkeyHint.Action="OpenSettings" Click="CtxPreferences_Click">
-                <MenuItem.Icon>
-                    <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="14" />
-                </MenuItem.Icon>
+                <MenuItem.Icon><TextBlock Text="&#xE713;" FontFamily="Segoe Fluent Icons" FontSize="14" /></MenuItem.Icon>
             </MenuItem>
-
+            <MenuItem x:Name="CtxPlaylistItem" Header="Playlist" IsCheckable="True" controls:HotkeyHint.Action="TogglePlaylist" Click="CtxTogglePlaylist_Click" />
+            <MenuItem Header="Playback and system information" controls:HotkeyHint.Action="ToggleMediaInfo" Click="CtxMediaInfo_Click">
+                <MenuItem.Icon><TextBlock Text="&#xE946;" FontFamily="Segoe Fluent Icons" FontSize="14" /></MenuItem.Icon>
+            </MenuItem>
             <MenuItem Header="About..." Click="CtxAbout_Click">
-                <MenuItem.Icon>
-                    <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="14" />
-                </MenuItem.Icon>
+                <MenuItem.Icon><TextBlock Text="&#xE897;" FontFamily="Segoe Fluent Icons" FontSize="14" /></MenuItem.Icon>
             </MenuItem>
-
             <Separator />
 
             <MenuItem Header="Exit" InputGestureText="Alt+F4" Click="CtxExit_Click">
-                <MenuItem.Icon>
-                    <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="14" />
-                </MenuItem.Icon>
+                <MenuItem.Icon><TextBlock Text="&#xE7E8;" FontFamily="Segoe Fluent Icons" FontSize="14" /></MenuItem.Icon>
             </MenuItem>
         </ContextMenu>
     </Window.ContextMenu>
@@ -420,6 +554,11 @@
                             <MenuItem controls:SettingsAction.Category="General" controls:SettingsAction.Section="Player presentation" Header="Player toolbar…" Tag="Player toolbar" Click="PlayerPreferences_Click" />
                             <MenuItem controls:SettingsAction.Category="Mouse" controls:SettingsAction.Section="Directional gestures" Header="Mouse gestures…" Tag="Mouse gestures" Click="PlayerPreferences_Click" />
                             <MenuItem controls:SettingsAction.Category="Mouse" controls:SettingsAction.Section="Touch gestures" Header="Touch gestures…" Tag="Touch gestures" Click="PlayerPreferences_Click" />
+                            <MenuItem Header="Translate subtitles…" Click="TranslateSubtitles_Click" controls:SettingsAction.Category="Subtitles" controls:SettingsAction.Section="Translation and speech" controls:SettingsAction.QuickAccess="True" />
+                            <MenuItem Header="Create subtitles from audio…" Click="WhisperSubtitles_Click" controls:SettingsAction.Category="Subtitles" controls:SettingsAction.Section="Translation and speech" controls:SettingsAction.QuickAccess="True" />
+                            <MenuItem Header="Register file types for this user…" Click="RegisterFileTypes_Click" controls:SettingsAction.Category="General" controls:SettingsAction.Section="Windows integration" />
+                            <MenuItem Header="Remove registered file types…" Click="UnregisterFileTypes_Click" controls:SettingsAction.Category="General" controls:SettingsAction.Section="Windows integration" />
+                            <MenuItem Header="Open Windows Default apps…" Click="DefaultApps_Click" controls:SettingsAction.Category="General" controls:SettingsAction.Section="Windows integration" />
                             <MenuItem controls:SettingsAction.Category="General" controls:SettingsAction.Section="Extensions" Header="Player extensions…" Click="PlayerExtensions_Click" />
                             <MenuItem controls:SettingsAction.Category="General" controls:SettingsAction.Section="Player presentation" Header="Custom video HUD…" Click="HudLayout_Click" />
                             <MenuItem controls:SettingsAction.Category="Video" controls:SettingsAction.Section="Renderer" Header="GPU decoding policy…" Click="GpuPolicy_Click" />

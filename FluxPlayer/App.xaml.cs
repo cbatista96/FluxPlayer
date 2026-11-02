@@ -52,6 +52,11 @@ public partial class App : Application
 
         var settingsService = new SettingsService();
         var startupSettings = settingsService.Load();
+        if (!startupSettings.AllowMultipleInstances)
+        {
+            _singleInstance = SingleInstance.TryOwn(AppProfile.Current.DataDirectory, AppProfile.Current.Sources);
+            if (_singleInstance == null) { Shutdown(0); return; }
+        }
         ThemeService.ApplyDialogPalette(startupSettings.Theme == AppTheme.LightMica);
 
         bool adaptiveCache = FeatureCatalog.IsEnabled(startupSettings, FeatureCatalog.AdaptiveCacheBySource);
@@ -85,8 +90,12 @@ public partial class App : Application
 
         Services = services.BuildServiceProvider();
 
+        // Every window (including tool windows built in code) is translated once it is loaded, and again when the language changes.
+        EventManager.RegisterClassHandler(typeof(Window), FrameworkElement.LoadedEvent, new RoutedEventHandler((sender, _) => Localizer.Apply((Window)sender)));
+        Localizer.Changed += (_, _) => Dispatcher.BeginInvoke(() => { foreach (Window window in Windows) Localizer.Apply(window); });
         var mainWindow = Services.GetRequiredService<MainWindow>();
         mainWindow.Show();
+        _singleInstance?.Listen(paths => Dispatcher.BeginInvoke(() => OpenFromOtherInstance(mainWindow, paths)));
 
         if (AppProfile.Current.Sources.Length > 0)
         {
@@ -100,8 +109,19 @@ public partial class App : Application
         else Services.GetRequiredService<MainViewModel>().RestorePlaylist();
     }
 
+    private SingleInstance? _singleInstance;
+
+    private static void OpenFromOtherInstance(Window window, string[] paths)
+    {
+        var files = paths.Where(path => System.IO.File.Exists(path) || System.IO.Directory.Exists(path) || MediaFormats.IsNetwork(path)).ToArray();
+        if (files.Length > 0) Services.GetRequiredService<MainViewModel>().AddFilesToPlaylist(files, playFirst: true);
+        if (window.WindowState == WindowState.Minimized) window.WindowState = WindowState.Normal;
+        window.Show(); window.Activate();
+    }
+
     protected override void OnExit(ExitEventArgs e)
     {
+        _singleInstance?.Dispose();
 
         if (Services != null)
         {
