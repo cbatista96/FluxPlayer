@@ -16,19 +16,22 @@ public partial class MediaService
         media.AddOption(s.ReplayGainPeakProtection ? ":audio-replay-gain-peak-protection" : ":no-audio-replay-gain-peak-protection");
         if (!string.IsNullOrWhiteSpace(s.PreferredAudioLanguage)) media.AddOption($":audio-language={s.PreferredAudioLanguage}");
         media.AddOption(":sub-language=" + SubtitleLanguages(s));
-        if (!s.AutoLoadSubtitles) media.AddOption(":no-sub-autodetect-file");
+        // When embedded subtitles are ignored, sidecar files are found and attached by SeedExternalSources instead of by VLC.
+        if (!s.AutoLoadSubtitles || s.IgnoreEmbeddedSubtitles) media.AddOption(":no-sub-autodetect-file");
         if (s.DeinterlaceEnabled) media.AddOption($":deinterlace=1");
     }
 
     public static string SubtitleLanguages(AppSettings settings)
     {
-        if (!settings.ShowSubtitlesByDefault) return "none";
+        if (!settings.ShowSubtitlesByDefault || settings.IgnoreEmbeddedSubtitles) return "none";
         var languages = (settings.PreferredSubtitleLanguage ?? "").Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
             .Where(language => language.Length <= 80 && !language.Any(char.IsControl))
             .Select(language => language.ToLowerInvariant()).Distinct().Take(16).ToList();
         // Prefer the requested languages, then allow a track without language metadata.
         // An explicit 'none' remains a deliberate stop condition in VLC's language list.
-        if (!languages.Contains("any") && !languages.Contains("none")) languages.Add("any");
+        // "Only the preferred languages" leaves the list closed, so a video with none of them starts without subtitles.
+        if (!settings.OnlyPreferredSubtitleLanguages && !languages.Contains("any") && !languages.Contains("none")) languages.Add("any");
+        if (languages.Count == 0) return "none";
         return string.Join(',', languages);
     }
 

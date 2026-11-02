@@ -104,7 +104,10 @@ public partial class App : Application
                 .Where(path => System.IO.File.Exists(path) || MediaFormats.IsNetwork(path))
                 .ToArray();
             if (validFiles.Length > 0)
+            {
+                vm.Engine.QueueExternalSources(AppProfile.Current.Subtitles ?? [], AppProfile.Current.Audio ?? []);
                 vm.AddFilesToPlaylist(validFiles, playFirst: true);
+            }
         }
         else Services.GetRequiredService<MainViewModel>().RestorePlaylist();
     }

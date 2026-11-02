@@ -39,6 +39,9 @@ public static partial class Localizer
         Changed?.Invoke(null, EventArgs.Empty);
     }
 
+    /// <summary>The English text an element was built with, even while it shows a translation (<paramref name="shown"/> when it was never translated).</summary>
+    public static string SourceOf(DependencyObject element, string shown) => (string?)element.GetValue(SourceProperty) ?? shown;
+
     /// <summary>Translates a literal, keeping a dynamic tail such as " (+5 s)" or " — 4:12" intact.</summary>
     public static string T(string text)
     {

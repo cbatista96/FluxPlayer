@@ -543,6 +543,28 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
+    private int _abRepeatsDone;
+    partial void OnLoopAChanged(long value) => Interlocked.Exchange(ref _abRepeatsDone, 0);
+    partial void OnLoopBChanged(long value) => Interlocked.Exchange(ref _abRepeatsDone, 0);
+
+    /// <summary>Moves the A-B section to the neighbouring stretch of the same length. Returns false when there is no section or no room.</summary>
+    public bool ShiftSectionRepeat(int direction)
+    {
+        if (!HasMedia || LoopA < 0 || LoopB < 0 || SectionRepeat.Shift(LoopA, LoopB, direction, _mediaService.GetDuration()) is not { } moved) return false;
+        LoopA = moved.A; LoopB = moved.B; AbLoopLabel = "A-B OK";
+        _mediaService.SeekTo(moved.A);
+        return true;
+    }
+
+    /// <summary>Sets the A-B section to the last few seconds that played, so they repeat straight away.</summary>
+    public bool RepeatLastSeconds()
+    {
+        if (!HasMedia || SectionRepeat.Last(_mediaService.GetTime(), _settings.QuickRepeatSeconds) is not { } last) return false;
+        LoopA = last.A; LoopB = last.B; AbLoopLabel = "A-B OK";
+        _mediaService.SeekTo(last.A);
+        return true;
+    }
+
     [RelayCommand]
     private void FrameForward()
     {
@@ -866,10 +888,24 @@ public partial class MainViewModel : ObservableObject
                 && Interlocked.Exchange(ref _abSeekPending, 1) == 0)
             {
                 long target = LoopA;
-                Interlocked.Exchange(ref _abSeekBlockedUntilTicks, nowTicks + TimeSpan.TicksPerMillisecond * 400);
+                int delay = _settings.AbLoopDelayMs;
+                if (SectionRepeat.IsFinished(Interlocked.Increment(ref _abRepeatsDone) - 1, _settings.AbLoopRepeatCount))
+                {
+                    // Played as many times as asked: drop the section and carry on past B.
+                    Interlocked.Exchange(ref _abSeekBlockedUntilTicks, nowTicks + TimeSpan.TicksPerSecond);
+                    Volatile.Write(ref _abSeekPending, 0);
+                    Application.Current?.Dispatcher.InvokeAsync(() => { LoopA = -1; LoopB = -1; AbLoopLabel = "A-B"; });
+                    return;
+                }
+                Interlocked.Exchange(ref _abSeekBlockedUntilTicks, nowTicks + TimeSpan.TicksPerMillisecond * (400L + delay));
                 ThreadPool.QueueUserWorkItem(_ =>
                 {
-                    try { _mediaService.SeekTo(target); }
+                    try
+                    {
+                        if (delay > 0) { _mediaService.Pause(); Thread.Sleep(delay); }
+                        if (LoopA >= 0 && LoopB >= 0) _mediaService.SeekTo(target);
+                        if (delay > 0) _mediaService.Play();
+                    }
                     catch { }
                     finally { Volatile.Write(ref _abSeekPending, 0); }
                 });
@@ -1219,6 +1255,16 @@ public partial class MainViewModel : ObservableObject
         Bookmarks.Clear();
     }
 
+    /// <summary>Replaces the current video's bookmarks with <paramref name="bookmarks"/> (kept sorted and at least a second apart).</summary>
+    public void ReplaceBookmarks(IEnumerable<long> bookmarks)
+    {
+        if (CurrentItem == null) return;
+        var list = BookmarkTools.Normalize(bookmarks);
+        string key = ResumeKey(CurrentItem.FilePath);
+        if (list.Count == 0) _bookmarks.Remove(key); else _bookmarks[key] = list;
+        LoadBookmarksForCurrent();
+    }
+
     public void RemoveBookmark(long ms)
     {
         if (CurrentItem == null) return;
@@ -1284,6 +1330,34 @@ public partial class MainViewModel : ObservableObject
             catch (Exception e) when (e is IOException or UnauthorizedAccessException)
             { ErrorOccurred?.Invoke(this, $"Unable to save the playlist: {e.Message}"); }
         }
+    }
+
+    /// <summary>Reorders the playlist by <paramref name="key"/> (see <see cref="PlaylistOrdering.Keys"/>); the playing item stays playing.</summary>
+    public void SortPlaylist(string key, bool descending)
+    {
+        if (Playlist.Count < 2 || !PlaylistOrdering.Keys.Contains(key)) return;
+        var infos = Playlist.Select(item => new PlaylistSortInfo(item.FilePath, item.Title, item.DurationMs, ModifiedUtc(item))).ToList();
+        var ordered = PlaylistOrdering.Order(infos, key, descending).Select(index => Playlist[index]).ToList();
+        for (int target = 0; target < ordered.Count; target++)
+        {
+            int current = Playlist.IndexOf(ordered[target]);
+            if (current != target) Playlist.Move(current, target);
+        }
+        for (int i = 0; i < Playlist.Count; i++) Playlist[i].Index = i;
+        if (CurrentItem != null) CurrentIndex = Playlist.IndexOf(CurrentItem);
+    }
+
+    private static DateTime ModifiedUtc(MediaItem item)
+    {
+        try { return item.IsNetwork || !File.Exists(item.FilePath) ? DateTime.MinValue : File.GetLastWriteTimeUtc(item.FilePath); }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException) { return DateTime.MinValue; }
+    }
+
+    /// <summary>Moves an entry to the top, up, down or bottom (see <see cref="PlaylistOrdering.Destination"/>).</summary>
+    public void MovePlaylistItem(MediaItem item, int move)
+    {
+        int index = Playlist.IndexOf(item);
+        MovePlaylistItem(index, PlaylistOrdering.Destination(index, Playlist.Count, move));
     }
 
     public void MovePlaylistItem(int oldIndex, int newIndex)

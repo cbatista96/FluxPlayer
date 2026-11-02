@@ -57,6 +57,11 @@ public partial class MainWindow
                 return true;
             case "DeleteToRecycleBin": _ = DeleteCurrentToRecycleBinAsync(); return true;
             case "CopyFilePath": CopyInfo("path"); return true;
+            case "SectionRepeatPrevious": ShiftRepeatSection(-1); return true;
+            case "SectionRepeatNext": ShiftRepeatSection(+1); return true;
+            case "RepeatLastSeconds":
+                ShowActionOsd("", _vm.RepeatLastSeconds() ? $"{Localizer.T("Repeating the last")} {_runtimeSettings.QuickRepeatSeconds} s" : Localizer.T("Nothing to repeat yet"));
+                return true;
         }
         return false;
     }
@@ -68,6 +73,12 @@ public partial class MainWindow
         long target = point switch { 0 => 0, 1 => total / 2, _ => Math.Max(0, total - 30_000) };
         _vm.SeekToMs(target);
         ShowActionOsd("", FormatTimeHMS(target));
+    }
+
+    private void ShiftRepeatSection(int direction)
+    {
+        bool moved = _vm.ShiftSectionRepeat(direction);
+        ShowActionOsd("", moved ? $"{Localizer.T("Loop")} {_vm.AbLoopLabel}" : Localizer.T("No repeat section there"));
     }
 
     private void SyncSubtitles(long deltaMs)
@@ -182,8 +193,8 @@ public partial class MainWindow
             "name" => path == null ? null : network ? path : Path.GetFileName(path),
             "folder" => path == null ? null : network ? path : Path.GetDirectoryName(path),
             "path" => path,
-            "elapsed" => _vm.HasMedia ? _vm.CurrentTime : null,
-            "total" => _vm.HasMedia ? _vm.TotalTime : null,
+            "elapsed" => _vm.HasMedia ? TimeText.Format(_vm.Engine.GetTime(), _runtimeSettings.ClipboardTimeFormat) : null,
+            "total" => _vm.HasMedia ? TimeText.Format(_vm.TotalDurationMs, _runtimeSettings.ClipboardTimeFormat) : null,
             _ => null
         };
         if (string.IsNullOrEmpty(text)) { ShowActionOsd("", Localizer.T("Nothing is playing.")); return; }

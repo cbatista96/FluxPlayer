@@ -43,6 +43,20 @@ public sealed class PhotoLibrary
         }
         return entries.OrderBy(item => item.Name, StringComparer.OrdinalIgnoreCase).ToArray();
     }, token);
+    /// <summary>The EXIF orientation (1–8) of a JPEG/TIFF photo; 1 when it has none or cannot be read.</summary>
+    public static Task<int> Orientation(string path, CancellationToken token) => Task.Run(() =>
+    {
+        try
+        {
+            token.ThrowIfCancellationRequested();
+            if (!Extensions.Contains(Path.GetExtension(path), StringComparer.OrdinalIgnoreCase) || new FileInfo(path).Length > 64 * 1024 * 1024) return 1;
+            using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+            var frame = BitmapDecoder.Create(stream, BitmapCreateOptions.DelayCreation | BitmapCreateOptions.IgnoreColorProfile, BitmapCacheOption.None).Frames[0];
+            return frame.Metadata is BitmapMetadata metadata && metadata.GetQuery("/app1/ifd/{ushort=274}") is ushort value && value is >= 1 and <= 8 ? value : 1;
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException or NotSupportedException or InvalidOperationException or ArgumentException or System.Runtime.InteropServices.COMException) { return 1; }
+    }, token);
+
     public static Task<BitmapSource> Decode(string path, CancellationToken token) => Task.Run<BitmapSource>(() =>
     {
         token.ThrowIfCancellationRequested(); var file = new FileInfo(path);

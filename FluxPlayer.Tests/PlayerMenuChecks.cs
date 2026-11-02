@@ -20,7 +20,7 @@ internal static class PlayerMenuChecks
         var top = menu.Elements().Where(element => element.Name.LocalName == "MenuItem").Select(Header).ToArray();
 
         string[] order = ["Open file...", "Open", "Broadcast", "Library and favorites", "Close playback", "Play", "Subtitles", "Video", "Audio", "Filters", "Themes", "Miscellaneous",
-            "Frame size", "Aspect ratio", "Window size", "Fullscreen", "Preferences...", "Playlist", "Playback and system information", "About...", "Exit"];
+            "Frame size", "Aspect ratio", "Window size", "Fullscreen", "Preferences...", "Customize this menu...", "Playlist", "Playback and system information", "About...", "Exit"];
         Check(top.SequenceEqual(order), "Top-level menu keeps the PotPlayer order: " + string.Join(" | ", top));
 
         // Every area has a "Configure …" entry as its last item, and its target is a real category (and a section that exists when given).

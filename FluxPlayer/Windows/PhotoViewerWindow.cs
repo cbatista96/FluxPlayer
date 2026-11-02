@@ -27,7 +27,7 @@ public sealed class PhotoViewerWindow : FluentWindow
     private CancellationTokenSource? _load;
     private int _index, _generation, _rotation;
     private double _zoom = 1;
-    private bool _closed, _busy;
+    private bool _closed, _busy, _mirror;
     private readonly ToolWindowFullscreen _fullscreen;
     public PhotoViewerWindow(Window owner, AppTheme theme, IReadOnlyList<string> paths, bool slideshow)
     {
@@ -61,14 +61,14 @@ public sealed class PhotoViewerWindow : FluentWindow
         _load?.Cancel(); _gifTimer.Stop(); _gif = null; _gifPlay.Visibility = Visibility.Collapsed; var job = new CancellationTokenSource(); _load = job; int generation = ++_generation; _busy = true; _image.Source = null; _status.Text = "Loading photo…";
         try
         {
-            BitmapSource image;
+            BitmapSource image; int exif = 1;
             if (Path.GetExtension(_paths[_index]).Equals(".gif", StringComparison.OrdinalIgnoreCase))
             {
                 var animation = await GifAnimations.Decode(_paths[_index], job.Token); if (_closed || generation != _generation) return;
                 _gif = animation; _gifIndex = _gifPlays = 0; _gifCompleted = false; image = animation.Frames[0]; _gifPlay.Visibility = Visibility.Visible; _gifPlay.Content = "Pause GIF"; _gifTimer.Interval = TimeSpan.FromMilliseconds(animation.DelaysMs[0]); if (animation.Frames.Length > 1) _gifTimer.Start();
             }
-            else image = await PhotoLibrary.Decode(_paths[_index], job.Token);
-            if (_closed || generation != _generation) return; _image.Source = image; _rotation = 0; _zoom = 1; Fit();
+            else { image = await PhotoLibrary.Decode(_paths[_index], job.Token); exif = await PhotoLibrary.Orientation(_paths[_index], job.Token); }
+            if (_closed || generation != _generation) return; _image.Source = image; (_rotation, _mirror) = ExifOrientation.ToTransform(exif); _zoom = 1; Fit();
         }
         catch (OperationCanceledException) { }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException or ArgumentException or InvalidOperationException or FormatException) { if (!_closed && generation == _generation) { Pause(); _status.Text = "Unable to display this photo: " + ex.Message; } }
@@ -90,7 +90,7 @@ public sealed class PhotoViewerWindow : FluentWindow
         if (!double.IsFinite(width) || !double.IsFinite(height)) return;
         bool turned = _rotation % 180 != 0;
         double factor = Math.Min(width / (turned ? bitmap.PixelHeight : bitmap.PixelWidth), height / (turned ? bitmap.PixelWidth : bitmap.PixelHeight));
-        _image.Width = Math.Max(1, bitmap.PixelWidth * factor * _zoom); _image.Height = Math.Max(1, bitmap.PixelHeight * factor * _zoom); _image.LayoutTransform = new RotateTransform(_rotation);
+        _image.Width = Math.Max(1, bitmap.PixelWidth * factor * _zoom); _image.Height = Math.Max(1, bitmap.PixelHeight * factor * _zoom); _image.LayoutTransform = new TransformGroup { Children = { new ScaleTransform(_mirror ? -1 : 1, 1), new RotateTransform(_rotation) } };
         _status.Text = $"{_index + 1}/{_paths.Length} · {Path.GetFileName(_paths[_index])} · {_zoom:0.##}× · {_rotation}° · Arrows: navigate · Space: slideshow · R: rotate · F/Esc: fullscreen · Ctrl+wheel: zoom";
     }
     private void Toggle() { if (_timer.IsEnabled) Pause(); else if (_image.Source != null) { _timer.Start(); _play.Content = "Pause slideshow"; } }

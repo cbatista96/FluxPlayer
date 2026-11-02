@@ -3,8 +3,10 @@ using System.IO;
 namespace FluxPlayer.Models;
 
 /// <summary>Startup-only data location selection. Profile switches never become media paths.</summary>
-public sealed record AppProfile(string DataDirectory, string CacheDirectory, string[] Sources)
+public sealed record AppProfile(string DataDirectory, string CacheDirectory, string[] Sources, string[]? Subtitles = null, string[]? Audio = null)
 {
+    public const int MaximumExternalFiles = 8;
+
     public static AppProfile Current { get; internal set; } = Parse(Array.Empty<string>(), AppContext.BaseDirectory);
 
     public static AppProfile Parse(IReadOnlyList<string> args, string applicationDirectory,
@@ -14,10 +16,21 @@ public sealed record AppProfile(string DataDirectory, string CacheDirectory, str
         string normalCache = Path.Combine(localDirectory ?? Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FluxPlayer");
         string? selected = null;
         var sources = new List<string>();
+        var subtitles = new List<string>();
+        var audio = new List<string>();
         for (int i = 0; i < args.Count; i++)
         {
             string value = args[i];
             if (value == "--") { sources.AddRange(args.Skip(i + 1)); break; }
+            if (value is "--subtitle" or "--audio")
+            {
+                if (++i >= args.Count || string.IsNullOrWhiteSpace(args[i]) || args[i].StartsWith("--", StringComparison.Ordinal))
+                    throw new ArgumentException($"{value} requires a file name.");
+                var list = value == "--subtitle" ? subtitles : audio;
+                if (list.Count >= MaximumExternalFiles) throw new ArgumentException($"Use {value} at most {MaximumExternalFiles} times.");
+                list.Add(Path.GetFullPath(args[i]));
+                continue;
+            }
             if (value is not ("--portable" or "--profile" or "--data-directory")) { sources.Add(value); continue; }
             if (selected != null) throw new ArgumentException("Choose only one of --portable, --profile or --data-directory.");
             if (value == "--portable") selected = Path.Combine(Path.GetFullPath(applicationDirectory), "Data");
@@ -38,7 +51,7 @@ public sealed record AppProfile(string DataDirectory, string CacheDirectory, str
             }
         }
         if (selected == null && portableMarker) selected = Path.Combine(Path.GetFullPath(applicationDirectory), "Data");
-        return new AppProfile(selected ?? normalData, selected == null ? normalCache : Path.Combine(selected, "Cache"), sources.ToArray());
+        return new AppProfile(selected ?? normalData, selected == null ? normalCache : Path.Combine(selected, "Cache"), sources.ToArray(), subtitles.ToArray(), audio.ToArray());
     }
 
     private static bool IsReservedName(string name)

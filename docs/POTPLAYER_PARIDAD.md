@@ -230,3 +230,28 @@ El archivo tiene 191 versiones y 691 líneas «Added». Las leí todas. **El est
 **Falta y necesita otro motor o hardware:** reproducción de 180° y 360° (261021, 191211), tono HDR y RTX Video HDR (250625, 240305), super resolución por GPU (230405), sombreadores de píxel (201209), 3D en vivo, doblar la tasa de cuadros con mejor calidad (261021), DXVA específico, libass propio (260401, 250226), ARIB y teletexto DVB, DVD/Blu-ray, captura de juegos/pantalla, BDA.
 
 **Hecho en esta entrega:** modos de desentrelazado (11 modos de LibVLC en menú y Ajustes) e inicio con Windows (clave Run del usuario; probada en una clave de pruebas).
+
+## 14. Entrega 3: las 13 funciones del registro que no necesitaban otro motor
+
+Estado de cada una. «Probado en la app» significa que se ejecutó la aplicación real y se vio el resultado; «probado con tests» que la lógica pura tiene pruebas automáticas pero la función completa no se ejecutó de principio a fin.
+
+| # | Función | Dónde está | Estado |
+|---|---|---|---|
+| 1 | Mantener pulsado para cambiar la velocidad | Ajustes › Ratón (velocidad y tiempo de pulsación) | Probado en la app: sube a 3x al mantener y vuelve a 1x al soltar sin pausar |
+| 2 | Repetición de sección: número de repeticiones, pausa entre repeticiones, sección anterior/siguiente, repetir los últimos segundos | Ajustes › Reproducción › Repetición de sección; menú Reproducir › Repetir A-B; acciones con atajo configurable | Número de repeticiones y pausa probados en la app (con 2 repeticiones el bucle se borró solo y la reproducción siguió); anterior/siguiente y últimos segundos probados con tests |
+| 3 | Ignorar subtítulos incrustados; solo idiomas preferidos | Ajustes › Subtítulos | Probado con tests (selección de idioma y búsqueda de archivos). No se probó con un vídeo con subtítulos incrustados |
+| 4 | Doble clic distinto en el tercio izquierdo y derecho | Ajustes › Ratón | Probado en la app (el tercio izquierdo retrocede) |
+| 5 | Rueda lateral y arrastrar con Ctrl/Alt/Mayús (mover imagen, ampliar, altura de subtítulos) | Ajustes › Ratón | Probado con tests (aritmética). No se probó con una rueda inclinable ni con el arrastre real |
+| 6 | Carpetas de subtítulos y de audio; `--subtitle` y `--audio` en la línea de comandos | Ajustes › Subtítulos; línea de comandos | `--subtitle` probado en la app; carpetas y `--audio` probados con tests. Con una segunda instancia (modo de instancia única) los archivos de `--subtitle`/`--audio` no se transmiten |
+| 7 | Lista: ordenar por nombre natural, fecha, extensión, duración, carpeta o invertir; mover; copiar rutas y nombre; filtrar | Menú del botón derecho sobre la lista; cuadro de filtro sobre la lista | Menú y cuadro de filtro vistos en la app; orden y filtro probados con tests. **No hecho:** vista de miniaturas |
+| 8 | Formato de tiempo al copiar; guardar y cargar marcadores en un archivo; filtrar y mover marcadores en lote | Ajustes › Reproducción; Reproducir › Capítulo / marcador › Administrar marcadores | Ventana abierta en la app; lógica probada con tests |
+| 9 | Pantalla completa en otra pantalla; oscurecer las demás; mantener la ventana en pantalla | Ajustes › Vídeo y General | Probado con tests (elección de pantalla y geometría). **No probado con más de un monitor** |
+| 10 | Girar JPEG según EXIF; color detrás del vídeo; tamaño máximo de ventana respecto a la pantalla | Visor de fotos; Ajustes › Vídeo y General | Probado con tests. No se abrió una foto con EXIF |
+| 11 | Buscador en Ajustes; ordenar y filtrar los atajos | Ajustes (cuadro sobre las categorías) y Teclado | Buscador probado en la app (encuentra y salta a la opción); orden/filtro de atajos no se probaron en la app |
+| 12 | Menú contextual personalizable | Menú › Personalizar este menú…; Ajustes › General | Probado en la app (se ocultaron dos entradas; las de «Configurar» y «Preferencias» no se pueden ocultar) |
+| 13 | Duración máxima de un subtítulo; quitar el texto para personas con discapacidad auditiva | Ajustes › Subtítulos | Quitar texto de sonidos probado en la app; duración máxima probada con tests. Se aplica a archivos de subtítulos externos (se usa una copia limpia en la caché; el original no se toca) |
+
+Notas:
+- La suite gestionada pasa (576 pruebas). Esta entrega suma una prueba que cubre todos los modelos nuevos.
+- La orientación EXIF se aplica siempre; no tiene ajuste porque es un metadato que el resto de visores también respeta.
+- Se corrigió un error de codificación que dejaba «sesiÃ³n» en lugar de «sesión» en la cadena en español de «Iniciar con Windows».

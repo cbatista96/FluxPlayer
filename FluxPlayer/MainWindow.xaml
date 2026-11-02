@@ -59,6 +59,7 @@
                     <MenuItem Header="Add bookmark here" controls:HotkeyHint.Action="AddBookmark" Click="CtxBookmarkAdd_Click" />
                     <MenuItem Header="Next bookmark" controls:HotkeyHint.Action="NextBookmark" Click="CtxBookmarkNext_Click" />
                     <MenuItem Header="Previous bookmark" controls:HotkeyHint.Action="PreviousBookmark" Click="CtxBookmarkPrev_Click" />
+                    <MenuItem Header="Manage bookmarks..." Click="CtxBookmarkManage_Click" />
                     <Separator x:Name="CtxBookmarkListSeparator" />
                     <MenuItem x:Name="CtxBookmarkClearItem" Header="Clear all bookmarks" Click="CtxBookmarkClear_Click" />
                 </MenuItem>
@@ -103,6 +104,9 @@
                 </MenuItem>
                 <MenuItem Header="Repeat A-B">
                     <MenuItem Header="A-B loop" controls:HotkeyHint.Action="ToggleAbLoop" Click="CtxAbLoop_Click" />
+                    <MenuItem Header="Repeat the last few seconds" Tag="act:RepeatLastSeconds" controls:HotkeyHint.Action="RepeatLastSeconds" Click="CtxAction_Click" />
+                    <MenuItem Header="Previous repeat section" Tag="act:SectionRepeatPrevious" controls:HotkeyHint.Action="SectionRepeatPrevious" Click="CtxAction_Click" />
+                    <MenuItem Header="Next repeat section" Tag="act:SectionRepeatNext" controls:HotkeyHint.Action="SectionRepeatNext" Click="CtxAction_Click" />
                     <MenuItem Header="Export A-B clip..." Click="CtxExportClip_Click" />
                 </MenuItem>
                 <MenuItem Header="Repeat">
@@ -349,6 +353,7 @@
             <MenuItem Header="Preferences..." controls:HotkeyHint.Action="OpenSettings" Click="CtxPreferences_Click">
                 <MenuItem.Icon><TextBlock Text="&#xE713;" FontFamily="Segoe Fluent Icons" FontSize="14" /></MenuItem.Icon>
             </MenuItem>
+            <MenuItem Header="Customize this menu..." Click="CtxCustomizeMenu_Click" />
             <MenuItem x:Name="CtxPlaylistItem" Header="Playlist" IsCheckable="True" controls:HotkeyHint.Action="TogglePlaylist" Click="CtxTogglePlaylist_Click" />
             <MenuItem Header="Playback and system information" controls:HotkeyHint.Action="ToggleMediaInfo" Click="CtxMediaInfo_Click">
                 <MenuItem.Icon><TextBlock Text="&#xE946;" FontFamily="Segoe Fluent Icons" FontSize="14" /></MenuItem.Icon>
@@ -753,7 +758,7 @@
                     </Border>
                 </Grid>
 
-                <Grid x:Name="VideoMouseOverlay" Background="Transparent" MouseDown="VideoOverlay_MouseDown" MouseLeftButtonDown="VideoOverlay_MouseLeftButtonDown" MouseMove="VideoOverlay_MouseMoveDrag" MouseWheel="VideoOverlay_MouseWheel" />
+                <Grid x:Name="VideoMouseOverlay" Background="Transparent" MouseDown="VideoOverlay_MouseDown" MouseLeftButtonDown="VideoOverlay_MouseLeftButtonDown" MouseLeftButtonUp="VideoOverlay_MouseLeftButtonUp" LostMouseCapture="VideoOverlay_LostMouseCapture" MouseMove="VideoOverlay_MouseMoveDrag" MouseWheel="VideoOverlay_MouseWheel" />
 
                 <controls:AudioNowPlaying x:Name="AudioSurface" Visibility="Collapsed" />
                 <Canvas x:Name="CustomHudCanvas" Visibility="Collapsed" ClipToBounds="True" Panel.ZIndex="20" />
@@ -919,6 +924,7 @@
                     </Grid.RowDefinitions>
 
                     <Border Grid.Row="0" Padding="12,10,10,10" BorderBrush="Transparent" BorderThickness="0">
+                      <StackPanel>
                         <Grid>
                             <TextBlock Text="Playlist" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource PlayerPrimaryForegroundBrush}" VerticalAlignment="Center" />
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
@@ -933,6 +939,8 @@
                                 </Button>
                             </StackPanel>
                         </Grid>
+                        <TextBox x:Name="PlaylistFilterBox" Margin="0,8,0,0" Height="28" FontSize="12" VerticalContentAlignment="Center" MaxLength="120" ToolTip="Filter the playlist by name or folder" TextChanged="PlaylistFilterBox_TextChanged" />
+                      </StackPanel>
                     </Border>
 
                     <ListBox Grid.Row="1" x:Name="PlaylistBox" ItemsSource="{Binding Playlist}" SelectedItem="{Binding CurrentItem, Mode=OneWay}" Background="Transparent" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.ScrollUnit="Pixel" ItemContainerStyle="{StaticResource PlaylistItemStyle}" MouseDoubleClick="PlaylistBox_MouseDoubleClick" AllowDrop="True" PreviewMouseLeftButtonDown="PlaylistBox_PreviewMouseLeftButtonDown" PreviewMouseMove="PlaylistBox_PreviewMouseMove" DragOver="PlaylistBox_DragOver" DragLeave="PlaylistBox_DragLeave" Drop="PlaylistBox_Drop" PreviewMouseRightButtonDown="PlaylistBox_PreviewMouseRightButtonDown" ContextMenuService.IsEnabled="False" ContextMenuOpening="PlaylistBox_ContextMenuOpening">
@@ -950,6 +958,24 @@
                                 </MenuItem>
                                 <MenuItem x:Name="PlCtxCopy" Header="Copy path" Click="PlCtxCopy_Click">
                                     <MenuItem.Icon><TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="14" /></MenuItem.Icon>
+                                </MenuItem>
+                                <Separator />
+                                <MenuItem x:Name="PlCtxCopyName" Header="Copy file name" Click="PlCtxCopyName_Click" />
+                                <MenuItem x:Name="PlCtxCopyAll" Header="Copy all paths" Click="PlCtxCopyAll_Click" />
+                                <MenuItem x:Name="PlCtxMove" Header="Move">
+                                    <MenuItem Header="To the top" Tag="0" Click="PlCtxMove_Click" />
+                                    <MenuItem Header="Up" Tag="1" Click="PlCtxMove_Click" />
+                                    <MenuItem Header="Down" Tag="2" Click="PlCtxMove_Click" />
+                                    <MenuItem Header="To the bottom" Tag="3" Click="PlCtxMove_Click" />
+                                </MenuItem>
+                                <MenuItem Header="Sort the playlist">
+                                    <MenuItem Header="By name" Tag="Name|A" Click="PlCtxSort_Click" />
+                                    <MenuItem Header="By date modified (oldest first)" Tag="Date|A" Click="PlCtxSort_Click" />
+                                    <MenuItem Header="By date modified (newest first)" Tag="Date|D" Click="PlCtxSort_Click" />
+                                    <MenuItem Header="By extension" Tag="Extension|A" Click="PlCtxSort_Click" />
+                                    <MenuItem Header="By duration" Tag="Duration|A" Click="PlCtxSort_Click" />
+                                    <MenuItem Header="By folder" Tag="Folder|A" Click="PlCtxSort_Click" />
+                                    <MenuItem Header="Reverse the order" Tag="Reverse|A" Click="PlCtxSort_Click" />
                                 </MenuItem>
                                 <Separator />
                                 <MenuItem x:Name="PlCtxRemove" Header="Remove from playlist" Click="PlCtxRemove_Click">

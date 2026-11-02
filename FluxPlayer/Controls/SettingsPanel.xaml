@@ -87,12 +87,20 @@
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
 
+                        <TextBox Grid.Row="1" x:Name="SettingsSearchBox" Margin="10,0,10,8" Height="36" MaxLength="80" VerticalContentAlignment="Center" ToolTip="Search the settings" TextChanged="SettingsSearchBox_TextChanged" PreviewKeyDown="SettingsSearchBox_PreviewKeyDown" />
+                        <Popup x:Name="SettingsSearchPopup" PlacementTarget="{Binding ElementName=SettingsSearchBox}" Placement="Bottom" StaysOpen="False" AllowsTransparency="True" Focusable="False">
+                            <Border Background="{DynamicResource SolidBackgroundFillColorBaseBrush}" BorderBrush="{DynamicResource FxDividerBrush}" BorderThickness="1" CornerRadius="6" Padding="4" MaxHeight="360" Margin="0,4,0,0">
+                                <ListBox x:Name="SettingsSearchResults" BorderThickness="0" Background="Transparent" Width="360" PreviewMouseLeftButtonUp="SettingsSearchResults_Click" />
+                            </Border>
+                        </Popup>
+
                         <TextBlock Grid.Row="0" Text="" FontFamily="Segoe Fluent Icons" FontSize="28" Foreground="{DynamicResource FxAccentTextBrush}" HorizontalAlignment="Center" Margin="0,18,0,12" />
 
-                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
                             <ListBox x:Name="CategoryList" Background="Transparent" BorderThickness="0" SelectionChanged="CategoryList_SelectionChanged" SelectedIndex="0">
                                 <ListBox.ItemContainerStyle>
                                     <Style TargetType="ListBoxItem">
@@ -253,6 +261,39 @@
                                         <ComboBoxItem Content="Remember when closing" Tag="Remember" />
                                         <ComboBoxItem Content="Fit to video (100%)" Tag="FitVideo" />
                                     </ComboBox>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Largest window size (% of the screen)" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="When the window fits itself to a video, it will not be bigger than this share of the screen (50–100); larger videos open maximized" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <TextBox x:Name="WindowLimitBox" Grid.Column="1" Width="80" Height="32" VerticalContentAlignment="Center" Text="97" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Keep the window on screen" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="If the window is dragged mostly off the screen, it is brought back when you let go" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="KeepOnScreenToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Right-click menu" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Choose which entries appear in the menu; the ones that open Settings always stay" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <Button Grid.Column="1" Content="Customize this menu..." Style="{StaticResource ActionBtn}" Click="CustomizeMenu_Click" />
                                 </Grid>
                             </Border>
 
@@ -523,6 +564,55 @@
                                 <Grid>
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                                     <StackPanel>
+                                        <TextBlock Text="Time format when copying" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="How the elapsed and total time are written when copied to the clipboard" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="ClipboardTimeCombo" Grid.Column="1" Width="200" VerticalContentAlignment="Center">
+                                        <ComboBoxItem Content="00:01:05" Tag="Clock" />
+                                        <ComboBoxItem Content="00:01:05.250" Tag="ClockMilliseconds" />
+                                        <ComboBoxItem Content="65.25 (seconds)" Tag="Seconds" />
+                                    </ComboBox>
+                                </Grid>
+                            </Border>
+
+                            <TextBlock Text="Section repeat" Style="{StaticResource SectionHdr}" Margin="0,18,0,8" />
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Repeat count" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="How many times the A-B section plays before normal playback resumes (0 repeats it until you clear it)" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <TextBox x:Name="AbRepeatCountBox" Grid.Column="1" Width="80" Height="32" VerticalContentAlignment="Center" Text="0" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Pause between repeats (milliseconds)" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Playback waits this long before going back to A, for example to repeat a phrase aloud" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <TextBox x:Name="AbRepeatDelayBox" Grid.Column="1" Width="80" Height="32" VerticalContentAlignment="Center" Text="0" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Quick repeat length (seconds)" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="The quick repeat action loops this many seconds before the current position" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <TextBox x:Name="QuickRepeatBox" Grid.Column="1" Width="80" Height="32" VerticalContentAlignment="Center" Text="5" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
                                         <TextBlock Text="Repeat mode" Style="{StaticResource OptTitle}" />
                                         <TextBlock Text="How to repeat the playlist when it ends" Style="{StaticResource OptSub}" />
                                     </StackPanel>
@@ -771,6 +861,43 @@
                                 </Grid>
                             </Border>
 
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Fullscreen monitor" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Which screen fullscreen uses when you have more than one" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="FullscreenMonitorCombo" Grid.Column="1" Width="220" VerticalContentAlignment="Center">
+                                        <ComboBoxItem Content="The screen the player is on" Tag="Current" />
+                                        <ComboBoxItem Content="The main screen" Tag="Primary" />
+                                        <ComboBoxItem Content="The next screen" Tag="Other" />
+                                    </ComboBox>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Black out the other screens in fullscreen" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Covers the screens the video is not on with black, like a cinema" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="BlackOutMonitorsToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Colour behind the video" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Shown around videos that do not fill the window, as #RRGGBB" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <TextBox x:Name="VideoBackgroundBox" Grid.Column="1" Width="100" Height="32" VerticalContentAlignment="Center" MaxLength="7" Text="#000000" />
+                                </Grid>
+                            </Border>
+
                             <TextBlock Text="Picture settings" Style="{StaticResource SubsectionHdr}" />
 
                             <Border Style="{StaticResource OptionCard}">
@@ -976,6 +1103,66 @@
                                 <Grid>
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                                     <StackPanel>
+                                        <TextBlock Text="Ignore subtitles inside the video" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Only subtitle files next to the video or in the folders below are used automatically" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="IgnoreEmbeddedSubsToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Only use the preferred subtitle languages" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="If none of the preferred languages is available, no subtitle is chosen" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="OnlyPreferredSubsToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <StackPanel>
+                                    <TextBlock Text="Extra subtitle folders" Style="{StaticResource OptTitle}" />
+                                    <TextBlock Text="Folders searched for a subtitle named like the video, separated by ;  (full paths)" Style="{StaticResource OptSub}" />
+                                    <TextBox x:Name="SubtitleFoldersBox" Height="32" Margin="0,8,0,0" VerticalContentAlignment="Center" MaxLength="2048" />
+                                </StackPanel>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <StackPanel>
+                                    <TextBlock Text="Extra audio track folders" Style="{StaticResource OptTitle}" />
+                                    <TextBlock Text="Folders searched for an audio file named like the video, added as another audio track, separated by ;" Style="{StaticResource OptSub}" />
+                                    <TextBox x:Name="AudioFoldersBox" Height="32" Margin="0,8,0,0" VerticalContentAlignment="Center" MaxLength="2048" />
+                                </StackPanel>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Remove hearing-impaired text" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Drops sound descriptions, music lines and speaker names from subtitle files; a cleaned copy is used and the original is never changed" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="RemoveHearingImpairedToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Longest time a subtitle stays on screen (seconds)" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Cuts over-long subtitles in subtitle files; 0 keeps the original timing" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <TextBox x:Name="MaxSubtitleSecondsBox" Grid.Column="1" Width="80" Height="32" VerticalContentAlignment="Center" Text="0" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
                                         <TextBlock Text="Preferred language" Style="{StaticResource OptTitle}" />
                                         <TextBlock Text="ISO 639-1 code (en, es, pt, ja, ...)" Style="{StaticResource OptSub}" />
                                     </StackPanel>
@@ -1154,6 +1341,15 @@
                                         <TextBlock Text="Actions" Style="{StaticResource OptTitle}" VerticalAlignment="Center" />
                                         <Button Grid.Column="1" Content="Restore defaults" Style="{StaticResource ActionBtn}" Click="ResetHotkeysBtn_Click" />
                                     </Grid>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                        <TextBox x:Name="HotkeyFilterBox" Width="200" Height="30" VerticalContentAlignment="Center" MaxLength="60" ToolTip="Filter the actions" TextChanged="HotkeyFilterBox_TextChanged" />
+                                        <ComboBox x:Name="HotkeySortCombo" Width="190" Margin="8,0,0,0" VerticalContentAlignment="Center" SelectedIndex="0" SelectionChanged="HotkeySortCombo_SelectionChanged">
+                                            <ComboBoxItem Content="Default order" Tag="Default" />
+                                            <ComboBoxItem Content="By action name" Tag="Name" />
+                                            <ComboBoxItem Content="By shortcut" Tag="Shortcut" />
+                                            <ComboBoxItem Content="Assigned first" Tag="Assigned" />
+                                        </ComboBox>
+                                    </StackPanel>
                                     <ItemsControl x:Name="HotkeysList">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
@@ -1230,6 +1426,77 @@
                                 <Grid>
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                                     <StackPanel>
+                                        <TextBlock Text="Double-click on the left third" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Lets the sides of the video do something different, such as skipping back" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="LeftDoubleClickCombo" Grid.Column="1" Width="200" VerticalContentAlignment="Center">
+                                        <ComboBoxItem Content="Same as double-click" Tag="" />
+                                        <ComboBoxItem Content="Seek back" Tag="SeekBack" />
+                                        <ComboBoxItem Content="Seek forward" Tag="SeekForward" />
+                                        <ComboBoxItem Content="Play / pause" Tag="PlayPause" />
+                                        <ComboBoxItem Content="Fullscreen" Tag="ToggleFullscreen" />
+                                        <ComboBoxItem Content="Mute" Tag="ToggleMute" />
+                                        <ComboBoxItem Content="None" Tag="None" />
+                                    </ComboBox>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Double-click on the right third" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Lets the sides of the video do something different, such as skipping ahead" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="RightDoubleClickCombo" Grid.Column="1" Width="200" VerticalContentAlignment="Center">
+                                        <ComboBoxItem Content="Same as double-click" Tag="" />
+                                        <ComboBoxItem Content="Seek back" Tag="SeekBack" />
+                                        <ComboBoxItem Content="Seek forward" Tag="SeekForward" />
+                                        <ComboBoxItem Content="Play / pause" Tag="PlayPause" />
+                                        <ComboBoxItem Content="Fullscreen" Tag="ToggleFullscreen" />
+                                        <ComboBoxItem Content="Mute" Tag="ToggleMute" />
+                                        <ComboBoxItem Content="None" Tag="None" />
+                                    </ComboBox>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Hold to change speed" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Playing speed while the left button is held on the video; it returns to normal when released" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="HoldSpeedCombo" Grid.Column="1" Width="200" VerticalContentAlignment="Center">
+                                        <ComboBoxItem Content="Off" Tag="0" />
+                                        <ComboBoxItem Content="1.5x" Tag="1.5" />
+                                        <ComboBoxItem Content="2x" Tag="2" />
+                                        <ComboBoxItem Content="3x" Tag="3" />
+                                        <ComboBoxItem Content="4x" Tag="4" />
+                                    </ComboBox>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Hold time before the speed changes" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="How long the button must stay down" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="HoldDelayCombo" Grid.Column="1" Width="200" VerticalContentAlignment="Center">
+                                        <ComboBoxItem Content="0.25 seconds" Tag="250" />
+                                        <ComboBoxItem Content="0.4 seconds" Tag="400" />
+                                        <ComboBoxItem Content="0.6 seconds" Tag="600" />
+                                        <ComboBoxItem Content="1 second" Tag="1000" />
+                                    </ComboBox>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
                                         <TextBlock Text="Middle click" Style="{StaticResource OptTitle}" />
                                         <TextBlock Text="Action when clicking the mouse wheel" Style="{StaticResource OptSub}" />
                                     </StackPanel>
@@ -1285,6 +1552,70 @@
                                         <ComboBoxItem Content="Volume" Tag="Volume" />
                                         <ComboBoxItem Content="Search" Tag="Seek" />
                                         <ComboBoxItem Content="None" Tag="None" />
+                                    </ComboBox>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Sideways wheel" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Action when tilting the wheel left or right, or using a horizontal touchpad scroll" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="HorizontalWheelCombo" Grid.Column="1" Width="200" VerticalContentAlignment="Center">
+                                        <ComboBoxItem Content="Search" Tag="Seek" />
+                                        <ComboBoxItem Content="Volume" Tag="Volume" />
+                                        <ComboBoxItem Content="Speed" Tag="Speed" />
+                                        <ComboBoxItem Content="None" Tag="None" />
+                                    </ComboBox>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Ctrl + drag" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Dragging on the video while holding Ctrl" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="CtrlDragCombo" Grid.Column="1" Width="200" VerticalContentAlignment="Center">
+                                        <ComboBoxItem Content="None" Tag="None" />
+                                        <ComboBoxItem Content="Move the picture" Tag="Pan" />
+                                        <ComboBoxItem Content="Zoom" Tag="Zoom" />
+                                        <ComboBoxItem Content="Subtitle position" Tag="SubtitlePosition" />
+                                    </ComboBox>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Alt + drag" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Dragging on the video while holding Alt" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="AltDragCombo" Grid.Column="1" Width="200" VerticalContentAlignment="Center">
+                                        <ComboBoxItem Content="None" Tag="None" />
+                                        <ComboBoxItem Content="Move the picture" Tag="Pan" />
+                                        <ComboBoxItem Content="Zoom" Tag="Zoom" />
+                                        <ComboBoxItem Content="Subtitle position" Tag="SubtitlePosition" />
+                                    </ComboBox>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Shift + drag" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Dragging on the video while holding Shift" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="ShiftDragCombo" Grid.Column="1" Width="200" VerticalContentAlignment="Center">
+                                        <ComboBoxItem Content="None" Tag="None" />
+                                        <ComboBoxItem Content="Move the picture" Tag="Pan" />
+                                        <ComboBoxItem Content="Zoom" Tag="Zoom" />
+                                        <ComboBoxItem Content="Subtitle position" Tag="SubtitlePosition" />
                                     </ComboBox>
                                 </Grid>
                             </Border>

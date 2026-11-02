@@ -4,6 +4,7 @@ using FluxPlayer.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -167,6 +168,10 @@ public partial class SettingsPanel : UserControl
         VolumeStepBox.Text = _settings.VolumeStep.ToString();
         SeekStepBox.Text = _settings.SeekStepSeconds.ToString();
         SeekLargeStepBox.Text = _settings.SeekLargeStepSeconds.ToString();
+        SelectComboByTag(ClipboardTimeCombo, _settings.ClipboardTimeFormat);
+        AbRepeatCountBox.Text = _settings.AbLoopRepeatCount.ToString();
+        AbRepeatDelayBox.Text = _settings.AbLoopDelayMs.ToString();
+        QuickRepeatBox.Text = _settings.QuickRepeatSeconds.ToString();
         SelectComboByTag(SpeedComboSetting,
             _settings.PlaybackRate.ToString(System.Globalization.CultureInfo.InvariantCulture));
         SelectComboByTag(RepeatComboSetting, _settings.RepeatMode.ToString());
@@ -196,6 +201,11 @@ public partial class SettingsPanel : UserControl
         DeinterlaceToggle.IsChecked = _settings.DeinterlaceEnabled;
         SelectComboByTag(DeinterlaceModeCombo, _settings.DeinterlaceMode);
         RestrictCursorToggle.IsChecked = _settings.RestrictFullscreenCursor;
+        SelectComboByTag(FullscreenMonitorCombo, _settings.FullscreenMonitor);
+        BlackOutMonitorsToggle.IsChecked = _settings.BlackOutOtherMonitors;
+        VideoBackgroundBox.Text = _settings.VideoBackgroundColor;
+        WindowLimitBox.Text = _settings.WindowSizeLimitPercent.ToString();
+        KeepOnScreenToggle.IsChecked = _settings.KeepWindowOnScreen;
         BrightnessSlider.Value = _settings.Brightness; UpdateImageLabel(BrightnessLabel, _settings.Brightness);
         ContrastSlider.Value = _settings.Contrast; UpdateImageLabel(ContrastLabel, _settings.Contrast);
         SaturationSlider.Value = _settings.Saturation; UpdateImageLabel(SaturationLabel, _settings.Saturation);
@@ -221,6 +231,12 @@ public partial class SettingsPanel : UserControl
 
         ShowSubsByDefaultToggle.IsChecked = _settings.ShowSubtitlesByDefault;
         AutoLoadSubsToggle.IsChecked = _settings.AutoLoadSubtitles;
+        IgnoreEmbeddedSubsToggle.IsChecked = _settings.IgnoreEmbeddedSubtitles;
+        OnlyPreferredSubsToggle.IsChecked = _settings.OnlyPreferredSubtitleLanguages;
+        SubtitleFoldersBox.Text = _settings.SubtitleFolders;
+        AudioFoldersBox.Text = _settings.AudioFolders;
+        RemoveHearingImpairedToggle.IsChecked = _settings.RemoveHearingImpairedText;
+        MaxSubtitleSecondsBox.Text = _settings.MaxSubtitleSeconds.ToString();
         PreferredSubLangBox.Text = _settings.PreferredSubtitleLanguage;
         SelectComboByTag(SubEncodingCombo, _settings.SubtitleEncoding);
         SubFontBox.Text = _settings.SubtitleFont;
@@ -244,6 +260,14 @@ public partial class SettingsPanel : UserControl
         SelectComboByTag(WheelCombo, _settings.WheelAction);
         SelectComboByTag(CtrlWheelCombo, _settings.CtrlWheelAction);
         SelectComboByTag(ShiftWheelCombo, _settings.ShiftWheelAction);
+        SelectComboByTag(LeftDoubleClickCombo, _settings.LeftDoubleClickAction);
+        SelectComboByTag(RightDoubleClickCombo, _settings.RightDoubleClickAction);
+        SelectComboByTag(HoldSpeedCombo, _settings.HoldSpeedRate.ToString("0.##", CultureInfo.InvariantCulture));
+        SelectComboByTag(HoldDelayCombo, _settings.HoldSpeedDelayMs.ToString(CultureInfo.InvariantCulture));
+        SelectComboByTag(HorizontalWheelCombo, _settings.HorizontalWheelAction);
+        SelectComboByTag(CtrlDragCombo, _settings.CtrlDragAction);
+        SelectComboByTag(AltDragCombo, _settings.AltDragAction);
+        SelectComboByTag(ShiftDragCombo, _settings.ShiftDragAction);
         InvertWheelToggle.IsChecked = _settings.InvertWheel;
 
         OpenStartPathLabel.Text = NonEmpty(_settings.OpenDialogStartFolder, "(system folder)");
@@ -302,6 +326,10 @@ public partial class SettingsPanel : UserControl
         if (int.TryParse(VolumeStepBox.Text, out int vs)) _settings.VolumeStep = Math.Clamp(vs, 1, 50);
         if (int.TryParse(SeekStepBox.Text, out int ss)) _settings.SeekStepSeconds = Math.Clamp(ss, 1, 120);
         if (int.TryParse(SeekLargeStepBox.Text, out int sls)) _settings.SeekLargeStepSeconds = Math.Clamp(sls, 5, 600);
+        _settings.ClipboardTimeFormat = GetComboTag(ClipboardTimeCombo) ?? _settings.ClipboardTimeFormat;
+        if (int.TryParse(AbRepeatCountBox.Text, out int arc)) _settings.AbLoopRepeatCount = SectionRepeat.NormalizeRepeats(arc);
+        if (int.TryParse(AbRepeatDelayBox.Text, out int ard)) _settings.AbLoopDelayMs = SectionRepeat.NormalizeDelay(ard);
+        if (int.TryParse(QuickRepeatBox.Text, out int qrs)) _settings.QuickRepeatSeconds = SectionRepeat.NormalizeQuickSeconds(qrs);
         if (float.TryParse(GetComboTag(SpeedComboSetting), System.Globalization.NumberStyles.Float,
             System.Globalization.CultureInfo.InvariantCulture, out float speed))
             _settings.PlaybackRate = speed;
@@ -326,6 +354,11 @@ public partial class SettingsPanel : UserControl
         _settings.DeinterlaceEnabled = DeinterlaceToggle.IsChecked == true;
         _settings.DeinterlaceMode = GetComboTag(DeinterlaceModeCombo) ?? _settings.DeinterlaceMode;
         _settings.RestrictFullscreenCursor = RestrictCursorToggle.IsChecked == true;
+        _settings.FullscreenMonitor = GetComboTag(FullscreenMonitorCombo) ?? _settings.FullscreenMonitor;
+        _settings.BlackOutOtherMonitors = BlackOutMonitorsToggle.IsChecked == true;
+        _settings.VideoBackgroundColor = MonitorPlan.NormalizeColor(VideoBackgroundBox.Text, _settings.VideoBackgroundColor);
+        if (int.TryParse(WindowLimitBox.Text, out int wlp)) _settings.WindowSizeLimitPercent = MonitorPlan.NormalizeLimitPercent(wlp);
+        _settings.KeepWindowOnScreen = KeepOnScreenToggle.IsChecked == true;
         _settings.Brightness = (int)BrightnessSlider.Value;
         _settings.Contrast = (int)ContrastSlider.Value;
         _settings.Saturation = (int)SaturationSlider.Value;
@@ -346,6 +379,12 @@ public partial class SettingsPanel : UserControl
 
         _settings.ShowSubtitlesByDefault = ShowSubsByDefaultToggle.IsChecked == true;
         _settings.AutoLoadSubtitles = AutoLoadSubsToggle.IsChecked == true;
+        _settings.IgnoreEmbeddedSubtitles = IgnoreEmbeddedSubsToggle.IsChecked == true;
+        _settings.OnlyPreferredSubtitleLanguages = OnlyPreferredSubsToggle.IsChecked == true;
+        _settings.SubtitleFolders = ExternalSources.NormalizeFolderList(SubtitleFoldersBox.Text);
+        _settings.AudioFolders = ExternalSources.NormalizeFolderList(AudioFoldersBox.Text);
+        _settings.RemoveHearingImpairedText = RemoveHearingImpairedToggle.IsChecked == true;
+        if (int.TryParse(MaxSubtitleSecondsBox.Text, out int mss)) _settings.MaxSubtitleSeconds = SubtitleCleanup.NormalizeMaxSeconds(mss);
         _settings.PreferredSubtitleLanguage = PreferredSubLangBox.Text.Trim();
         _settings.SubtitleEncoding = GetComboTag(SubEncodingCombo) ?? "UTF-8";
         _settings.SubtitleFont = SubFontBox.Text.Trim();
@@ -372,6 +411,14 @@ public partial class SettingsPanel : UserControl
         _settings.WheelAction = GetComboTag(WheelCombo) ?? _settings.WheelAction;
         _settings.CtrlWheelAction = GetComboTag(CtrlWheelCombo) ?? _settings.CtrlWheelAction;
         _settings.ShiftWheelAction = GetComboTag(ShiftWheelCombo) ?? _settings.ShiftWheelAction;
+        _settings.LeftDoubleClickAction = GetComboTag(LeftDoubleClickCombo) ?? _settings.LeftDoubleClickAction;
+        _settings.RightDoubleClickAction = GetComboTag(RightDoubleClickCombo) ?? _settings.RightDoubleClickAction;
+        if (float.TryParse(GetComboTag(HoldSpeedCombo), NumberStyles.Float, CultureInfo.InvariantCulture, out float holdRate)) _settings.HoldSpeedRate = holdRate;
+        if (int.TryParse(GetComboTag(HoldDelayCombo), NumberStyles.Integer, CultureInfo.InvariantCulture, out int holdDelay)) _settings.HoldSpeedDelayMs = holdDelay;
+        _settings.HorizontalWheelAction = GetComboTag(HorizontalWheelCombo) ?? _settings.HorizontalWheelAction;
+        _settings.CtrlDragAction = GetComboTag(CtrlDragCombo) ?? _settings.CtrlDragAction;
+        _settings.AltDragAction = GetComboTag(AltDragCombo) ?? _settings.AltDragAction;
+        _settings.ShiftDragAction = GetComboTag(ShiftDragCombo) ?? _settings.ShiftDragAction;
         _settings.InvertWheel = InvertWheelToggle.IsChecked == true;
 
         _settings.OpenDialogStartFolder = ExtractPath(OpenStartPathLabel.Text);

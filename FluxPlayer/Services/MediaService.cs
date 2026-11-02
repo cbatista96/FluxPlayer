@@ -185,7 +185,7 @@ public partial class MediaService : IDisposable
         lock (_playbackStateLock)
         {
             if (_disposed) return;
-            _sourceGeneration++; UsesSubtitleSoftwareFallback = false; _opaqueVideoSurface = false; _externalSubtitleSources.Clear(); _externalAudioSources.Clear();
+            _sourceGeneration++; UsesSubtitleSoftwareFallback = false; _opaqueVideoSurface = false; _externalSubtitleSources.Clear(); _externalAudioSources.Clear(); SeedExternalSources(path);
             bool resetCrop = CurrentCrop != null;
             _presentation = _presentation with { View = new() };
             CurrentCrop = null;
@@ -226,7 +226,7 @@ public partial class MediaService : IDisposable
         for (int index = 0; index < _externalSubtitleSources.Count; index++)
             if (File.Exists(_externalSubtitleSources[index]))
                 _currentMedia.AddSlave(MediaSlaveType.Subtitle, index == _externalSubtitleSources.Count - 1 ? 4u : 2u,
-                    new Uri(_externalSubtitleSources[index]));
+                    new Uri(PrepareSubtitle(_externalSubtitleSources[index])));
         ApplyMediaOptions(_currentMedia);
         if (SubtitleBridgeDisabled) _currentMedia.AddOption(":sub-filter=none");
         MediaPlayer.EnableHardwareDecoding = profile.HardwareDecoding;
@@ -479,7 +479,7 @@ public partial class MediaService : IDisposable
             path = Path.GetFullPath(path);
             bool exists = _externalSubtitleSources.Contains(path, StringComparer.OrdinalIgnoreCase);
             if (!exists && _externalSubtitleSources.Count >= 16) return false;
-            if (!MediaPlayer.AddSlave(MediaSlaveType.Subtitle, new Uri(path).AbsoluteUri, true)) return false;
+            if (!MediaPlayer.AddSlave(MediaSlaveType.Subtitle, new Uri(PrepareSubtitle(path)).AbsoluteUri, true)) return false;
             _externalSubtitleSources.RemoveAll(source => string.Equals(source, path, StringComparison.OrdinalIgnoreCase));
             _externalSubtitleSources.Add(path); return true;
         }

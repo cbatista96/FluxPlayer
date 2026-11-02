@@ -151,6 +151,8 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
             RunMouseAction(_runtimeSettings.LeftClickAction);
         };
 
+        InitializePointerGestures();
+        InitializeMonitorOptions();
         RebuildKeyMap();
 
         if (_vm.MediaPlayer != null)
@@ -456,7 +458,8 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
             var dpi = VisualTreeHelper.GetDpi(this);
             double videoW = vw / dpi.DpiScaleX;
             double videoH = vh / dpi.DpiScaleY;
-            if (videoW + chromeW >= work.Width * 0.97 || videoH + chromeH >= work.Height * 0.97)
+            double limit = _runtimeSettings.WindowSizeLimitPercent / 100d;
+            if (videoW + chromeW >= work.Width * limit || videoH + chromeH >= work.Height * limit)
             {
 
                 WindowState = WindowState.Maximized;
@@ -1085,6 +1088,12 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
                 _vm.ToggleMuteCommand.Execute(null);
                 ShowVolumeOsd();
                 break;
+            case "SeekBack":
+                SeekWithOsd(-_vm.SeekStepSeconds);
+                break;
+            case "SeekForward":
+                SeekWithOsd(_vm.SeekStepSeconds);
+                break;
         }
     }
 
@@ -1104,7 +1113,11 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         int notches = _wheelAccumulator / Mouse.MouseWheelDeltaForOneLine;
         if (notches == 0) return;
         _wheelAccumulator -= notches * Mouse.MouseWheelDeltaForOneLine;
+        RunWheelAction(action, notches);
+    }
 
+    private void RunWheelAction(string action, int notches)
+    {
         switch (action)
         {
             case "Volume":
@@ -1239,12 +1252,27 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         if (e.ClickCount == 2)
         {
             _singleClickTimer.Stop();
-            RunMouseAction(_runtimeSettings.DoubleClickAction);
+            RunMouseAction(PointerGestureRules.DoubleClickFor(_runtimeSettings, e.GetPosition(VideoMouseOverlay).X, VideoMouseOverlay.ActualWidth));
             return;
         }
         _videoDragStart = e.GetPosition(this);
         _videoDragInitiated = false;
+        if (BeginPointerGesture(e)) return;
 
+        if (_runtimeSettings.HoldSpeedRate > 0 && _vm.HasMedia)
+        {
+            // With hold-to-speed the click is decided on release, so a long press never also toggles playback.
+            VideoMouseOverlay.CaptureMouse();
+            _holdTimer.Interval = TimeSpan.FromMilliseconds(_runtimeSettings.HoldSpeedDelayMs);
+            _holdTimer.Stop();
+            _holdTimer.Start();
+            return;
+        }
+        StartSingleClickTimer();
+    }
+
+    private void StartSingleClickTimer()
+    {
         string single = _runtimeSettings.LeftClickAction;
         if (string.IsNullOrEmpty(single) || single == "None") return;
         string dbl = _runtimeSettings.DoubleClickAction;
@@ -1264,6 +1292,8 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
     private void VideoOverlay_MouseMoveDrag(object sender, MouseEventArgs e)
     {
         if (e.LeftButton != MouseButtonState.Pressed) return;
+        if (_dragGesture != "None") { ApplyPointerGesture(e); return; }
+        if (_holdActive) return;
         if (_videoDragInitiated) return;
         if (_isFullscreen) return;
         if (WindowState == WindowState.Maximized) return;
@@ -1273,6 +1303,8 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
             Math.Abs(current.Y - _videoDragStart.Y) > SystemParameters.MinimumVerticalDragDistance)
         {
             _videoDragInitiated = true;
+            _holdTimer.Stop();
+            VideoMouseOverlay.ReleaseMouseCapture();
             try { DragMove(); } catch { }
         }
     }
@@ -1356,7 +1388,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         _playlistCtxItem = (dep as ListBoxItem)?.DataContext as MediaItem;
 
         e.Handled = true;
-        if (_playlistCtxItem == null) return;
+        if (_playlistCtxItem == null && _vm.Playlist.Count == 0) return;
         PlaylistItemMenu.PlacementTarget = PlaylistBox;
         PlaylistItemMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.MousePoint;
         PlaylistItemMenu.IsOpen = true;
@@ -1364,12 +1396,60 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
 
     private void PlaylistItemMenu_Opened(object sender, RoutedEventArgs e)
     {
-        if (_playlistCtxItem == null) { PlaylistItemMenu.IsOpen = false; return; }
+        // Right-clicking empty space still offers the whole-playlist entries (sort, copy all paths); the per-item ones are disabled.
+        bool hasItem = _playlistCtxItem != null;
+        foreach (var entry in PlaylistItemMenu.Items.OfType<MenuItem>().Where(entry => entry != PlCtxCopyAll && entry.Header as string != "Sort the playlist"))
+            entry.IsEnabled = hasItem;
+        PlCtxCopyAll.IsEnabled = _vm.Playlist.Count > 0;
+        if (_playlistCtxItem == null) return;
         bool isCurrent = ReferenceEquals(_playlistCtxItem, _vm.CurrentItem);
         bool isLocal = !_playlistCtxItem.IsNetwork;
         PlCtxQueue.Header = _playlistCtxItem.QueuePosition > 0 ? "Remove from queue" : "Play next";
         PlCtxQueue.IsEnabled = !isCurrent;
         PlCtxReveal.IsEnabled = isLocal && File.Exists(_playlistCtxItem.FilePath);
+        PlCtxMove.IsEnabled = _playlistFilter.Length == 0;
+    }
+
+    private string _playlistFilter = "";
+
+    private void PlaylistFilterBox_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        _playlistFilter = PlaylistFilterBox.Text.Trim();
+        var view = System.Windows.Data.CollectionViewSource.GetDefaultView(_vm.Playlist);
+        view.Filter = _playlistFilter.Length == 0 ? null : item => item is MediaItem media && PlaylistOrdering.Matches(media.Title, media.FilePath, _playlistFilter);
+        view.Refresh();
+    }
+
+    private void PlCtxCopyName_Click(object sender, RoutedEventArgs e)
+    {
+        string? path = _playlistCtxItem?.FilePath;
+        if (string.IsNullOrEmpty(path)) return;
+        CopyToClipboard(_playlistCtxItem!.IsNetwork ? path : Path.GetFileName(path));
+    }
+
+    private void PlCtxCopyAll_Click(object sender, RoutedEventArgs e)
+    {
+        if (_vm.Playlist.Count == 0) return;
+        CopyToClipboard(string.Join(Environment.NewLine, _vm.Playlist.Select(item => item.FilePath)));
+    }
+
+    private void CopyToClipboard(string text)
+    {
+        try { Clipboard.SetText(text); ShowActionOsd("", Localizer.T("Copied to the clipboard")); }
+        catch (System.Runtime.InteropServices.ExternalException) { ShowActionOsd("", Localizer.T("The clipboard is busy.")); }
+    }
+
+    private void PlCtxMove_Click(object sender, RoutedEventArgs e)
+    {
+        if (_playlistCtxItem != null && sender is MenuItem { Tag: string tag } && int.TryParse(tag, out int move)) _vm.MovePlaylistItem(_playlistCtxItem, move);
+    }
+
+    private void PlCtxSort_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not MenuItem { Tag: string tag }) return;
+        string[] parts = tag.Split('|');
+        _vm.SortPlaylist(parts[0], parts.Length > 1 && parts[1] == "D");
+        ShowActionOsd("", Localizer.T("Playlist sorted"));
     }
 
     private void PlaylistBox_ContextMenuOpening(object sender, ContextMenuEventArgs e) => e.Handled = true;
@@ -1716,7 +1796,8 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
             SetWindowCornerPreference(DWMWCP_DONOTROUND);
 
             var hwnd = new WindowInteropHelper(this).Handle;
-            var screen = System.Windows.Forms.Screen.FromHandle(hwnd);
+            var here = System.Windows.Forms.Screen.FromHandle(hwnd);
+            var screen = ChooseFullscreenScreen(hwnd);
             var b = screen.Bounds;
             var fromDevice = PresentationSource.FromVisual(this)?.CompositionTarget?.TransformFromDevice
                              ?? Matrix.Identity;
@@ -1726,7 +1807,10 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
             Top = tl.Y;
             Width = br.X - tl.X;
             Height = br.Y - tl.Y;
+            // Another monitor may scale differently, so place the window by device pixels rather than by the DIPs computed above.
+            if (screen.DeviceName != here.DeviceName) PlaceOnScreen(hwnd, screen);
             _isFullscreen = true;
+            UpdateBlackout(screen);
             ShowChromeNow();
         }
         else
@@ -1757,6 +1841,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
             FullscreenOsd.Opacity = 0;
             FsSeekPreviewTip.Visibility = Visibility.Collapsed;
             _isFullscreen = false;
+            _blackout.Hide();
             Topmost = _prevTopmost;
             ApplyTopmostPolicy();
             ShowChromeNow();
@@ -2253,6 +2338,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         RefreshSettingChecks(MainContextMenu);
         RefreshChoiceChecks();
         ApplyInterfaceLanguage();
+        ApplyMenuCustomization();
     }
 
     private string GestureText(string action)
@@ -2275,6 +2361,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
     private void ApplyRuntimeFeatureOptions()
     {
         FluxPlayer.Controls.ButtonFx.ReduceMotion = _runtimeSettings.ReduceMotion;
+        ApplyVideoBackground();
 
         bool fullOsdEnabled = IsFeatureEnabled(FeatureCatalog.FullOsd);
         if (!fullOsdEnabled)
@@ -2340,7 +2427,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
 
     private void PlaylistBox_PreviewMouseMove(object sender, MouseEventArgs e)
     {
-        if (e.LeftButton != MouseButtonState.Pressed) return;
+        if (e.LeftButton != MouseButtonState.Pressed || _playlistFilter.Length > 0) return;
 
         var pos = e.GetPosition(null);
         var diff = _dragStartPoint - pos;

@@ -854,6 +854,7 @@ internal static class Program
         await Test("Player menu: PotPlayer order, Configure entries per area, bound settings, Spanish coverage and go-to-time parsing", () => PlayerMenuChecks.Managed(Root));
         await Test("Windows integration: action catalog, per-user file types and single-instance hand-over", () => PlayerMenuChecks.Integration(Root));
         await Test("Subtitle translation: LibreTranslate, DeepL and Google protocols on loopback, bounded batches, bilingual SRT, subtitle lookup and Whisper wrapper", () => TranslationChecks.Run(Root));
+        await Test("Parity: mouse gestures, section repeat, bookmarks, time text, subtitle cleaning and external subtitle/audio discovery", () => ParityChecks.Managed(Root));
         await Test("Playback history: atomic sessions, UTC, bounded retention, export, cancellation, corrupt stores and clearing", () => PlaybackHistoryChecks.Managed(Root));
         await Test("Media catalog: ordered lists, protection, revisions, cross-list search, stations, bounded input and atomic failures", () => MediaCatalogChecks.Catalog(Root, wav));
         await Test("Named playlist documents: M3U8/PLS/XSPF titles, order, missing paths, copies, entities and cancellation", () => MediaCatalogChecks.Playlists(Root, wav));

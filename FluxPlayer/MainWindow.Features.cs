@@ -830,6 +830,12 @@ public partial class MainWindow
     private void CtxBookmarkNext_Click(object sender, RoutedEventArgs e) => JumpBookmarkWithOsd(+1);
     private void CtxBookmarkPrev_Click(object sender, RoutedEventArgs e) => JumpBookmarkWithOsd(-1);
 
+    private void CtxBookmarkManage_Click(object sender, RoutedEventArgs e)
+    {
+        if (!_vm.HasMedia) { ShowActionOsd("", Localizer.T("Nothing is playing.")); return; }
+        new Windows.BookmarksWindow(this, _vm, RedrawBookmarks).ShowDialog();
+    }
+
     private void CtxBookmarkClear_Click(object sender, RoutedEventArgs e)
     {
         _vm.ClearBookmarks();
