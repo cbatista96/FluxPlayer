@@ -1,0 +1,24 @@
+[
+  {
+    "Name": "LG ULTRAGEAR",
+    "Device": "\\\\.\\DISPLAY2",
+    "ColorMode": "SDR",
+    "HdrSupported": true,
+    "HdrUserEnabled": false,
+    "BitsPerChannel": 8,
+    "ColorEncoding": "RGB",
+    "LegacyIccProfile": "C:\\WINDOWS\\system32\\spool\\drivers\\color\\sRGB Color Space Profile.icm",
+    "Detail": "OS-reported display state, not measured luminance or proof of the video\u0027s swap-chain format. Legacy ICC filename is informational; Advanced Color manages profiles differently. API status: 0"
+  },
+  {
+    "Name": "Dell AW3418DW",
+    "Device": "\\\\.\\DISPLAY1",
+    "ColorMode": "SDR",
+    "HdrSupported": false,
+    "HdrUserEnabled": false,
+    "BitsPerChannel": 8,
+    "ColorEncoding": "RGB",
+    "LegacyIccProfile": "C:\\WINDOWS\\system32\\spool\\drivers\\color\\sRGB Color Space Profile.icm",
+    "Detail": "OS-reported display state, not measured luminance or proof of the video\u0027s swap-chain format. Legacy ICC filename is informational; Advanced Color manages profiles differently. API status: 0"
+  }
+]

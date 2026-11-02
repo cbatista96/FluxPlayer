@@ -1,0 +1,502 @@
+[
+  {
+    "name": "F0201: movie library survives profile restart and rejects stale editor",
+    "passed": true,
+    "ms": 17
+  },
+  {
+    "name": "F0202: series and episodes survive restart",
+    "passed": true,
+    "ms": 2
+  },
+  {
+    "name": "F0203: poster association decodes actual frozen bitmap",
+    "passed": true,
+    "ms": 12
+  },
+  {
+    "name": "F0204: fanart association decodes independently",
+    "passed": true,
+    "ms": 2
+  },
+  {
+    "name": "F0205: actor profile and biography persist",
+    "passed": true,
+    "ms": 0
+  },
+  {
+    "name": "F0206: synopsis edits are saved and searchable",
+    "passed": true,
+    "ms": 6
+  },
+  {
+    "name": "F0207: optional release date round trip",
+    "passed": true,
+    "ms": 1
+  },
+  {
+    "name": "F0208: classification filter",
+    "passed": true,
+    "ms": 0
+  },
+  {
+    "name": "F0209: watched movie state clears captured position",
+    "passed": true,
+    "ms": 4
+  },
+  {
+    "name": "F0210: watchlist and unwatched filters",
+    "passed": true,
+    "ms": 8
+  },
+  {
+    "name": "F0211: series-season dependent query excludes other seasons",
+    "passed": true,
+    "ms": 4
+  },
+  {
+    "name": "F0212: numbered episodes enforce unique identities",
+    "passed": true,
+    "ms": 0
+  },
+  {
+    "name": "F0213: season cover loads",
+    "passed": true,
+    "ms": 2
+  },
+  {
+    "name": "F0214: series banner loads",
+    "passed": true,
+    "ms": 1
+  },
+  {
+    "name": "F0215: cast characters and reverse profile credits",
+    "passed": true,
+    "ms": 0
+  },
+  {
+    "name": "F0216: watched episodes advance series",
+    "passed": true,
+    "ms": 4
+  },
+  {
+    "name": "F0217: series continuation selects earliest unfinished episode",
+    "passed": true,
+    "ms": 5
+  },
+  {
+    "name": "F0218: poster wall displays forty cards and next page",
+    "passed": true,
+    "ms": 338
+  },
+  {
+    "name": "F0219: trailer playback queues feature immediately next",
+    "passed": true,
+    "ms": 100
+  },
+  {
+    "name": "F0220: TV library has large transport and keyboard list",
+    "passed": true,
+    "ms": 2
+  },
+  {
+    "name": "F0221: artist biography survives edit and restart",
+    "passed": true,
+    "ms": 1
+  },
+  {
+    "name": "F0222: composer linked to saved work",
+    "passed": true,
+    "ms": 2
+  },
+  {
+    "name": "F0223: production credits include job and role",
+    "passed": true,
+    "ms": 1
+  },
+  {
+    "name": "F0224: person relationships round trip and reject self-links",
+    "passed": true,
+    "ms": 8
+  },
+  {
+    "name": "F0225: discography ordered local release playback",
+    "passed": true,
+    "ms": 43
+  },
+  {
+    "name": "F0226: multiple metadata values round trip and duplicate rejection",
+    "passed": true,
+    "ms": 2
+  },
+  {
+    "name": "F0227: classical movement order survives restart and playback",
+    "passed": true,
+    "ms": 44
+  },
+  {
+    "name": "F0228: combined rating/date/attribute ordering",
+    "passed": true,
+    "ms": 1
+  },
+  {
+    "name": "F0229: thumbnail cache reuses frozen reduced artwork and releases source",
+    "passed": true,
+    "ms": 0
+  },
+  {
+    "name": "F0230: captured viewing position persists and resumes native playback",
+    "passed": true,
+    "ms": 51
+  },
+  {
+    "name": "F0231: FIR low/high/band-pass measured frequency responses",
+    "passed": true,
+    "ms": 10
+  },
+  {
+    "name": "F0232: offline convolution attenuates a rejected source frequency",
+    "passed": true,
+    "ms": 135
+  },
+  {
+    "name": "F0233: three resamplers render requested sample rates",
+    "passed": true,
+    "ms": 294
+  },
+  {
+    "name": "F0234: rectangular/triangular dither produce 16-bit PCM",
+    "passed": true,
+    "ms": 368
+  },
+  {
+    "name": "F0235: three noise-shaped quantizers produce valid audio",
+    "passed": true,
+    "ms": 387
+  },
+  {
+    "name": "F0236: two-pass sample normalization reaches target peak",
+    "passed": true,
+    "ms": 114
+  },
+  {
+    "name": "F0237: pitch changes preserve duration and double frequency",
+    "passed": true,
+    "ms": 114
+  },
+  {
+    "name": "F0238: tempo doubles speed while retaining pitch",
+    "passed": true,
+    "ms": 97
+  },
+  {
+    "name": "F0239: RIAA reproduction changes real source response",
+    "passed": true,
+    "ms": 67
+  },
+  {
+    "name": "F0240: DC and subsonic cleanup removes offset",
+    "passed": true,
+    "ms": 68
+  },
+  {
+    "name": "F0241: FFT spectrum locates known tone and peak envelope",
+    "passed": true,
+    "ms": 43
+  },
+  {
+    "name": "F0242: selected sonic analysis persists descriptors",
+    "passed": true,
+    "ms": 81
+  },
+  {
+    "name": "F0243: track similarity ranks available sources and excludes seed",
+    "passed": true,
+    "ms": 2
+  },
+  {
+    "name": "F0244: album aggregate similarity",
+    "passed": true,
+    "ms": 3
+  },
+  {
+    "name": "F0245: artist aggregate similarity",
+    "passed": true,
+    "ms": 0
+  },
+  {
+    "name": "F0246: Bilinear scaling",
+    "passed": true,
+    "ms": 143
+  },
+  {
+    "name": "F0247: Bicubic scaling",
+    "passed": true,
+    "ms": 146
+  },
+  {
+    "name": "F0248: Lanczos scaling",
+    "passed": true,
+    "ms": 150
+  },
+  {
+    "name": "F0249: Spline scaling",
+    "passed": true,
+    "ms": 145
+  },
+  {
+    "name": "F0250: aspect preserving reduction and no upscale",
+    "passed": true,
+    "ms": 154
+  },
+  {
+    "name": "F0251: deband renders decodable copy",
+    "passed": true,
+    "ms": 149
+  },
+  {
+    "name": "F0252: spatiotemporal denoise renders copy",
+    "passed": true,
+    "ms": 194
+  },
+  {
+    "name": "F0253: small motion stabilization renders copy",
+    "passed": true,
+    "ms": 158
+  },
+  {
+    "name": "F0254: motion interpolation emits requested frame rate",
+    "passed": true,
+    "ms": 269
+  },
+  {
+    "name": "F0255: local logo and rasterized caption overlays",
+    "passed": true,
+    "ms": 171
+  },
+  {
+    "name": "F0256: declared PQ HDR becomes tagged SDR",
+    "passed": true,
+    "ms": 151
+  },
+  {
+    "name": "F0257: Reinhard tone mapping output",
+    "passed": true,
+    "ms": 144
+  },
+  {
+    "name": "F0258: Hable tone mapping output",
+    "passed": true,
+    "ms": 146
+  },
+  {
+    "name": "F0259: reference luminance controls tone mapping",
+    "passed": true,
+    "ms": 148
+  },
+  {
+    "name": "F0260: explicit full input and limited output ranges",
+    "passed": true,
+    "ms": 147
+  },
+  {
+    "name": "F0291: bass crossover redirects low frequency into LFE",
+    "passed": true,
+    "ms": 124
+  },
+  {
+    "name": "F0292: named mono stereo 5.1 and 7.1 layouts",
+    "passed": true,
+    "ms": 274
+  },
+  {
+    "name": "F0293: independent output gain measured in PCM",
+    "passed": true,
+    "ms": 67
+  },
+  {
+    "name": "F0294: independent output delay measured at start",
+    "passed": true,
+    "ms": 65
+  },
+  {
+    "name": "F0295: stereo surround spread creates center and rear differences",
+    "passed": true,
+    "ms": 123
+  },
+  {
+    "name": "F0296: bounded arbitrary multichannel matrix",
+    "passed": true,
+    "ms": 73
+  },
+  {
+    "name": "F0297: two-source multichannel mix retains both inputs",
+    "passed": true,
+    "ms": 74
+  },
+  {
+    "name": "F0298: multichannel WAV and FLAC exports decode",
+    "passed": true,
+    "ms": 104
+  },
+  {
+    "name": "F0299: double precision graph retains tiny routed coefficients",
+    "passed": true,
+    "ms": 71
+  },
+  {
+    "name": "F0300: post-matrix channel permutation",
+    "passed": true,
+    "ms": 68
+  },
+  {
+    "name": "F0301: local LUT trilinear and tetrahedral interpolation",
+    "passed": true,
+    "ms": 262
+  },
+  {
+    "name": "F0302: three software deinterlacers and field orders",
+    "passed": true,
+    "ms": 378
+  },
+  {
+    "name": "F0303: stereo packed source to Dubois anaglyph",
+    "passed": true,
+    "ms": 159
+  },
+  {
+    "name": "F0304: four-edge overscan crop",
+    "passed": true,
+    "ms": 166
+  },
+  {
+    "name": "F0305: anamorphic sample aspect metadata",
+    "passed": true,
+    "ms": 166
+  },
+  {
+    "name": "F0306: exact image placement within canvas",
+    "passed": true,
+    "ms": 164
+  },
+  {
+    "name": "F0307: nine coefficient RGB transform",
+    "passed": true,
+    "ms": 177
+  },
+  {
+    "name": "F0308: excerpt luminance analysis and new-copy report",
+    "passed": true,
+    "ms": 52
+  },
+  {
+    "name": "F0309: SDR code value legalization",
+    "passed": true,
+    "ms": 170
+  },
+  {
+    "name": "F0310: declared BT2020 SDR gamut conversion",
+    "passed": true,
+    "ms": 162
+  },
+  {
+    "name": "F0311: ProRes 422 HQ actual encoder export",
+    "passed": true,
+    "ms": 136
+  },
+  {
+    "name": "F0312: HEVC / AAC actual encoder export",
+    "passed": true,
+    "ms": 158
+  },
+  {
+    "name": "F0313: AV1 / Opus actual encoder export",
+    "passed": true,
+    "ms": 345
+  },
+  {
+    "name": "F0314: MPEG-2 / MP2 actual encoder export",
+    "passed": true,
+    "ms": 105
+  },
+  {
+    "name": "F0315: MXF / DNxHR HQ actual encoder export",
+    "passed": true,
+    "ms": 198
+  },
+  {
+    "name": "F0316: AC-3 stereo actual encoder export",
+    "passed": true,
+    "ms": 95
+  },
+  {
+    "name": "F0317: E-AC-3 stereo actual encoder export",
+    "passed": true,
+    "ms": 105
+  },
+  {
+    "name": "F0318: RF64 / 24-bit PCM actual encoder export",
+    "passed": true,
+    "ms": 148
+  },
+  {
+    "name": "F0319: AIFF / 24-bit PCM actual encoder export",
+    "passed": true,
+    "ms": 101
+  },
+  {
+    "name": "F0320: DXD-rate / 24-bit PCM actual encoder export",
+    "passed": true,
+    "ms": 97
+  },
+  {
+    "name": "F0371: allowlisted ordered restoration chains reject arbitrary filters",
+    "passed": true,
+    "ms": 77
+  },
+  {
+    "name": "F0372: named recipes persist and portable JSON round trips",
+    "passed": true,
+    "ms": 8
+  },
+  {
+    "name": "F0373: impulsive click removal processes actual impulses",
+    "passed": true,
+    "ms": 96
+  },
+  {
+    "name": "F0374: clipped-sample reconstruction produces finite changed PCM",
+    "passed": true,
+    "ms": 14988
+  },
+  {
+    "name": "F0375: spectral denoise reduces stationary noise energy",
+    "passed": true,
+    "ms": 118
+  },
+  {
+    "name": "F0376: noise gate attenuates quiet passages",
+    "passed": true,
+    "ms": 116
+  },
+  {
+    "name": "F0377: speech half-cycle normalization alters envelope",
+    "passed": true,
+    "ms": 81
+  },
+  {
+    "name": "F0378: discrete center extraction isolates actual center signal",
+    "passed": true,
+    "ms": 78
+  },
+  {
+    "name": "F0379: two-source crossfade has expected duration and source content",
+    "passed": true,
+    "ms": 201
+  },
+  {
+    "name": "F0380: two-pass EBU loudness reaches measured target",
+    "passed": true,
+    "ms": 253
+  }
+]

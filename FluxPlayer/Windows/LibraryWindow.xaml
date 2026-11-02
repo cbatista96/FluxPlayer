@@ -15,7 +15,7 @@
             </StackPanel>
         </Grid>
         <Grid Grid.Row="1" Margin="0,0,0,14">
-            <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+            <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" /><ColumnDefinition Width="170" /><ColumnDefinition Width="200" /><ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
@@ -33,30 +33,75 @@
                 <ComboBoxItem Content="Most played" /><ComboBoxItem Content="Not played" /><ComboBoxItem Content="Tags not analyzed" />
             </ComboBox>
             <CheckBox x:Name="WatchNewFolder" Grid.Column="3" Content="Watch when adding" IsChecked="True" VerticalAlignment="Center" Margin="14,0,0,0" />
+            <StackPanel Grid.Row="3" Grid.ColumnSpan="4" Orientation="Horizontal" Margin="0,10,0,0">
+                <ComboBox x:Name="UserCollectionCombo" Width="300" DisplayMemberPath="Display" SelectedValuePath="Id" MaxDropDownHeight="320" SelectionChanged="UserCollection_Changed" AutomationProperties.Name="Library collection"/>
+                <CheckBox x:Name="IncludeChildCollections" Content="Include child collections" IsChecked="True" Checked="ChildCollections_Changed" Unchecked="ChildCollections_Changed" VerticalAlignment="Center" Margin="14,0,0,0"/>
+                <Button Content="Manage collections…" Click="ManageCollections_Click" Padding="12,5" Margin="12,0,0,0"/>
+            </StackPanel>
             <StackPanel Grid.Row="1" Grid.ColumnSpan="4" Orientation="Horizontal" Margin="0,10,0,0">
                 <ComboBox x:Name="SmartListCombo" Width="240" DisplayMemberPath="Name" SelectionChanged="SmartList_Changed" AutomationProperties.Name="Saved smart playlists" />
                 <Button Content="Save view as playlist…" Click="SaveSmartList_Click" Margin="10,0,0,0" Padding="12,5" />
                 <Button Content="Remove saved playlist" Click="RemoveSmartList_Click" Margin="8,0,0,0" Padding="12,5" />
             </StackPanel>
+            <Grid Grid.Row="2" Grid.ColumnSpan="4" Margin="0,10,0,0">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                <StackPanel Margin="0,0,10,0">
+                    <TextBlock Text="Artist" Margin="0,0,0,5" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                    <ComboBox x:Name="ArtistBrowser" DisplayMemberPath="Display" SelectedValuePath="Value" SelectionChanged="ArtistBrowser_Changed" TextSearch.TextPath="Name" IsTextSearchEnabled="True" MaxDropDownHeight="360" ScrollViewer.CanContentScroll="True" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" AutomationProperties.Name="Browse library artists">
+                        <ComboBox.ItemsPanel><ItemsPanelTemplate><VirtualizingStackPanel/></ItemsPanelTemplate></ComboBox.ItemsPanel>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Margin="0,0,10,0">
+                    <TextBlock Text="Album" Margin="0,0,0,5" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                    <ComboBox x:Name="AlbumBrowser" DisplayMemberPath="Display" SelectedValuePath="Value" SelectionChanged="AlbumBrowser_Changed" TextSearch.TextPath="Name" IsTextSearchEnabled="True" MaxDropDownHeight="360" ScrollViewer.CanContentScroll="True" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" AutomationProperties.Name="Browse library albums">
+                        <ComboBox.ItemsPanel><ItemsPanelTemplate><VirtualizingStackPanel/></ItemsPanelTemplate></ComboBox.ItemsPanel>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Grid.Column="2" Margin="0,0,10,0">
+                    <TextBlock Text="Personal label" Margin="0,0,0,5" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                    <ComboBox x:Name="LabelBrowser" DisplayMemberPath="Display" SelectedValuePath="Value" SelectionChanged="LabelBrowser_Changed" TextSearch.TextPath="Name" IsTextSearchEnabled="True" MaxDropDownHeight="360" ScrollViewer.CanContentScroll="True" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" AutomationProperties.Name="Browse personal library labels">
+                        <ComboBox.ItemsPanel><ItemsPanelTemplate><VirtualizingStackPanel/></ItemsPanelTemplate></ComboBox.ItemsPanel>
+                    </ComboBox>
+                </StackPanel>
+                <Button Grid.Column="3" Content="Clear browsing" Click="ResetBrowser_Click" Padding="12,6" VerticalAlignment="Bottom"/>
+            </Grid>
+            <Grid Grid.Row="4" Grid.ColumnSpan="4" Margin="0,10,0,0">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                <StackPanel Margin="0,0,10,0"><TextBlock Text="Genre" Margin="0,0,0,5" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                    <ComboBox x:Name="GenreBrowser" DisplayMemberPath="Display" SelectionChanged="GenreBrowser_Changed" MaxDropDownHeight="320" ScrollViewer.CanContentScroll="True" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" AutomationProperties.Name="Browse library genres"><ComboBox.ItemsPanel><ItemsPanelTemplate><VirtualizingStackPanel/></ItemsPanelTemplate></ComboBox.ItemsPanel></ComboBox>
+                </StackPanel>
+                <StackPanel Grid.Column="1"><TextBlock Text="Decade" Margin="0,0,0,5" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                    <ComboBox x:Name="DecadeBrowser" DisplayMemberPath="Display" SelectionChanged="DecadeBrowser_Changed" MaxDropDownHeight="320" AutomationProperties.Name="Browse library decades"/>
+                </StackPanel>
+            </Grid>
         </Grid>
         <Border Grid.Row="2" CornerRadius="10" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1" ClipToBounds="True">
             <Grid>
                 <DataGrid x:Name="MediaGrid" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Extended" SelectionUnit="FullRow" EnableRowVirtualization="True" EnableColumnVirtualization="True" VirtualizingPanel.VirtualizationMode="Recycling" HeadersVisibility="Column" GridLinesVisibility="None" RowHeight="40" BorderThickness="0" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" MouseDoubleClick="Play_Click" PreviewKeyDown="Grid_KeyDown">
-                    <DataGrid.Columns>
+            <DataGrid.Columns>
                         <DataGridTemplateColumn Header="★" Width="44" SortMemberPath="Favorite">
                             <DataGridTemplateColumn.CellTemplate><DataTemplate>
                                 <CheckBox IsChecked="{Binding Favorite, Mode=OneWay}" IsHitTestVisible="False" Focusable="False" HorizontalAlignment="Center" VerticalAlignment="Center" AutomationProperties.Name="Favorite" />
                             </DataTemplate></DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="2*" MinWidth="180" />
-                        <DataGridTextColumn Header="Artist" Binding="{Binding Artist}" Width="*" MinWidth="110" />
-                        <DataGridTextColumn Header="Album" Binding="{Binding Album}" Width="*" MinWidth="110" />
-                        <DataGridTextColumn Header="Format" Binding="{Binding Format}" Width="75" />
-                        <DataGridTextColumn Header="Duration" Binding="{Binding Duration}" Width="80" />
-                        <DataGridTextColumn Header="Plays" Binding="{Binding PlayCount}" Width="60" />
-                        <DataGridTextColumn Header="Labels" Binding="{Binding LabelText}" Width="140">
+                        <DataGridTextColumn Header="Title" SortMemberPath="Title" Binding="{Binding Title}" Width="2*" MinWidth="180" />
+                        <DataGridTextColumn Header="Artist" SortMemberPath="Artist" Binding="{Binding Artist}" Width="*" MinWidth="110" />
+                        <DataGridTextColumn Header="Album" SortMemberPath="Album" Binding="{Binding Album}" Width="*" MinWidth="110" />
+                        <DataGridTextColumn Header="Format" SortMemberPath="Format" Binding="{Binding Format}" Width="75" />
+                        <DataGridTextColumn Header="Duration" SortMemberPath="DurationMs" Binding="{Binding Duration}" Width="80" />
+                        <DataGridTextColumn Header="Plays" SortMemberPath="PlayCount" Binding="{Binding PlayCount}" Width="60" />
+                        <DataGridTextColumn Header="Labels" SortMemberPath="LabelText" Binding="{Binding LabelText}" Width="140">
                             <DataGridTextColumn.ElementStyle><Style TargetType="TextBlock"><Setter Property="TextTrimming" Value="CharacterEllipsis"/><Setter Property="ToolTip" Value="{Binding LabelText}"/></Style></DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
+                        <DataGridTextColumn Header="Genre" Binding="{Binding Genre}" SortMemberPath="Genre" Width="140" Visibility="Collapsed"/>
+                        <DataGridTextColumn Header="Folder" Binding="{Binding Folder}" SortMemberPath="Folder" Width="260" Visibility="Collapsed"><DataGridTextColumn.ElementStyle><Style TargetType="TextBlock"><Setter Property="TextTrimming" Value="CharacterEllipsis"/><Setter Property="ToolTip" Value="{Binding Folder}"/></Style></DataGridTextColumn.ElementStyle></DataGridTextColumn>
+                        <DataGridTextColumn Header="Size (bytes)" Binding="{Binding Size, StringFormat=N0}" SortMemberPath="Size" Width="110" Visibility="Collapsed"/>
+                        <DataGridTextColumn Header="Added (UTC)" Binding="{Binding AddedUtc, StringFormat=yyyy-MM-dd HH:mm}" SortMemberPath="AddedUtc" Width="150" Visibility="Collapsed"/>
+                        <DataGridTextColumn Header="Modified (UTC)" Binding="{Binding ModifiedUtc, StringFormat=yyyy-MM-dd HH:mm}" SortMemberPath="ModifiedUtc" Width="150" Visibility="Collapsed"/>
+                        <DataGridTextColumn Header="Last played (UTC)" Binding="{Binding LastPlayedUtc, StringFormat=yyyy-MM-dd HH:mm}" SortMemberPath="LastPlayedUtc" Width="150" Visibility="Collapsed"/>
+                        <DataGridTextColumn Header="Year" Binding="{Binding Year}" SortMemberPath="Year" Width="75" Visibility="Collapsed"/>
+                        <DataGridTextColumn Header="Rating" Binding="{Binding Rating}" SortMemberPath="Rating" Width="70" Visibility="Collapsed"/>
+                        <DataGridTextColumn Header="Remaining" Binding="{Binding Remaining}" SortMemberPath="RemainingMs" Width="105" Visibility="Collapsed"/>
                     </DataGrid.Columns>
                 </DataGrid>
                 <TextBlock x:Name="EmptyText" Text="Add a folder to get started. Files you play will also appear here." HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" MaxWidth="470" TextAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" IsHitTestVisible="False" />
@@ -67,6 +112,7 @@
                 <Button Content="Play" Click="Play_Click" Margin="0,0,0,8" Padding="14,7" />
                 <Button Content="Add to playlist" Click="Enqueue_Click" Margin="8,0,0,8" Padding="14,7" />
                 <Button Content="Favorite" Click="Favorite_Click" Margin="8,0,0,8" Padding="14,7" />
+                <Button Content="Rate…" Click="Rate_Click" Margin="8,0,0,8" Padding="14,7" />
                 <Button Content="Read tags" Click="Analyze_Click" Margin="8,0,0,8" Padding="14,7" />
                 <Button Content="Edit tags" Click="EditTags_Click" Margin="8,0,0,8" Padding="14,7" />
                 <Button Content="Personal labels…" Click="PersonalLabels_Click" Margin="8,0,0,8" Padding="14,7" />

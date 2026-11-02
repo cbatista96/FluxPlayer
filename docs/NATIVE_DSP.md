@@ -1,6 +1,6 @@
 # Native equalizer implementation and measurements
 
-The 15/20/31-band layouts are implemented in `Native/FluxDsp/fluxdsp.c`, compiled against the pinned VLC 3.0.21 plugin SDK. They process actual decoded audio in independent native biquads. The ten-band layout continues to use VLC's original equalizer. See [Architecture](ARCHITECTURE.md) for configuration and lifetime details and [Building](BUILDING.md) for the C++ prerequisites.
+The 15/20/31-band layouts are implemented in `Native/FluxDsp/fluxdsp.c`, compiled against the pinned VLC 3.0.21 plugin SDK. They process actual decoded audio in independent native biquads. The ten-band layout uses VLC's original equalizer when the new native effects/meters are bypassed, and shares the native filter when either is enabled. See [Architecture](ARCHITECTURE.md) for configuration and lifetime details and [Building](BUILDING.md) for the C++ prerequisites.
 
 ## Response checks
 
@@ -52,3 +52,41 @@ try {
 ```
 
 Use your configured NuGet global-packages folder if it differs. Close the development player before replacing a loaded native DLL. Probe objects, binaries and local logs remain ignored; the public repository contains their source only.
+
+## Native effect and meter checkpoint
+
+The thirty-capability batch adds ten-band parametric peaking EQ, bass shelf, crossfeed, linked compressor and sample-peak limiter, balance, per-channel gain/delay, width, echo, short reverb, flanger, chorus and center reduction. Actual stereo PCM fixtures verify peaking gain, bass/high-frequency isolation, opposite-ear crossfeed, loud-tone compression, a -12 dBFS sample ceiling, independent channel level/delay, width and center behavior, delayed impulses and finite modulation output. Live checks activate effects while paused, retain position/volume, update them beside 31-band EQ, bypass them while the graphic EQ continues and reject changes after failed settings publication.
+
+Native input/output peak and RMS are measured per block only when requested by the open signal-path window. Protocol 2 reports these values with active effect flags and the applied configuration sequence. These are DSP-stage measurements, before device/mixer volume. Effects support up to eight logical decoded channels at 192 kHz; stereo PCM measurements do not establish the entire channel/rate/device matrix. Graphic-only processing retains its previous bounds and 384 kHz response check.
+
+The coefficient equations follow the primary [W3C Audio EQ Cookbook](https://www.w3.org/TR/audio-eq-cookbook/). Offline source measurements use documented [FFmpeg filters](https://ffmpeg.org/ffmpeg-filters.html), independently of the live native processor.
+
+A fresh local probe on 25 October 2026 processed the same 60-second equivalent and also tested meters plus a combined 31-band/14-effect chain. Combined effects use different left/right tones so center reduction cannot turn the entire workload into silence.
+
+| Case | Wall time | Thread CPU | One-core equivalent |
+|---|---:|---:|---:|
+| Flat 31-band, effects/meters off | 0.115 ms | Below timer resolution | Unresolved |
+| Three nonzero graphic bands | 20.494 ms | 15.625 ms | 0.0260% |
+| Twenty nonzero graphic bands | 124.792 ms | 125.000 ms | 0.2083% |
+| Thirty-one nonzero graphic bands | 212.800 ms | 218.750 ms | 0.3646% |
+| Flat graphic EQ with live meters | 44.812 ms | 46.875 ms | 0.0781% |
+| Thirty-one bands, fourteen effects and meters | 674.969 ms | 671.875 ms | 1.1198% |
+
+The bypass fast path is retained; enabled effects have measurable cost. This offline single-run probe excludes decoding, startup, UI, audio devices and scheduling jitter. It is not a zero-cost promise or a whole-player performance benchmark. Raw local evidence is `session-state/tests/thirty-features-benchmark.txt`; production source and benchmark source remain in the repository.
+
+## Matrix and adaptive leveling checkpoint
+
+Protocol 3 retains the prior prefix and appends an 8x8 row-output/column-input matrix at byte 604, then RMS target, maximum boost and response at bytes 860, 864 and 868. The configuration is 872 bytes in the existing 4,096-byte map; acknowledgement/meter status remains at byte 1,536. Both managed and native sides validate finite bounded parameters. The identity matrix and disabled leveling preserve defaults. Effect flags now include matrix (32768) and leveling (65536); real-processing detection excludes the meter-only flag.
+
+Matrix processing copies up to eight logical input channels into a stack buffer before each output-row dot product. Linked RMS leveling follows time effects and precedes compressor/limiter. Its smoothed energy envelope drives bounded gain, with a silence gate, faster reduction and sample protection. Gating uses the envelope rather than instantaneous sample amplitude so waveform zero crossings do not cause gain pumping. Flush resets envelope/gain state. These are logical-channel/RMS features; physical speaker routing, LUFS/EBU R128 compliance and true-peak certification remain separate work.
+
+Actual PCM tests verify channel swapping, quiet/loud convergence and maximum boost. The native benchmark source adds matrix-only, leveling-only and all-sixteen-effect cases. On 25 October 2026, each processed 60 seconds equivalent of 48 kHz stereo on this machine:
+
+| Case | Wall time | Thread CPU | One-core equivalent |
+|---|---:|---:|---:|
+| Flat, processing/meters off | 0.132 ms | Below timer resolution | Unresolved |
+| Matrix only | 57.246 ms | 62.500 ms | 0.1042% |
+| Adaptive RMS leveling only | 97.951 ms | 93.750 ms | 0.1562% |
+| 31 graphic bands, sixteen effects and meters | 787.986 ms | 796.875 ms | 1.3281% |
+
+The combined case uses different left/right tones. Configuration updates averaged 11.7–38.8 microseconds; the largest measured update was 53.7 microseconds. Timer quantization explains CPU time exceeding wall time in some cases. These are single-run offline DSP observations, excluding startup, decoder/UI/device costs and deadlines. Disabled costs below timer resolution are not zero cost. Evidence: `session-state/tests/more-thirty-benchmark.txt`.

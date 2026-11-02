@@ -1,0 +1,1002 @@
+[
+  {
+    "Id": "acrusher",
+    "Name": "Bit-depth and sample reduction",
+    "Category": "Audio",
+    "Original": "R0980",
+    "Description": "Quantized lo-fi processing using the acrusher algorithm.",
+    "Template": "acrusher=bits=12:mix=0.5",
+    "Parameters": [],
+    "Family": "Creative sound"
+  },
+  {
+    "Id": "aderivative",
+    "Name": "Audio derivative transform",
+    "Category": "Audio",
+    "Original": "R0980",
+    "Description": "First-difference sample transform; this is mathematical processing, not restoration.",
+    "Template": "aderivative",
+    "Parameters": [],
+    "Family": "Signal transforms"
+  },
+  {
+    "Id": "aintegral",
+    "Name": "Audio integral transform",
+    "Category": "Audio",
+    "Original": "R0980",
+    "Description": "Integrate samples and bound the resulting peaks with a limiter.",
+    "Template": "aintegral,alimiter=limit=0.8",
+    "Parameters": [],
+    "Family": "Signal transforms"
+  },
+  {
+    "Id": "adrc",
+    "Name": "Spectral dynamic-range control",
+    "Category": "Audio",
+    "Original": "R0980",
+    "Description": "Frequency-domain compression above a fixed reference level.",
+    "Template": "adrc=transfer='if(gt(p,-40),-40+(p+40)/4,p)'",
+    "Parameters": [],
+    "Family": "Dialogue and dynamics"
+  },
+  {
+    "Id": "adynamicequalizer",
+    "Name": "Detected-band dynamic equalization",
+    "Category": "Audio",
+    "Original": "R0980",
+    "Description": "Use detected-band dynamic equalization with explicit cut-above behavior.",
+    "Template": "adynamicequalizer=threshold=10:ratio=2:mode=cutabove:range=6",
+    "Parameters": [],
+    "Family": "Dialogue and dynamics"
+  },
+  {
+    "Id": "adynamicsmooth",
+    "Name": "Adaptive dynamic smoothing",
+    "Category": "Audio",
+    "Original": "R0980",
+    "Description": "Apply the backend dynamic smoothing algorithm.",
+    "Template": "adynamicsmooth",
+    "Parameters": [],
+    "Family": "Signal transforms"
+  },
+  {
+    "Id": "afwtdn",
+    "Name": "Audio wavelet denoising",
+    "Category": "Audio",
+    "Original": "R0980",
+    "Description": "Wavelet-domain noise reduction with a fixed bounded noise estimate.",
+    "Template": "afwtdn=sigma=0.01",
+    "Parameters": [],
+    "Family": "Audio noise reduction"
+  },
+  {
+    "Id": "aloop",
+    "Name": "One-second audio phrase repetition",
+    "Category": "Audio",
+    "Original": "R0980",
+    "Description": "Repeat the first decoded second once within the bounded exported excerpt.",
+    "Template": "aloop=loop=1:size=48000:start=0",
+    "Parameters": [],
+    "Family": "Creative sound"
+  },
+  {
+    "Id": "anlmdn",
+    "Name": "Non-local means audio denoising",
+    "Category": "Audio",
+    "Original": "R0980",
+    "Description": "Patch-based audio noise reduction; processing cost depends on the installed filter.",
+    "Template": "anlmdn=s=0.001:p=0.001:r=0.004",
+    "Parameters": [],
+    "Family": "Audio noise reduction"
+  },
+  {
+    "Id": "apad",
+    "Name": "Finite audio tail padding",
+    "Category": "Audio",
+    "Original": "R0980",
+    "Description": "Add up to one second of silence after natural end, within the output-duration cap.",
+    "Template": "apad=pad_dur=1",
+    "Parameters": [],
+    "Family": "Signal transforms"
+  },
+  {
+    "Id": "apsyclip",
+    "Name": "Psychoacoustic clipping reduction",
+    "Category": "Audio",
+    "Original": "R0980",
+    "Description": "Apply the psychoacoustic clipping algorithm to peaks; not lost-signal reconstruction.",
+    "Template": "apsyclip",
+    "Parameters": [],
+    "Family": "Dialogue and dynamics"
+  },
+  {
+    "Id": "asubboost",
+    "Name": "Subharmonic bass reinforcement",
+    "Category": "Audio",
+    "Original": "R0980",
+    "Description": "Apply sub-bass reinforcement without changing the output-device configuration.",
+    "Template": "asubboost=boost=2",
+    "Parameters": [],
+    "Family": "Creative sound"
+  },
+  {
+    "Id": "asubcut",
+    "Name": "Steep subsonic removal",
+    "Category": "Audio",
+    "Original": "R0980",
+    "Description": "High-order subsonic cutoff at 30 Hz.",
+    "Template": "asubcut=cutoff=30:order=10",
+    "Parameters": [],
+    "Family": "Signal transforms"
+  },
+  {
+    "Id": "asupercut",
+    "Name": "Steep ultrasonic removal",
+    "Category": "Audio",
+    "Original": "R0980",
+    "Description": "High-order cutoff above 20 kHz at the working sample rate.",
+    "Template": "asupercut=cutoff=20000:order=10",
+    "Parameters": [],
+    "Family": "Signal transforms"
+  },
+  {
+    "Id": "asuperpass",
+    "Name": "High-order Butterworth pass band",
+    "Category": "Audio",
+    "Original": "R0980",
+    "Description": "Use the separate high-order Butterworth band-pass algorithm.",
+    "Template": "asuperpass",
+    "Parameters": [],
+    "Family": "Signal transforms"
+  },
+  {
+    "Id": "asuperstop",
+    "Name": "High-order Butterworth rejection band",
+    "Category": "Audio",
+    "Original": "R0980",
+    "Description": "Use the high-order Butterworth band-stop algorithm.",
+    "Template": "asuperstop",
+    "Parameters": [],
+    "Family": "Signal transforms"
+  },
+  {
+    "Id": "atilt",
+    "Name": "Spectral tilt transform",
+    "Category": "Audio",
+    "Original": "R0980",
+    "Description": "Apply the spectral tilt algorithm independently of the shelving-EQ implementation.",
+    "Template": "atilt=slope=0.5",
+    "Parameters": [],
+    "Family": "Signal transforms"
+  },
+  {
+    "Id": "bs2b",
+    "Name": "Bauer binaural crossfeed",
+    "Category": "Audio",
+    "Original": "R0980",
+    "Description": "Use libbs2b-style crossfeed when the installed FFmpeg includes that filter.",
+    "Template": "bs2b=fcut=700:feed=45",
+    "Parameters": [],
+    "Family": "Stereo and headphones"
+  },
+  {
+    "Id": "compensationdelay",
+    "Name": "Distance-derived acoustic delay",
+    "Category": "Audio",
+    "Original": "R0980",
+    "Description": "Apply the acoustic propagation delay corresponding to one metre, with backend temperature defaults.",
+    "Template": "compensationdelay=m=1",
+    "Parameters": [],
+    "Family": "Stereo and headphones"
+  },
+  {
+    "Id": "hdcd",
+    "Name": "HDCD PCM decoding",
+    "Category": "Audio",
+    "Original": "R0980",
+    "Description": "Decode HDCD markers before resampling; requires an appropriate decoded 16-bit source.",
+    "Template": "hdcd",
+    "Parameters": [],
+    "Family": "Source decoding"
+  },
+  {
+    "Id": "rubberband",
+    "Name": "Rubber Band pitch processing",
+    "Category": "Audio",
+    "Original": "R0980",
+    "Description": "One-semitone pitch transformation using the optional Rubber Band implementation.",
+    "Template": "rubberband=tempo=1:pitch=1.059463094",
+    "Parameters": [],
+    "Family": "Creative sound"
+  },
+  {
+    "Id": "silenceremove",
+    "Name": "Leading-silence trimming",
+    "Category": "Audio",
+    "Original": "R0980",
+    "Description": "Trim leading audio below the configured fixed silence threshold.",
+    "Template": "silenceremove=start_periods=1:start_threshold=-50dB:start_duration=0.1",
+    "Parameters": [],
+    "Family": "Audio noise reduction"
+  },
+  {
+    "Id": "stereotools",
+    "Name": "Stereo phase and image processor",
+    "Category": "Audio",
+    "Original": "R0980",
+    "Description": "Apply a 15-degree stereo phase transformation with stereotools.",
+    "Template": "stereotools=phase=15",
+    "Parameters": [],
+    "Family": "Stereo and headphones"
+  },
+  {
+    "Id": "superequalizer",
+    "Name": "Eighteen-band presence processing",
+    "Category": "Audio",
+    "Original": "R0980",
+    "Description": "Use the separate eighteen-band equalizer algorithm with a fixed presence emphasis.",
+    "Template": "superequalizer=8b=3:9b=3",
+    "Parameters": [],
+    "Family": "Tone and signal shaping"
+  },
+  {
+    "Id": "virtualbass",
+    "Name": "Virtual bass harmonic synthesis",
+    "Category": "Audio",
+    "Original": "R0980",
+    "Description": "Synthesize the backend virtual-bass effect; not hardware bass management.",
+    "Template": "virtualbass,pan=stereo|c0=0.8*FL+0.2*LFE|c1=0.8*FR+0.2*LFE",
+    "Parameters": [],
+    "Family": "Creative sound"
+  },
+  {
+    "Id": "amplify",
+    "Name": "Temporal pixel-difference amplification",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Amplify temporal pixel differences with a bounded five-frame neighborhood.",
+    "Template": "amplify=radius=2:factor=2",
+    "Parameters": [],
+    "Family": "Temporal processing"
+  },
+  {
+    "Id": "avgblur",
+    "Name": "Average-neighborhood smoothing",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Apply separable neighborhood averaging.",
+    "Template": "avgblur=sizeX=3:sizeY=3",
+    "Parameters": [],
+    "Family": "Noise reduction"
+  },
+  {
+    "Id": "boxblur",
+    "Name": "Box-kernel picture smoothing",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Apply a bounded box blur.",
+    "Template": "boxblur=2:1",
+    "Parameters": [],
+    "Family": "Noise reduction"
+  },
+  {
+    "Id": "ciescope",
+    "Name": "CIE chromaticity scope rendering",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Render a CIE chromaticity diagram from the input picture.",
+    "Template": "ciescope",
+    "Parameters": [],
+    "Family": "Visual analysis"
+  },
+  {
+    "Id": "codecview",
+    "Name": "Decoded motion-vector visualization",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Draw exported decoder motion vectors when the codec supports them.",
+    "Template": "codecview=mv=pf+bf+bb",
+    "Parameters": [],
+    "Family": "Visual analysis"
+  },
+  {
+    "Id": "colorize",
+    "Name": "HSL colorization",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Blend a fixed HSL tint using the colorize algorithm.",
+    "Template": "colorize=hue=200:saturation=0.4:mix=0.5",
+    "Parameters": [],
+    "Family": "Creative picture"
+  },
+  {
+    "Id": "colorhold",
+    "Name": "Selected-color isolation",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Retain colors near red and desaturate the rest.",
+    "Template": "colorhold=color=red:similarity=0.15:blend=0.1",
+    "Parameters": [],
+    "Family": "Creative picture"
+  },
+  {
+    "Id": "colormatrix",
+    "Name": "BT.601-to-BT.709 YUV matrix correction",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Explicit matrix correction for a source known to use BT.601; not automatic source detection.",
+    "Template": "colormatrix=src=bt601:dst=bt709",
+    "Parameters": [],
+    "Family": "Color and light"
+  },
+  {
+    "Id": "convolution",
+    "Name": "Spatial convolution edge processing",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Apply a spatial 3-by-3 sharpening kernel to luma.",
+    "Template": "convolution=0m='0 -1 0 -1 5 -1 0 -1 0'",
+    "Parameters": [],
+    "Family": "Sharpness and gradients"
+  },
+  {
+    "Id": "curves",
+    "Name": "Spline-based RGB contrast curve",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Use a spline contrast curve rather than a linear channel matrix.",
+    "Template": "curves=all='0/0 0.25/0.2 0.75/0.8 1/1'",
+    "Parameters": [],
+    "Family": "Color and light"
+  },
+  {
+    "Id": "datascope",
+    "Name": "Pixel-value inspection visualization",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Overlay the backend pixel-value datascope.",
+    "Template": "datascope",
+    "Parameters": [],
+    "Family": "Visual analysis"
+  },
+  {
+    "Id": "dblur",
+    "Name": "Directional motion blur",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Apply directional blur along a 45-degree axis.",
+    "Template": "dblur=angle=45:radius=4",
+    "Parameters": [],
+    "Family": "Creative picture"
+  },
+  {
+    "Id": "dctdnoiz",
+    "Name": "DCT-domain denoising",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Apply discrete-cosine-domain picture denoising.",
+    "Template": "dctdnoiz=sigma=2",
+    "Parameters": [],
+    "Family": "Noise reduction"
+  },
+  {
+    "Id": "deblock",
+    "Name": "Codec-block boundary smoothing",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Smooth eight-pixel coding-block boundaries with the weak algorithm.",
+    "Template": "deblock=filter=weak:block=8",
+    "Parameters": [],
+    "Family": "Noise reduction"
+  },
+  {
+    "Id": "decimate",
+    "Name": "Fixed-cycle duplicate-frame decimation",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Drop a duplicate candidate per five-frame cycle; use appropriate telecined sources.",
+    "Template": "decimate=cycle=5",
+    "Parameters": [],
+    "Family": "Temporal processing"
+  },
+  {
+    "Id": "dedot",
+    "Name": "Cross-color and dot-crawl reduction",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Apply the dedicated dot-crawl/cross-color suppression algorithm.",
+    "Template": "dedot",
+    "Parameters": [],
+    "Family": "Noise reduction"
+  },
+  {
+    "Id": "deflate",
+    "Name": "Local pixel-minimum deflation",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Apply local morphological deflation.",
+    "Template": "deflate",
+    "Parameters": [],
+    "Family": "Creative picture"
+  },
+  {
+    "Id": "dejudder",
+    "Name": "Cadence judder correction",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Correct uneven frame timing using the backend cadence algorithm.",
+    "Template": "dejudder",
+    "Parameters": [],
+    "Family": "Temporal processing"
+  },
+  {
+    "Id": "dilation",
+    "Name": "Morphological picture dilation",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Use the dedicated local-maximum dilation filter.",
+    "Template": "dilation",
+    "Parameters": [],
+    "Family": "Creative picture"
+  },
+  {
+    "Id": "drawbox",
+    "Name": "Picture reference-rectangle overlay",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Draw a visible reference rectangle in scaled-frame coordinates.",
+    "Template": "drawbox=x=20:y=20:w=100:h=100:color=cyan:t=2",
+    "Parameters": [],
+    "Family": "Presentation overlays"
+  },
+  {
+    "Id": "drawgrid",
+    "Name": "Picture alignment-grid overlay",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Draw a translucent alignment grid.",
+    "Template": "drawgrid=w=64:h=64:t=1:color=white@0.3",
+    "Parameters": [],
+    "Family": "Presentation overlays"
+  },
+  {
+    "Id": "edgedetect",
+    "Name": "Canny-style edge visualization",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Render detected picture edges.",
+    "Template": "edgedetect=low=0.1:high=0.3",
+    "Parameters": [],
+    "Family": "Visual analysis"
+  },
+  {
+    "Id": "elbg",
+    "Name": "Codebook color quantization",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Quantize picture colors with an ELBG codebook.",
+    "Template": "elbg=codebook_length=64",
+    "Parameters": [],
+    "Family": "Creative picture"
+  },
+  {
+    "Id": "epx",
+    "Name": "EPX pixel-art enlargement",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Use EPX edge-aware pixel-art scaling before the final output-size cap.",
+    "Template": "epx=n=2",
+    "Parameters": [],
+    "Family": "Pixel-art scaling"
+  },
+  {
+    "Id": "erosion",
+    "Name": "Morphological picture erosion",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Use a local-minimum erosion filter.",
+    "Template": "erosion",
+    "Parameters": [],
+    "Family": "Creative picture"
+  },
+  {
+    "Id": "estdif",
+    "Name": "Edge-directed spatial-temporal deinterlacing",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Use the ESTDIF deinterlacer when present in the installed backend.",
+    "Template": "estdif",
+    "Parameters": [],
+    "Family": "Field processing"
+  },
+  {
+    "Id": "exposure",
+    "Name": "Exposure-domain brightness correction",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Raise exposure by half a stop using the exposure filter.",
+    "Template": "exposure=exposure=0.5",
+    "Parameters": [],
+    "Family": "Color and light"
+  },
+  {
+    "Id": "fade",
+    "Name": "Timed video fade-in",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Fade the first second of the selected excerpt from black.",
+    "Template": "fade=t=in:st=0:d=1",
+    "Parameters": [],
+    "Family": "Presentation overlays"
+  },
+  {
+    "Id": "fftfilt",
+    "Name": "Frequency-domain picture filtering",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Apply a smooth low-pass frequency-domain weighting.",
+    "Template": "fftfilt=dc_Y=0:weight_Y='exp(-4*((Y+X)/(W+H)))'",
+    "Parameters": [],
+    "Family": "Sharpness and gradients"
+  },
+  {
+    "Id": "field",
+    "Name": "Single-field extraction",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Extract top fields as half-height pictures.",
+    "Template": "field=type=top",
+    "Parameters": [],
+    "Family": "Field processing"
+  },
+  {
+    "Id": "fieldorder",
+    "Name": "Interlaced field-order conversion",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Request bottom-field-first ordering for appropriately marked interlaced input.",
+    "Template": "fieldorder=order=bff",
+    "Parameters": [],
+    "Family": "Field processing"
+  },
+  {
+    "Id": "fillborders",
+    "Name": "Edge border reconstruction",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Reconstruct a two-pixel edge border by smearing neighboring values.",
+    "Template": "fillborders=left=2:right=2:top=2:bottom=2:mode=smear",
+    "Parameters": [],
+    "Family": "Geometry and restoration"
+  },
+  {
+    "Id": "floodfill",
+    "Name": "Connected-region color fill",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Fill the connected corner region using component destination values.",
+    "Template": "floodfill=x=0:y=0:d0=16:d1=128:d2=128",
+    "Parameters": [],
+    "Family": "Creative picture"
+  },
+  {
+    "Id": "fspp",
+    "Name": "Fast postprocessing artifact reduction",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Apply fast simple postprocessing at bounded quality.",
+    "Template": "fspp=quality=4",
+    "Parameters": [],
+    "Family": "Noise reduction"
+  },
+  {
+    "Id": "gblur",
+    "Name": "Gaussian picture smoothing",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Apply Gaussian spatial smoothing.",
+    "Template": "gblur=sigma=1",
+    "Parameters": [],
+    "Family": "Noise reduction"
+  },
+  {
+    "Id": "grayworld",
+    "Name": "Gray-world white balance",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Use gray-world illuminant estimation; source assumptions require review.",
+    "Template": "grayworld",
+    "Parameters": [],
+    "Family": "Color and light"
+  },
+  {
+    "Id": "greyedge",
+    "Name": "Gray-edge illuminant correction",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Use gradient-based illuminant estimation.",
+    "Template": "greyedge",
+    "Parameters": [],
+    "Family": "Color and light"
+  },
+  {
+    "Id": "hqx",
+    "Name": "HQx pixel-art enlargement",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Use HQ2x pixel-art scaling before the final output-size cap.",
+    "Template": "hqx=n=2",
+    "Parameters": [],
+    "Family": "Pixel-art scaling"
+  },
+  {
+    "Id": "hsvhold",
+    "Name": "HSV-selected color isolation",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Retain a selected HSV neighborhood with the dedicated HSV hold filter.",
+    "Template": "hsvhold=hue=0:sat=1:val=1:similarity=0.15:blend=0.1",
+    "Parameters": [],
+    "Family": "Creative picture"
+  },
+  {
+    "Id": "inflate",
+    "Name": "Local pixel-maximum inflation",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Apply local morphological inflation.",
+    "Template": "inflate",
+    "Parameters": [],
+    "Family": "Creative picture"
+  },
+  {
+    "Id": "interlace",
+    "Name": "Progressive-frame field interleaving",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Interleave progressive pictures into fields for offline picture transformation; container interlace certification is not claimed.",
+    "Template": "interlace",
+    "Parameters": [],
+    "Family": "Field processing"
+  },
+  {
+    "Id": "scharr",
+    "Name": "Scharr edge visualization",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Render picture gradients with the Scharr operator.",
+    "Template": "scharr",
+    "Parameters": [],
+    "Family": "Visual analysis"
+  },
+  {
+    "Id": "xbr",
+    "Name": "xBR pixel-art enlargement",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Use the separate xBR pixel-art enlargement algorithm before the final size cap.",
+    "Template": "xbr=n=2",
+    "Parameters": [],
+    "Family": "Pixel-art scaling"
+  },
+  {
+    "Id": "loop",
+    "Name": "Finite video phrase repetition",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Repeat the first 25-frame phrase once within the final excerpt-duration cap.",
+    "Template": "loop=loop=1:size=25:start=0",
+    "Parameters": [],
+    "Family": "Temporal processing"
+  },
+  {
+    "Id": "vectorscope",
+    "Name": "Chroma vectorscope rendering",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Render a chroma vectorscope, distinct from the audio stereo vectorscope.",
+    "Template": "format=yuv444p,vectorscope,format=yuv420p",
+    "Parameters": [],
+    "Family": "Visual analysis"
+  },
+  {
+    "Id": "maskfun",
+    "Name": "Luma-threshold mask generation",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Generate a threshold-based luma mask.",
+    "Template": "maskfun=low=64:high=192:sum=255",
+    "Parameters": [],
+    "Family": "Visual analysis"
+  },
+  {
+    "Id": "median",
+    "Name": "Median picture denoising",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Apply bounded median-neighborhood filtering.",
+    "Template": "median=radius=1",
+    "Parameters": [],
+    "Family": "Noise reduction"
+  },
+  {
+    "Id": "monochrome",
+    "Name": "Weighted monochrome conversion",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Convert to monochrome using the dedicated chroma-weighted algorithm.",
+    "Template": "monochrome",
+    "Parameters": [],
+    "Family": "Creative picture"
+  },
+  {
+    "Id": "negate",
+    "Name": "Picture color inversion",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Invert decoded picture values.",
+    "Template": "negate",
+    "Parameters": [],
+    "Family": "Creative picture"
+  },
+  {
+    "Id": "noise",
+    "Name": "Synthetic picture grain injection",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Add bounded temporal uniform grain.",
+    "Template": "noise=alls=5:allf=t+u",
+    "Parameters": [],
+    "Family": "Creative picture"
+  },
+  {
+    "Id": "oscilloscope",
+    "Name": "Picture-line oscilloscope overlay",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Visualize picture-line values with the video oscilloscope filter.",
+    "Template": "oscilloscope",
+    "Parameters": [],
+    "Family": "Visual analysis"
+  },
+  {
+    "Id": "photosensitivity",
+    "Name": "Flashing-pattern reduction attempt",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Apply the backend flashing reduction algorithm; not a medical safety guarantee.",
+    "Template": "photosensitivity",
+    "Parameters": [],
+    "Family": "Temporal processing"
+  },
+  {
+    "Id": "pixelize",
+    "Name": "Block-pixelation processing",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Apply sixteen-pixel picture pixelation.",
+    "Template": "pixelize=width=16:height=16",
+    "Parameters": [],
+    "Family": "Creative picture"
+  },
+  {
+    "Id": "prewitt",
+    "Name": "Prewitt edge visualization",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Render gradients using the Prewitt operator.",
+    "Template": "prewitt",
+    "Parameters": [],
+    "Family": "Visual analysis"
+  },
+  {
+    "Id": "pseudocolor",
+    "Name": "Luma-to-pseudocolor visualization",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Render a viridis pseudocolor mapping for inspection.",
+    "Template": "pseudocolor=preset=viridis",
+    "Parameters": [],
+    "Family": "Visual analysis"
+  },
+  {
+    "Id": "pullup",
+    "Name": "Mixed-telecine field reconstruction",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Attempt field matching on suitable mixed telecined sources.",
+    "Template": "pullup",
+    "Parameters": [],
+    "Family": "Field processing"
+  },
+  {
+    "Id": "v360",
+    "Name": "Equirectangular-to-flat panorama view",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Create a fixed rectilinear view from a known equirectangular panorama; no projection detection.",
+    "Template": "v360=input=equirect:output=flat:h_fov=90:v_fov=60:w=1280:h=720",
+    "Parameters": [],
+    "Family": "Panoramic video"
+  },
+  {
+    "Id": "roberts",
+    "Name": "Roberts edge visualization",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Render gradients using the Roberts operator.",
+    "Template": "roberts",
+    "Parameters": [],
+    "Family": "Visual analysis"
+  },
+  {
+    "Id": "sab",
+    "Name": "Shape-adaptive picture smoothing",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Use shape-adaptive luma/chroma blur.",
+    "Template": "sab=lr=1:lpfr=1:ls=1",
+    "Parameters": [],
+    "Family": "Noise reduction"
+  },
+  {
+    "Id": "scroll",
+    "Name": "Animated picture scrolling",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Apply a bounded horizontal scroll velocity.",
+    "Template": "scroll=horizontal=0.01:vertical=0",
+    "Parameters": [],
+    "Family": "Creative picture"
+  },
+  {
+    "Id": "separatefields",
+    "Name": "Field-to-frame separation",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Separate interlaced fields into half-height frames.",
+    "Template": "separatefields",
+    "Parameters": [],
+    "Family": "Field processing"
+  },
+  {
+    "Id": "shear",
+    "Name": "Geometric picture shear",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Apply a horizontal shear to the scaled picture.",
+    "Template": "shear=shx=0.1:shy=0",
+    "Parameters": [],
+    "Family": "Geometry and restoration"
+  },
+  {
+    "Id": "vibrance",
+    "Name": "Selective saturation enhancement",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Use the vibrance algorithm for selective saturation changes.",
+    "Template": "vibrance=intensity=0.2",
+    "Parameters": [],
+    "Family": "Color and light"
+  },
+  {
+    "Id": "shuffleframes",
+    "Name": "Adjacent-frame order permutation",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Swap adjacent frame positions in each two-frame group.",
+    "Template": "shuffleframes=mapping='1 0'",
+    "Parameters": [],
+    "Family": "Temporal processing"
+  },
+  {
+    "Id": "shufflepixels",
+    "Name": "Deterministic pixel permutation",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Permute picture pixels with a fixed seed.",
+    "Template": "shufflepixels=direction=forward:mode=horizontal:seed=1",
+    "Parameters": [],
+    "Family": "Creative picture"
+  },
+  {
+    "Id": "vaguedenoiser",
+    "Name": "Undecimated-wavelet picture denoising",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Use the separate vague wavelet-denoising implementation.",
+    "Template": "vaguedenoiser",
+    "Parameters": [],
+    "Family": "Noise reduction"
+  },
+  {
+    "Id": "sobel",
+    "Name": "Sobel edge visualization",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Render gradients with the Sobel operator.",
+    "Template": "sobel",
+    "Parameters": [],
+    "Family": "Visual analysis"
+  },
+  {
+    "Id": "spp",
+    "Name": "Simple-postprocessing artifact reduction",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Apply simple postprocessing at a bounded quality level.",
+    "Template": "spp=quality=3",
+    "Parameters": [],
+    "Family": "Noise reduction"
+  },
+  {
+    "Id": "tblend",
+    "Name": "Two-frame temporal difference visualization",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Render differences between consecutive pictures.",
+    "Template": "tblend=all_mode=difference",
+    "Parameters": [],
+    "Family": "Visual analysis"
+  },
+  {
+    "Id": "telecine",
+    "Name": "Progressive-to-telecine cadence generation",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Generate a 2:3 field cadence from suitable progressive sources.",
+    "Template": "telecine=pattern=23",
+    "Parameters": [],
+    "Family": "Field processing"
+  },
+  {
+    "Id": "thistogram",
+    "Name": "Temporal histogram visualization",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Render temporal picture-histogram changes.",
+    "Template": "format=yuv444p,thistogram,format=yuv420p",
+    "Parameters": [],
+    "Family": "Visual analysis"
+  },
+  {
+    "Id": "tinterlace",
+    "Name": "Temporal field interleaving",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Interleave temporal fields using top-first ordering.",
+    "Template": "tinterlace=mode=interleave_top",
+    "Parameters": [],
+    "Family": "Field processing"
+  },
+  {
+    "Id": "tmedian",
+    "Name": "Temporal median denoising",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Apply a bounded three-frame temporal median.",
+    "Template": "tmedian=radius=1",
+    "Parameters": [],
+    "Family": "Noise reduction"
+  },
+  {
+    "Id": "waveform",
+    "Name": "Video-component waveform scope",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Render video signal-component waveforms, distinct from audio waveform images.",
+    "Template": "waveform",
+    "Parameters": [],
+    "Family": "Visual analysis"
+  },
+  {
+    "Id": "unsharp",
+    "Name": "Unsharp-mask picture sharpening",
+    "Category": "Video",
+    "Original": "R1391",
+    "Description": "Apply luma unsharp masking with a fixed spatial kernel.",
+    "Template": "unsharp=5:5:0.5:5:5:0",
+    "Parameters": [],
+    "Family": "Sharpness and gradients"
+  }
+]

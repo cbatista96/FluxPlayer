@@ -148,12 +148,13 @@
                                 <ListBoxItem Content="Video" Tag="" local:ButtonFx.IconEffect="Pop" />
                                 <ListBoxItem Content="Audio" Tag="" local:ButtonFx.IconEffect="Wiggle" />
                                 <ListBoxItem Content="Subtitles" Tag="" local:ButtonFx.IconEffect="Bounce" />
+                                <ListBoxItem Content="Library" Tag="" />
+                                <ListBoxItem Content="Files and tags" Tag="" />
                                 <ListBoxItem Content="Keyboard shortcuts" Tag="" local:ButtonFx.IconEffect="Bounce" />
                                 <ListBoxItem Content="Mouse" Tag="" local:ButtonFx.IconEffect="Wiggle" />
                                 <ListBoxItem Content="Locations" Tag="" local:ButtonFx.IconEffect="Bounce" />
                                 <ListBoxItem Content="Accessibility" Tag="" local:ButtonFx.IconEffect="Pop" />
                                 <ListBoxItem Content="Features" Tag="" local:ButtonFx.IconEffect="Wiggle" />
-                                <ListBoxItem Content="Tools" Tag="" />
                                 <ListBoxItem Content="About" Tag="" local:ButtonFx.IconEffect="SpinCW" />
                             </ListBox>
                         </ScrollViewer>
@@ -432,6 +433,7 @@
                                     <Button Grid.Column="1" Content="Open folder" Style="{StaticResource ActionBtn}" Click="OpenConfigFolderBtn_Click" />
                                 </Grid>
                             </Border>
+                            <StackPanel x:Name="GeneralActions" />
                         </StackPanel>
 
                         <StackPanel x:Name="PagePlayback" Visibility="Collapsed">
@@ -552,6 +554,26 @@
                                     <CheckBox x:Name="ResumeLastToggle" Grid.Column="1" VerticalAlignment="Center" />
                                 </Grid>
                             </Border>
+                            <Border Style="{StaticResource OptionCard}"><Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                <StackPanel><TextBlock Text="Remember volume per file" Style="{StaticResource OptTitle}"/><TextBlock Text="Restore a local file's volume, within the current boost limit" Style="{StaticResource OptSub}"/></StackPanel>
+                                <CheckBox x:Name="RememberFileVolumeToggle" Grid.Column="1" VerticalAlignment="Center" AutomationProperties.Name="Remember volume per file"/>
+                            </Grid></Border>
+                            <Border Style="{StaticResource OptionCard}"><Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                <StackPanel><TextBlock Text="Remember audio track per file" Style="{StaticResource OptTitle}"/><TextBlock Text="Restore an explicitly selected matching audio track" Style="{StaticResource OptSub}"/></StackPanel>
+                                <CheckBox x:Name="RememberFileAudioToggle" Grid.Column="1" VerticalAlignment="Center" AutomationProperties.Name="Remember audio track per file"/>
+                            </Grid></Border>
+                            <Border Style="{StaticResource OptionCard}"><Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                <StackPanel><TextBlock Text="Remember subtitles per file" Style="{StaticResource OptTitle}"/><TextBlock Text="Recall a selected track, Disabled, or a local external subtitle file" Style="{StaticResource OptSub}"/></StackPanel>
+                                <CheckBox x:Name="RememberFileSubtitlesToggle" Grid.Column="1" VerticalAlignment="Center" AutomationProperties.Name="Remember subtitles per file"/>
+                            </Grid></Border>
+                            <Border Style="{StaticResource OptionCard}"><StackPanel>
+                                <TextBlock Text="Per-file playback history" Style="{StaticResource OptTitle}"/>
+                                <TextBlock Text="Keeps up to 1,000 local files. Changed files do not reuse old preferences." Style="{StaticResource OptSub}"/>
+                                <Button x:Name="ForgetFilePreferencesButton" Content="Forget all file preferences" Click="ForgetFilePreferences_Click" HorizontalAlignment="Left" Padding="14,7" Margin="0,10,0,0"/>
+                            </StackPanel></Border>
 
                             <Border Style="{StaticResource OptionCard}">
                                 <Grid>
@@ -590,6 +612,7 @@
                                     </ComboBox>
                                 </Grid>
                             </Border>
+                            <StackPanel x:Name="PlaybackActions" />
                         </StackPanel>
 
                         <StackPanel x:Name="PageVideo" Visibility="Collapsed">
@@ -797,6 +820,7 @@
                                     </ComboBox>
                                 </Grid>
                             </Border>
+                            <StackPanel x:Name="VideoActions" />
                         </StackPanel>
 
                         <StackPanel x:Name="PageAudio" Visibility="Collapsed">
@@ -846,17 +870,6 @@
                                 <Grid>
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                                     <StackPanel>
-                                        <TextBlock Text="Normalize volume" Style="{StaticResource OptTitle}" />
-                                        <TextBlock Text="Pending verified playback processing. Conversion normalization is available in the converter." TextWrapping="Wrap" Style="{StaticResource OptSub}" />
-                                    </StackPanel>
-                                    <CheckBox x:Name="NormalizeVolumeToggle" Grid.Column="1" VerticalAlignment="Center" IsEnabled="False" ToolTip="Playback normalization is not implemented yet." />
-                                </Grid>
-                            </Border>
-
-                            <Border Style="{StaticResource OptionCard}">
-                                <Grid>
-                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                                    <StackPanel>
                                         <TextBlock Text="Volume boost" Style="{StaticResource OptTitle}" />
                                         <TextBlock Text="Allow amplification above 100%" Style="{StaticResource OptSub}" />
                                     </StackPanel>
@@ -896,6 +909,7 @@
                                     <TextBox x:Name="AudioDelayStepBox" Grid.Column="1" Width="80" Height="32" VerticalContentAlignment="Center" Text="50" />
                                 </Grid>
                             </Border>
+                            <StackPanel x:Name="AudioActions" />
                         </StackPanel>
 
                         <StackPanel x:Name="PageSubtitles" Visibility="Collapsed">
@@ -1088,6 +1102,7 @@
                                     <TextBox x:Name="SubDelayStepBox" Grid.Column="1" Width="80" Height="32" VerticalContentAlignment="Center" Text="100" />
                                 </Grid>
                             </Border>
+                            <StackPanel x:Name="SubtitleActions" />
                         </StackPanel>
 
                         <StackPanel x:Name="PageHotkeys" Visibility="Collapsed">
@@ -1139,6 +1154,7 @@
                                     </ItemsControl>
                                 </StackPanel>
                             </Border>
+                            <StackPanel x:Name="KeyboardActions" />
                         </StackPanel>
 
                         <StackPanel x:Name="PageMouse" Visibility="Collapsed">
@@ -1248,6 +1264,7 @@
                                     <CheckBox x:Name="InvertWheelToggle" Grid.Column="1" VerticalAlignment="Center" />
                                 </Grid>
                             </Border>
+                            <StackPanel x:Name="MouseActions" />
                         </StackPanel>
 
                         <StackPanel x:Name="PageLocations" Visibility="Collapsed">
@@ -1482,10 +1499,30 @@
                             </Border>
                         </StackPanel>
 
-                        <StackPanel x:Name="PageTools" Visibility="Collapsed">
-                            <TextBlock Text="Tools" Style="{StaticResource SectionHdr}" />
-                            <TextBlock Text="Audio, video, library and media utilities. Opening a tool saves your current preferences." Style="{StaticResource OptSub}" Margin="0,0,0,18" />
-                            <StackPanel x:Name="ToolActions" />
+                        <StackPanel x:Name="PageLibrary" Visibility="Collapsed">
+                            <TextBlock Text="Library" Style="{StaticResource SectionHdr}" />
+                            <TextBlock Text="Browse local music, videos and photo albums. Opening an action saves your current preferences." Style="{StaticResource OptSub}" Margin="0,0,0,8" />
+                            <TextBlock Text="Playback history" Style="{StaticResource SubsectionHdr}" />
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                    <StackPanel Margin="0,0,16,0"><TextBlock Text="Keep playback history" Style="{StaticResource OptTitle}"/><TextBlock Text="Record local session times, listening duration and last positions. Starts with the next opened media file." Style="{StaticResource OptSub}"/></StackPanel>
+                                    <CheckBox x:Name="KeepHistoryToggle" Grid.Column="1" VerticalAlignment="Center" AutomationProperties.Name="Keep playback history"/>
+                                </Grid>
+                            </Border>
+                            <Border Style="{StaticResource OptionCard}"><StackPanel>
+                                <TextBlock Text="History limits" Style="{StaticResource OptTitle}"/>
+                                <WrapPanel Margin="0,8,0,0">
+                                    <TextBlock Text="Sessions (1–5,000)" VerticalAlignment="Center" Margin="0,0,8,8"/><TextBox x:Name="HistoryLimitBox" Width="90" Padding="8,5" Margin="0,0,18,8" AutomationProperties.Name="Maximum history sessions"/>
+                                    <TextBlock Text="Days (1–3,650)" VerticalAlignment="Center" Margin="0,0,8,8"/><TextBox x:Name="HistoryDaysBox" Width="90" Padding="8,5" Margin="0,0,0,8" AutomationProperties.Name="History retention days"/>
+                                </WrapPanel>
+                                <TextBlock Text="Limits apply to recorded and displayed history. Turning recording off retains existing history." Style="{StaticResource OptSub}"/>
+                            </StackPanel></Border>
+                            <StackPanel x:Name="LibraryActions" />
+                        </StackPanel>
+                        <StackPanel x:Name="PageFiles" Visibility="Collapsed">
+                            <TextBlock Text="Files and tags" Style="{StaticResource SectionHdr}" />
+                            <TextBlock Text="Edit metadata and preview file changes. Opening an action saves your current preferences." Style="{StaticResource OptSub}" Margin="0,0,0,8" />
+                            <StackPanel x:Name="FileActions" />
                         </StackPanel>
                         <StackPanel x:Name="PageAbout" Visibility="Collapsed">
                             <TextBlock Text="About" Style="{StaticResource SectionHdr}" />

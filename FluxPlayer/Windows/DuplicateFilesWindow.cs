@@ -8,6 +8,8 @@ using Wpf.Ui.Controls;
 using Button = System.Windows.Controls.Button;
 using TextBlock = System.Windows.Controls.TextBlock;
 using DataGrid = System.Windows.Controls.DataGrid;
+using MessageBoxButton = System.Windows.MessageBoxButton;
+using MessageBoxResult = System.Windows.MessageBoxResult;
 
 namespace FluxPlayer.Windows;
 
@@ -40,6 +42,7 @@ public sealed class DuplicateFilesWindow : FluentWindow
     private readonly Button _cancel = new() { Content = "Cancel scan", IsEnabled = false, Margin = new Thickness(8, 0, 0, 0), Padding = new Thickness(16, 8, 16, 8) };
     private CancellationTokenSource? _operation;
     private bool _closed;
+    private DuplicateGroup[] _groups = [];
 
     public DuplicateFilesWindow(Window owner, MainViewModel vm)
     {
@@ -88,6 +91,26 @@ public sealed class DuplicateFilesWindow : FluentWindow
         }
         AddAction("Play selected", (_, _) => { var paths = SelectedPaths(); if (paths.Length > 0) _vm.AddFilesToPlaylist(paths, true); });
         AddAction("Add to playlist", (_, _) => _vm.AddFilesToPlaylist(SelectedPaths()));
+        AddAction("Consolidate group into selected…", (_, _) =>
+        {
+            if (_grid.SelectedItem is not Row keeper || _grid.ItemsSource is not Row[] rows) return;
+            new DuplicateMergeWindow(this, _vm, keeper.Path, rows.Where(r => r.Group == keeper.Group).Select(r => r.Path).ToArray()).Show();
+        });
+        AddAction("Automatically consolidate exact groups…", async (_, _) =>
+        {
+            if (_operation != null || _groups.Length == 0) return;
+            if (System.Windows.MessageBox.Show(this, $"Consolidate {_groups.Length} exact-file groups? The oldest indexed entry in each group is retained. Metadata and collections merge; unchanged copies stay excluded from future scans. Files remain intact. Completed groups are retained if canceled.", "Review automatic consolidation", MessageBoxButton.OKCancel) != MessageBoxResult.OK) return;
+            using var cancel = new CancellationTokenSource(); _operation = cancel; _scan.IsEnabled = false; _cancel.IsEnabled = true;
+            try { int count = await _vm.Library.AutoConsolidate(_groups, new Progress<string>(s => { if (!_closed) _status.Text = s; }), cancel.Token); _grid.ItemsSource = Array.Empty<Row>(); _groups = []; _status.Text = $"Consolidated {count} index entries. Original files remain intact."; }
+            catch (Exception ex) when (ex is not OutOfMemoryException) { if (!_closed) _status.Text = ex is OperationCanceledException ? "Canceled. Completed group merges remain saved; rescan to continue." : ex.Message; }
+            finally { _operation = null; _scan.IsEnabled = true; _cancel.IsEnabled = false; }
+        });
+        AddAction("Restore consolidated paths…", async (_, _) =>
+        {
+            if (_operation != null) return;
+            try { int count = await _vm.Library.RestoreConsolidatedDuplicates(CancellationToken.None); _status.Text = $"Cleared {count} exclusions. Rescan folders to reimport their files."; }
+            catch (Exception ex) when (ex is not OutOfMemoryException) { _status.Text = ex.Message; }
+        });
         AddAction("Remove selected from library", async (_, _) =>
         {
             int removed = await _vm.Library.RemoveEntriesAsync(SelectedPaths());
@@ -113,6 +136,7 @@ public sealed class DuplicateFilesWindow : FluentWindow
         using var cancellation = new CancellationTokenSource(); _operation = cancellation;
         _scan.IsEnabled = false; _cancel.IsEnabled = true; _progress.IsIndeterminate = true;
         _grid.ItemsSource = Array.Empty<Row>(); _status.Text = "Checking sizes before hashing candidates…";
+        _groups = [];
         try
         {
             var entries = await _vm.Library.SnapshotAsync();
@@ -124,6 +148,7 @@ public sealed class DuplicateFilesWindow : FluentWindow
             });
             var result = await DuplicateFinder.FindAsync(entries, progress, cancellation.Token);
             if (_closed) return;
+            _groups = result.Groups;
             _grid.ItemsSource = result.Groups.SelectMany((group, index) => group.Paths.Select(path => new Row(index + 1, path, group.Size))).ToArray();
             _progress.Value = 1;
             _status.Text = $"{result.Groups.Length:N0} duplicate groups · {result.HashedFiles:N0} files hashed · {result.SkippedFiles:N0} unavailable or changed files skipped.";

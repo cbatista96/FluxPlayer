@@ -101,6 +101,7 @@ public partial class MainViewModel
 
     public void RefreshNowPlaying()
     {
+        if (IsRealtimeAudio) return;
         if (_shuttingDown) return;
         var item = CurrentItem;
         if (item == null) return;
@@ -117,6 +118,7 @@ public partial class MainViewModel
             NowPlayingAlbum = item.Album;
             AudioTechnical = metadata.Technical;
             WindowTitle = $"FluxPlayer  —  {item.Title}";
+            UpdateHistoryMetadata(metadata);
             if (Chapters.Count == 0)
                 foreach (var chapter in _mediaService.GetChapters()) Chapters.Add(chapter);
             string artworkKey = item.FilePath + "|" + metadata.Artwork;
@@ -143,6 +145,8 @@ public partial class MainViewModel
         _settings.SubtitleDelay = (int)SubtitleDelayMs;
         _mediaService.PlaybackSettings = _settings;
         _mediaService.ApplyPlaybackSettings();
+        ApplyConfiguredAudioEffects();
+        _mediaService.ApplyPicture(CurrentPicture);
         PushEqualizer();
     }
 
@@ -218,8 +222,9 @@ public partial class MainViewModel
         if (index < 0) return;
         PlayAt(index);
         _pendingResumeMs = Math.Max(0, positionMs);
+        _pendingPositionExplicit = true;
         if (TotalDurationMs > positionMs && _mediaService.GetDuration() > positionMs)
-        { _pendingResumeMs = -1; SeekToMs(positionMs); }
+        { _pendingResumeMs = -1; _pendingPositionExplicit = false; SeekToMs(positionMs); }
     }
 
     private string[] ExpandPlaylistInputs(string[] paths)
@@ -260,7 +265,12 @@ public partial class MainViewModel
 
     public async Task ShutdownAsync()
     {
+        CancelRealtimeStart();
+        await StopExternalServices();
         _shuttingDown = true;
+        _scheduleTimer?.Stop(); CancelVolumeFade();
+        CheckpointSpoken(clear: true); await _spokenWrites;
+        await FinishHistoryAsync();
         _mediaService.TracksChanged -= OnTracksChanged;
         _mediaService.VideoSurfaceChanged -= OnTracksChanged;
         Interlocked.Increment(ref _durationParseToken);

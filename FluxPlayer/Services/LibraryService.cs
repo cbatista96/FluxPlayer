@@ -1,4 +1,5 @@
 using FluxPlayer.Models;
+using System.Collections.Immutable;
 using System.IO;
 using System.Text.Json;
 
@@ -31,7 +32,7 @@ public sealed partial class LibraryService : IAsyncDisposable
         _load = Task.Run(LoadAsync);
     }
 
-    private sealed record Store(int Version, string[] Folders, LibraryEntry[] Entries, SmartList[]? Lists = null);
+    private sealed record Store(int Version, string[] Folders, LibraryEntry[] Entries, SmartList[]? Lists = null, LibraryCollection[]? Collections = null, ConsolidatedDuplicate[]? Consolidated = null);
 
     private async Task LoadAsync()
     {
@@ -42,12 +43,19 @@ public sealed partial class LibraryService : IAsyncDisposable
             var store = await JsonSerializer.DeserializeAsync<Store>(file);
             if (store == null || store.Version != 1) return;
             foreach (var entry in store.Entries.Take(200_000))
-                if (!string.IsNullOrWhiteSpace(entry.Path)) _entries[entry.Path] = entry with { Kind = NormalizeKind(entry.Kind), Labels = LibraryLabels.Sanitize(entry.Labels) };
+                if (!string.IsNullOrWhiteSpace(entry.Path)) _entries[entry.Path] = entry with { Kind = NormalizeKind(entry.Kind), Labels = LibraryLabels.Sanitize(entry.Labels), Year = Math.Clamp(entry.Year, 0, 9999), Rating = Math.Clamp(entry.Rating, 0, 5) };
             foreach (var folder in store.Folders) if (Directory.Exists(folder)) _folders.Add(folder);
-            foreach (var list in store.Lists ?? Array.Empty<SmartList>()) _lists[list.Name] = list;
+            foreach (var list in (store.Lists ?? Array.Empty<SmartList>()).Take(5000))
+                if (list?.IsValid == true) _lists[list.Name] = list;
+            var collections = store.Collections ?? Array.Empty<LibraryCollection>();
+            LibraryCollections.Validate(collections);
+            foreach (var node in collections) _collections[node.Id] = node with { Paths = node.Paths.Where(_entries.ContainsKey).ToImmutableArray() };
             ConfigureWatchers();
+            var consolidated = store.Consolidated ?? [];
+            ValidateConsolidated(consolidated);
+            foreach (var item in consolidated) if (_entries.ContainsKey(item.Keeper)) _consolidated[item.File.Path] = item;
         }
-        catch (Exception e) when (e is IOException or UnauthorizedAccessException or JsonException)
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException or JsonException or ArgumentException)
         { LastError = $"Unable to read the library: {e.Message}"; }
     }
 
@@ -74,9 +82,14 @@ public sealed partial class LibraryService : IAsyncDisposable
     }
     public async Task SaveSmartListAsync(SmartList list)
     {
-        if (string.IsNullOrWhiteSpace(list.Name) || list.Name.Length > 120) throw new ArgumentException("The name must contain between 1 and 120 characters.");
+        if (!list.IsValid) throw new ArgumentException("Use a name of 1–120 characters, rules and artist/album names up to 4096 characters, personal labels up to 64 printable characters, and valid media/collection filters.");
         await _load; await _gate.WaitAsync();
-        try { _lists[list.Name.Trim()] = list with { Name = list.Name.Trim() }; MarkDirty(); } finally { _gate.Release(); }
+        try
+        {
+            if (list.CollectionId != null && !_collections.ContainsKey(list.CollectionId)) throw new ArgumentException("The selected collection no longer exists.");
+            _lists[list.Name.Trim()] = list with { Name = list.Name.Trim() }; MarkDirty();
+        }
+        finally { _gate.Release(); }
     }
     public async Task RemoveSmartListAsync(string name)
     {
@@ -137,6 +150,11 @@ public sealed partial class LibraryService : IAsyncDisposable
         {
             foreach (var item in batch)
             {
+                if (_consolidated.TryGetValue(item.Path, out var duplicate))
+                {
+                    if (_entries.ContainsKey(duplicate.Keeper) && item.Size == duplicate.File.Size && item.ModifiedUtc.Ticks == duplicate.File.ModifiedTicks) continue;
+                    _consolidated.Remove(item.Path);
+                }
                 if (_entries.TryGetValue(item.Path, out var old))
                     _entries[item.Path] = old with
                     {
@@ -165,6 +183,16 @@ public sealed partial class LibraryService : IAsyncDisposable
         try
         {
             if (_disposed) return;
+            if (_consolidated.TryGetValue(path, out var duplicate) && _entries.TryGetValue(duplicate.Keeper, out var retained))
+            {
+                var info = new FileInfo(path);
+                if (info.Exists && info.Length == duplicate.File.Size && info.LastWriteTimeUtc.Ticks == duplicate.File.ModifiedTicks)
+                {
+                    if (countPlayback) { _entries[retained.Path] = retained with { PlayCount = retained.PlayCount == int.MaxValue ? int.MaxValue : retained.PlayCount + 1, LastPlayedUtc = DateTime.UtcNow }; MarkDirty(); }
+                    return;
+                }
+                _consolidated.Remove(path);
+            }
             _entries.TryGetValue(path, out var old);
             old ??= new LibraryEntry { Path = path, Title = System.IO.Path.GetFileNameWithoutExtension(path) };
             _entries[path] = old with
@@ -173,6 +201,8 @@ public sealed partial class LibraryService : IAsyncDisposable
                 Artist = metadata.Artist,
                 Album = metadata.Album,
                 Genre = metadata.Genre,
+                Year = Math.Clamp(metadata.Year, 0, 9999),
+                TrackNumber = Math.Clamp(metadata.TrackNumber, 0, 65535),
                 DurationMs = metadata.DurationMs > 0 ? metadata.DurationMs : old.DurationMs,
                 Size = stamp?.Size ?? old.Size,
                 ModifiedUtc = stamp?.ModifiedUtc ?? old.ModifiedUtc,
@@ -307,7 +337,7 @@ public sealed partial class LibraryService : IAsyncDisposable
             linked.Token.ThrowIfCancellationRequested();
             if (entry == null || string.IsNullOrWhiteSpace(entry.Path) || entry.Path.Length > 32767
                 || (!MediaFormats.IsNetwork(entry.Path) && !System.IO.Path.IsPathFullyQualified(entry.Path))
-                || entry.DurationMs < 0 || entry.Size < 0 || entry.PlayCount < 0
+                || entry.DurationMs < 0 || entry.Size < 0 || entry.PlayCount < 0 || entry.Year is < 0 or > 9999 || entry.Rating is < 0 or > 5
                 || new[] { entry.Title, entry.Artist, entry.Album, entry.Genre }.Any(s => s == null || s.Length > 4096))
                 throw new InvalidDataException("The backup contains an invalid media entry.");
             string path;
@@ -321,9 +351,15 @@ public sealed partial class LibraryService : IAsyncDisposable
                 throw new InvalidDataException("The backup contains duplicate media paths.");
         }
         var lists = store.Lists ?? Array.Empty<SmartList>();
-        if (lists.Length > 5000 || lists.Any(l => l == null || string.IsNullOrWhiteSpace(l.Name) || l.Name.Length > 120
-            || l.Query == null || l.Query.Length > 4096 || l.Kind is < 0 or > 2 || l.Collection is < 0 or > 5))
+        ValidateConsolidated(store.Consolidated ?? []);
+        if (lists.Length > 5000 || lists.Any(l => l?.IsValid != true))
             throw new InvalidDataException("The backup contains an invalid smart playlist.");
+        var collections = store.Collections ?? Array.Empty<LibraryCollection>();
+        try { LibraryCollections.Validate(collections); }
+        catch (ArgumentException e) { throw new InvalidDataException("The backup contains invalid collection trees.", e); }
+        var collectionIds = collections.Select(node => node.Id).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        if (collections.Any(node => node.Paths.Any(path => !imported.ContainsKey(path))) || lists.Any(list => list.CollectionId != null && !collectionIds.Contains(list.CollectionId)))
+            throw new InvalidDataException("The backup contains missing collection/media references.");
         if (store.Folders.Length > 64 || store.Folders.Any(f => string.IsNullOrWhiteSpace(f)
             || f.Length > 32767 || !System.IO.Path.IsPathFullyQualified(f)))
             throw new InvalidDataException("The backup contains invalid watched folders.");
@@ -335,6 +371,9 @@ public sealed partial class LibraryService : IAsyncDisposable
         try
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
+            (LibraryCollection[] Nodes, Dictionary<string, string> Ids) collectionMerge;
+            try { collectionMerge = MergeCollections(collections); }
+            catch (ArgumentException e) { throw new InvalidDataException("The merged collection tree exceeds its limits.", e); }
             if (_entries.Count + imported.Keys.Count(path => !_entries.ContainsKey(path)) > 200_000
                 || _folders.Union(folders, StringComparer.OrdinalIgnoreCase).Count() > 64
                 || _lists.Keys.Union(lists.Select(l => l.Name), StringComparer.OrdinalIgnoreCase).Count() > 5000)
@@ -353,6 +392,7 @@ public sealed partial class LibraryService : IAsyncDisposable
                     _entries[pair.Key] = metadata with
                     {
                         Favorite = current.Favorite || pair.Value.Favorite,
+                        Rating = current.Rating > 0 ? current.Rating : pair.Value.Rating,
                         Labels = mergedLabels[pair.Key],
                         PlayCount = Math.Max(current.PlayCount, pair.Value.PlayCount),
                         AddedUtc = current.AddedUtc < pair.Value.AddedUtc ? current.AddedUtc : pair.Value.AddedUtc,
@@ -363,8 +403,20 @@ public sealed partial class LibraryService : IAsyncDisposable
                 }
                 else { _entries.Add(pair.Key, pair.Value); added++; }
             }
-            foreach (var list in lists) if (_lists.TryAdd(list.Name, list)) addedLists++;
+            _collections.Clear(); foreach (var node in collectionMerge.Nodes) _collections.Add(node.Id, node);
+            foreach (var list in lists)
+            {
+                var restoredList = list.CollectionId == null ? list : list with { CollectionId = collectionMerge.Ids[list.CollectionId] };
+                if (_lists.TryAdd(restoredList.Name, restoredList)) addedLists++;
+            }
             foreach (string folder in folders) _folders.Add(folder);
+            foreach (var item in store.Consolidated ?? []) if (_entries.ContainsKey(item.Keeper) && _consolidated.Count < 200000) _consolidated.TryAdd(item.File.Path, item);
+            foreach (var item in _consolidated.Values.Where(c => _entries.ContainsKey(c.Keeper)).ToArray())
+            {
+                _entries.Remove(item.File.Path);
+                foreach (var node in _collections.Values.Where(n => n.Paths.Contains(item.File.Path, StringComparer.OrdinalIgnoreCase)).ToArray())
+                    _collections[node.Id] = node with { Paths = node.Paths.Select(p => p.Equals(item.File.Path, StringComparison.OrdinalIgnoreCase) ? item.Keeper : p).Distinct(StringComparer.OrdinalIgnoreCase).ToImmutableArray() };
+            }
             if (folders.Length > 0) ConfigureWatchers();
             MarkDirty();
         }
@@ -386,6 +438,8 @@ public sealed partial class LibraryService : IAsyncDisposable
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
             foreach (string path in selected) if (_entries.Remove(path)) removed++;
+            if (removed > 0)
+                foreach (var node in _collections.Values.ToArray()) _collections[node.Id] = node with { Paths = node.Paths.Where(_entries.ContainsKey).ToImmutableArray() };
             if (removed > 0) MarkDirty();
         }
         finally { _gate.Release(); }

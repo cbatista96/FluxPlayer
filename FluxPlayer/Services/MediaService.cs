@@ -9,6 +9,7 @@ public partial class MediaService : IDisposable
     private readonly LibVLC _libVLC;
     private readonly string? _pluginDirectory;
     private readonly bool _hardwareDecoding;
+    private readonly string _hardwareDecoder;
     private readonly string? _videoOutputModule;
     private readonly bool _adaptiveCacheBySource;
     private readonly bool _ultraFastStartup;
@@ -36,6 +37,7 @@ public partial class MediaService : IDisposable
     public MediaPlayer MediaPlayer { get; }
 
     public LibVLC LibVLC => _libVLC;
+    public NativeSubtitleBridge? SubtitleBridge { get; }
 
     public event EventHandler<MediaPlayerTimeChangedEventArgs>? TimeChanged;
     public event EventHandler<MediaPlayerMediaChangedEventArgs>? MediaChanged;
@@ -55,8 +57,11 @@ public partial class MediaService : IDisposable
         bool ultraFastStartup = false,
         bool enableDiagnosticLogging = true,
         bool resumePlaybackPerFile = false,
-        SubtitleStyle? subtitleStyle = null)
+        SubtitleStyle? subtitleStyle = null,
+        string hardwareDecoder = "any", bool wpfSubtitleComposition = false)
     {
+        if (!GpuRenderPolicy.Backends.Contains(hardwareDecoder)) throw new ArgumentException("Unknown hardware decoder.");
+        _hardwareDecoder = hardwareDecoder;
         _hardwareDecoding = hardwareDecoding;
         _videoOutputModule = string.IsNullOrWhiteSpace(videoOutputModule)
             ? null
@@ -101,6 +106,10 @@ public partial class MediaService : IDisposable
         };
         // The text renderer inherits instance settings; per-media freetype options are ineffective here.
         vlcOptions.AddRange(SubtitleStyle.Normalize(subtitleStyle).NativeOptions().Select(option => "--" + option[1..]));
+        if (wpfSubtitleComposition && libVlcRuntimeDir != null && File.Exists(Path.Combine(libVlcRuntimeDir, "plugins", "spu", "libfluxsub_plugin.dll")))
+        {
+            SubtitleBridge = new NativeSubtitleBridge(); vlcOptions.Add("--fluxsub-map=" + SubtitleBridge.Name); vlcOptions.Add("--sub-filter=fluxsub");
+        }
         if (libVlcRuntimeDir != null && File.Exists(Path.Combine(libVlcRuntimeDir, "plugins", "audio_filter", "libfluxdsp_plugin.dll")))
         {
             _nativeDsp = new NativeDspBridge();
@@ -112,7 +121,7 @@ public partial class MediaService : IDisposable
             vlcOptions.Add("--reset-plugins-cache");
 
         try { _libVLC = new LibVLC(enableDebugLogs: _enableDiagnosticLogging, vlcOptions.ToArray()); }
-        catch { _nativeDsp?.Dispose(); throw; }
+        catch { _nativeDsp?.Dispose(); SubtitleBridge?.Dispose(); throw; }
         if (_enableDiagnosticLogging)
         {
             ConfigureLogging();
@@ -132,6 +141,7 @@ public partial class MediaService : IDisposable
         };
         MediaPlayer.EndReached += (s, e) =>
         {
+            if (Realtime != null) return;
             WriteDiagnostic("EndReached");
             EndReached?.Invoke(s, EventArgs.Empty);
         };
@@ -171,10 +181,15 @@ public partial class MediaService : IDisposable
 
     public void PlayFile(string path)
     {
+        StopRealtime();
         lock (_playbackStateLock)
         {
             if (_disposed) return;
-            _sourceGeneration++; UsesSubtitleSoftwareFallback = false; _opaqueVideoSurface = false; _externalSubtitleSources.Clear();
+            _sourceGeneration++; UsesSubtitleSoftwareFallback = false; _opaqueVideoSurface = false; _externalSubtitleSources.Clear(); _externalAudioSources.Clear();
+            bool resetCrop = CurrentCrop != null;
+            _presentation = _presentation with { View = new() };
+            CurrentCrop = null;
+            if (resetCrop) PresentationCropChanged?.Invoke(this, EventArgs.Empty);
             _subtitleTransition?.Cancel();
             Interlocked.Exchange(ref _recoveringProfile, 0);
             try
@@ -188,6 +203,7 @@ public partial class MediaService : IDisposable
             }
 
             _currentSourcePath = path;
+            if (resetCrop && _memoryCropPresenters == 0) MediaPlayer.CropGeometry = "";
             _activePlaybackProfileIndex = 0;
             WriteDiagnostic($"PlayFile | Source={path}");
             PlayWithActiveProfile(path);
@@ -206,13 +222,15 @@ public partial class MediaService : IDisposable
             : new Uri(path, UriKind.Absolute);
 
         _currentMedia = new Media(_libVLC, uri);
+        foreach (string audio in _externalAudioSources.Where(File.Exists)) _currentMedia.AddSlave(MediaSlaveType.Audio, 4, new Uri(audio));
         for (int index = 0; index < _externalSubtitleSources.Count; index++)
             if (File.Exists(_externalSubtitleSources[index]))
                 _currentMedia.AddSlave(MediaSlaveType.Subtitle, index == _externalSubtitleSources.Count - 1 ? 4u : 2u,
                     new Uri(_externalSubtitleSources[index]));
         ApplyMediaOptions(_currentMedia);
+        if (SubtitleBridgeDisabled) _currentMedia.AddOption(":sub-filter=none");
         MediaPlayer.EnableHardwareDecoding = profile.HardwareDecoding;
-        _currentMedia.AddOption(profile.HardwareDecoding ? ":avcodec-hw=any" : ":avcodec-hw=none");
+        _currentMedia.AddOption(profile.HardwareDecoding ? ":avcodec-hw=" + (_activePlaybackProfileIndex == 0 ? _hardwareDecoder : "any") : ":avcodec-hw=none");
         if (_adaptiveCacheBySource)
         {
             if (isNetworkSource)
@@ -284,6 +302,7 @@ public partial class MediaService : IDisposable
 
     public void Play()
     {
+        if (Realtime is { } realtime) { realtime.Play(); Playing?.Invoke(this, EventArgs.Empty); return; }
         if (MediaPlayer.Media == null)
             return;
 
@@ -303,6 +322,7 @@ public partial class MediaService : IDisposable
 
     public void Pause()
     {
+        if (Realtime is { } realtime) { realtime.Pause(); Paused?.Invoke(this, EventArgs.Empty); return; }
         if (MediaPlayer.Media == null)
             return;
 
@@ -321,7 +341,7 @@ public partial class MediaService : IDisposable
 
     public void TogglePlayPause()
     {
-        if (MediaPlayer.IsPlaying)
+        if (IsPlaying)
             Pause();
         else
             Play();
@@ -329,6 +349,7 @@ public partial class MediaService : IDisposable
 
     public void Stop()
     {
+        StopRealtime();
         lock (_playbackStateLock)
         {
             _sourceGeneration++;
@@ -339,13 +360,14 @@ public partial class MediaService : IDisposable
         }
     }
 
-    public bool IsPlaying => MediaPlayer.IsPlaying;
+    public bool IsPlaying => Realtime?.IsPlaying ?? MediaPlayer.IsPlaying;
 
-    public long GetTime() => MediaPlayer.Time;
-    public long GetDuration() => MediaPlayer.Length;
+    public long GetTime() => Realtime?.Position().PositionMs ?? MediaPlayer.Time;
+    public long GetDuration() => Realtime?.Position().DurationMs ?? MediaPlayer.Length;
 
     public void SeekTo(long milliseconds)
     {
+        if (Realtime != null) { RealtimeSeekRequested?.Invoke(milliseconds); return; }
         var length = MediaPlayer.Length;
         var clamped = Math.Max(0, milliseconds);
         if (length > 0)
@@ -357,12 +379,13 @@ public partial class MediaService : IDisposable
 
     public void SeekRelative(long offsetMs)
     {
-        long newTime = Math.Max(0, Math.Min(MediaPlayer.Length, MediaPlayer.Time + offsetMs));
+        long newTime = Math.Max(0, Math.Min(GetDuration(), GetTime() + offsetMs));
         SeekTo(newTime);
     }
 
     public void SeekToPercent(float percent)
     {
+        if (Realtime != null) { SeekTo((long)(GetDuration() * Math.Clamp(percent, 0, 1))); return; }
         var clamped = Math.Clamp(percent, 0f, 1f);
         long length = MediaPlayer.Length;
         long targetTime = length > 0 ? (long)(length * clamped) : -1;
@@ -411,10 +434,10 @@ public partial class MediaService : IDisposable
         }
     }
 
-    public void SetVolume(int volume) => MediaPlayer.Volume = Math.Clamp(volume, 0, 200);
+    public void SetVolume(int volume) { if (Realtime is { } realtime) { if (!realtime.Options.DirectPcm) realtime.Volume = Math.Clamp(volume, 0, 200) / 100f; return; } MediaPlayer.Volume = Math.Clamp(volume, 0, 200); }
 
-    public void SetMute(bool mute) => MediaPlayer.Mute = mute;
-    public int GetVolume() => MediaPlayer.Volume;
+    public void SetMute(bool mute) { if (Realtime is { } realtime) { if (!realtime.Options.DirectPcm) realtime.Muted = mute; return; } MediaPlayer.Mute = mute; }
+    public int GetVolume() => Realtime is { } realtime ? (int)(realtime.Volume * 100) : MediaPlayer.Volume;
 
     public void SetRate(float rate) => MediaPlayer.SetRate(rate);
 
@@ -464,7 +487,8 @@ public partial class MediaService : IDisposable
 
     public void ApplyEqualizer(float[] bands, float preamp = 0f, bool antiClip = false)
     {
-        bool extended = bands.Length is 15 or 20 or 31;
+        _requestedBands = (float[])bands.Clone(); _requestedPreamp = preamp; _requestedAntiClip = antiClip; _requestedEqEnabled = true;
+        bool extended = bands.Length is 15 or 20 or 31 || PipelineEffects != AudioEffect.None;
         if (!EqualizerLayout.IsSupported(bands.Length)) throw new ArgumentException("Choose 10, 15, 20 or 31 bands.");
         if (extended && _nativeDsp == null) throw new InvalidOperationException("Build the native DSP module to use 15/20/31 bands.");
         _nativeDsp?.Publish(bands, preamp, true, antiClip);
@@ -481,6 +505,14 @@ public partial class MediaService : IDisposable
 
     public void DisableEqualizer()
     {
+        _requestedEqEnabled = false;
+        if (PipelineEffects != AudioEffect.None)
+        {
+            _nativeDsp?.Publish(_requestedBands, 0, false, true);
+            if (_equalizer != null && _usingExtendedEqualizer) return;
+            if (_equalizer != null) MediaPlayer.UnsetEqualizer(); _equalizer?.Dispose();
+            _usingExtendedEqualizer = true; _equalizer = new Equalizer(); _equalizer.SetPreamp(EqualizerPresets.NativePreamp(0)); MediaPlayer.SetEqualizer(_equalizer); return;
+        }
         // Avoid native filter reconfiguration when the equalizer is already disabled.
         if (_equalizer == null) return;
         _nativeDsp?.Publish(new float[10], 0, false, true); _usingExtendedEqualizer = false;
@@ -547,6 +579,8 @@ public partial class MediaService : IDisposable
 
     public void SetAspectRatio(string? ratio)
     {
+        if (!string.IsNullOrEmpty(ratio)) ratio = CustomAspect.Parse(ratio);
+        lock (_playbackStateLock) { _presentation = _presentation with { Aspect = ratio }; PresentationCropChanged?.Invoke(this, EventArgs.Empty); }
         MediaPlayer.AspectRatio = ratio;
     }
 
@@ -580,6 +614,7 @@ public partial class MediaService : IDisposable
 
     public void Dispose()
     {
+        StopRealtime();
         if (Interlocked.Exchange(ref _disposeStarted, 1) != 0) return;
         _disposed = true;
         _subtitleCompositionLifetime.Cancel();
@@ -611,6 +646,7 @@ public partial class MediaService : IDisposable
         }
         _libVLC.Dispose();
         _nativeDsp?.Dispose();
+        SubtitleBridge?.Dispose();
         _subtitleCompositionLifetime.Dispose();
         _subtitleCompositionGate.Release();
         _durationParseGate.Release();
@@ -638,8 +674,13 @@ public partial class MediaService : IDisposable
     {
         if (string.IsNullOrWhiteSpace(pluginDir) || !Directory.Exists(pluginDir))
             return false;
-        if (File.Exists(Path.Combine(pluginDir, "plugins.dat")))
-            return false;
+        string cache = Path.Combine(pluginDir, "plugins.dat");
+        if (File.Exists(cache))
+        {
+            DateTime stamp = File.GetLastWriteTimeUtc(cache);
+            var ownPlugins = new[] { Path.Combine(pluginDir, "audio_filter", "libfluxdsp_plugin.dll"), Path.Combine(pluginDir, "spu", "libfluxsub_plugin.dll") };
+            if (!ownPlugins.Any(file => File.Exists(file) && File.GetLastWriteTimeUtc(file) > stamp)) return false;
+        }
 
         try
         {

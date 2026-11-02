@@ -1,5 +1,15 @@
 # Building FluxPlayer
 
+## Current local build and package
+
+The current source compiles successfully in Release x64. Run `dotnet build FluxPlayer.sln -c Release -p:Platform=x64`, then launch `FluxPlayer/bin/x64/Release/net8.0-windows10.0.19041.0/FluxPlayer.exe`. To create a local ZIP that includes the .NET runtime, run `pwsh -NoProfile -File tools/Build-Release.ps1 -OutputDirectory artifacts/releases/my-local-build`. Choose a new output directory; the script preserves existing artifacts. No certificate/PFX is needed for local use.
+
+The optional `-BuildUnsignedMsix` path validates package schema and packing with Windows SDK MakeAppx. Unsigned MSIX is for packaging validation. Real signed distribution and App Installer update acceptance are deferred by the user. The release workflow is manual and has not been dispatched. [Current implementation and limitations](LOCAL_COMPLETION_PROGRESS.md).
+
+## Historical optional interoperability and processing checkpoint (unverified)
+
+F0681–F1180 add embedded JSON schemas/catalogs and managed client/control code, without new NuGet dependencies. The source has not been compiled or tested. Kodi requires an existing reachable JSON-RPC server, MPD an existing daemon (a certificate-validating TLS proxy for non-loopback access), mpv a separately installed trusted mpv.exe, and the new offline algorithms a separately installed FFmpeg containing their filters/encoders. None is bundled or automatically installed. Main playback still uses the existing LibVLC runtime. See UNTESTED_FIVE_HUNDRED.md and THIRD_PARTY_INTEROP.md. No new executable was generated for this batch.
+
 ## Development environment
 
 Use 64-bit Windows and install the SDK selected by `global.json` (currently 10.0.402). The application itself targets .NET 8 for Windows. A framework-dependent build also requires the .NET 8 desktop runtime. Install Visual Studio 2022 or its Build Tools with **Desktop development with C++**, including the x64 MSVC compiler and Windows SDK, for the native 15/20/31-band DSP module. The Visual Studio editor is optional.
@@ -46,7 +56,7 @@ An internal assembly version is used by local builds and the installer script. I
 
 ## Optional FFmpeg tools
 
-Place a compatible `ffmpeg.exe` on `PATH` or beside `FluxPlayer.exe`. The converter discovers it only when needed. It does not download FFmpeg, run it during normal playback or bundle it in the source repository. Available conversion profiles require the matching encoders in that FFmpeg build.
+Place compatible `ffmpeg.exe` and `ffprobe.exe` together on `PATH` or beside `FluxPlayer.exe`. Conversion and the explicitly selected continuous PCM transport discover these tools when needed; the ordinary LibVLC transport does not use FFmpeg executables. They are not downloaded or bundled. Available conversion profiles require the matching encoders. Native ASIO DSD uses its own bitstream reader and a compatible installed device driver. See [audio transport guide](REALTIME_AUDIO.md).
 
 ## Troubleshooting
 

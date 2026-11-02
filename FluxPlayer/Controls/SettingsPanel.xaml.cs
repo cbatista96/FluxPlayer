@@ -20,6 +20,7 @@ public partial class SettingsPanel : UserControl
     private readonly StackPanel[] _pages;
     private readonly ObservableCollection<FeatureToggleItem> _featureItems = new();
     private readonly ObservableCollection<HotkeyItem> _hotkeyItems = new();
+    private ComboBoxItem? _customAspectChoice;
 
     public event EventHandler? SettingsSaved;
     public event EventHandler? CloseRequested;
@@ -35,14 +36,21 @@ public partial class SettingsPanel : UserControl
         _settingsService = App.Services.GetRequiredService<SettingsService>();
         _settings = _settingsService.Load();
         _pages = new[] {
-            PageGeneral, PagePlayback, PageVideo, PageAudio, PageSubtitles,
+            PageGeneral, PagePlayback, PageVideo, PageAudio, PageSubtitles, PageLibrary, PageFiles,
             PageHotkeys, PageMouse, PageLocations, PageAccessibility,
-            PageFeatures, PageTools, PageAbout
+            PageFeatures, PageAbout
         };
         FeatureFlagsList.ItemsSource = _featureItems;
         HotkeysList.ItemsSource = _hotkeyItems;
 
         LoadSettingsToUI();
+    }
+
+    private void ForgetFilePreferences_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.FilePlaybackPreferences.Clear();
+        _settings.FilePlaybackMemoryToken = Guid.NewGuid().ToString("N");
+        ForgetFilePreferencesButton.Content = "Will clear when saved";
     }
 
     public void Reload()
@@ -97,6 +105,8 @@ public partial class SettingsPanel : UserControl
 
     private void LoadSettingsToUI()
     {
+        KeepHistoryToggle.IsChecked = _settings.KeepPlaybackHistory;
+        HistoryLimitBox.Text = _settings.PlaybackHistoryLimit.ToString(); HistoryDaysBox.Text = _settings.PlaybackHistoryDays.ToString();
 
         SelectComboByTag(ThemeComboSetting, _settings.Theme.ToString());
         SelectComboByTag(LanguageCombo, _settings.Language);
@@ -129,6 +139,10 @@ public partial class SettingsPanel : UserControl
         ShuffleToggle.IsChecked = _settings.Shuffle;
         AutoPlayToggle.IsChecked = _settings.AutoPlay;
         ResumeLastToggle.IsChecked = _settings.ResumeLastPosition;
+        RememberFileVolumeToggle.IsChecked = _settings.RememberFileVolume;
+        RememberFileAudioToggle.IsChecked = _settings.RememberFileAudioTrack;
+        RememberFileSubtitlesToggle.IsChecked = _settings.RememberFileSubtitles;
+        ForgetFilePreferencesButton.Content = "Forget all file preferences";
         RememberSpeedToggle.IsChecked = _settings.RememberPlaybackSpeed;
         RememberAspectToggle.IsChecked = _settings.RememberAspectRatio;
         SelectComboByTag(OnEndCombo, _settings.DefaultPlaybackOnEnd);
@@ -138,6 +152,11 @@ public partial class SettingsPanel : UserControl
         AmbientIntensitySlider.Value = Math.Clamp(_settings.AmbientLightIntensity, 10, 100);
         SelectComboByTag(VideoOutputCombo, _settings.VideoOutput);
         SelectComboByTag(VideoScalerCombo, _settings.VideoScaler);
+        if (!AspectComboSetting.Items.Cast<ComboBoxItem>().Any(item => item.Tag?.ToString() == _settings.AspectRatio))
+        {
+            if (_customAspectChoice == null) { _customAspectChoice = new ComboBoxItem(); AspectComboSetting.Items.Add(_customAspectChoice); }
+            _customAspectChoice.Content = _customAspectChoice.Tag = _settings.AspectRatio;
+        }
         SelectComboByTag(AspectComboSetting, _settings.AspectRatio);
         VSyncToggle.IsChecked = _settings.VSync;
         DeinterlaceToggle.IsChecked = _settings.DeinterlaceEnabled;
@@ -160,7 +179,6 @@ public partial class SettingsPanel : UserControl
             foreach (var name in EqualizerPresets.Names)
                 EqPresetComboSetting.Items.Add(new ComboBoxItem { Content = name });
         SelectComboByContent(EqPresetComboSetting, EqualizerPresets.Normalize(_settings.EqualizerPreset));
-        NormalizeVolumeToggle.IsChecked = _settings.NormalizeVolume;
         BoostVolumeToggle.IsChecked = _settings.BoostVolume;
         VolumeBoostMaxBox.Text = _settings.VolumeBoostMaxPercent.ToString();
         AudioDelayBox.Text = _settings.AudioDelay.ToString();
@@ -219,6 +237,9 @@ public partial class SettingsPanel : UserControl
     private void SaveBtn_Click(object sender, RoutedEventArgs e)
     {
         _lastSaveSucceeded = false;
+        if (!int.TryParse(HistoryLimitBox.Text, out int historyLimit) || historyLimit is < 1 or > 5000 || !int.TryParse(HistoryDaysBox.Text, out int historyDays) || historyDays is < 1 or > 3650)
+        { MessageBox.Show("Use 1–5,000 history sessions and 1–3,650 retention days.", "Playback history", MessageBoxButton.OK, MessageBoxImage.Information); return; }
+        _settings.KeepPlaybackHistory = KeepHistoryToggle.IsChecked == true; _settings.PlaybackHistoryLimit = historyLimit; _settings.PlaybackHistoryDays = historyDays;
 
         _settings.Theme = ParseTheme(GetComboTag(ThemeComboSetting));
         _settings.Language = GetComboTag(LanguageCombo) ?? _settings.Language;
@@ -252,6 +273,9 @@ public partial class SettingsPanel : UserControl
         _settings.Shuffle = ShuffleToggle.IsChecked == true;
         _settings.AutoPlay = AutoPlayToggle.IsChecked == true;
         _settings.ResumeLastPosition = ResumeLastToggle.IsChecked == true;
+        _settings.RememberFileVolume = RememberFileVolumeToggle.IsChecked == true;
+        _settings.RememberFileAudioTrack = RememberFileAudioToggle.IsChecked == true;
+        _settings.RememberFileSubtitles = RememberFileSubtitlesToggle.IsChecked == true;
         _settings.RememberPlaybackSpeed = RememberSpeedToggle.IsChecked == true;
         _settings.RememberAspectRatio = RememberAspectToggle.IsChecked == true;
         _settings.DefaultPlaybackOnEnd = GetComboTag(OnEndCombo) ?? _settings.DefaultPlaybackOnEnd;
@@ -276,7 +300,6 @@ public partial class SettingsPanel : UserControl
         _settings.AudioChannels = GetComboTag(AudioChannelsCombo) ?? _settings.AudioChannels;
         _settings.EqualizerEnabled = EqualizerToggle.IsChecked == true;
         _settings.EqualizerPreset = GetComboContent(EqPresetComboSetting) ?? EqualizerPresets.Flat;
-        _settings.NormalizeVolume = NormalizeVolumeToggle.IsChecked == true;
         _settings.BoostVolume = BoostVolumeToggle.IsChecked == true;
         if (int.TryParse(VolumeBoostMaxBox.Text, out int vbm))
             _settings.VolumeBoostMaxPercent = Math.Clamp(vbm, 100, 400);
@@ -513,8 +536,14 @@ public partial class SettingsPanel : UserControl
         Process.Start(new ProcessStartInfo(folder) { UseShellExecute = true });
     }
 
-    private bool SaveOrNotify(AppSettings settings)
+    private bool SaveOrNotify(AppSettings settings, bool preserveLibraryViews = true)
     {
+        if (preserveLibraryViews)
+        {
+            var latest = _settingsService.Load();
+            settings.LibraryColumnView = latest.LibraryColumnView;
+            settings.LibraryColumnViews = latest.LibraryColumnViews;
+        }
         if (_settingsService.Save(settings)) return true;
         MessageBox.Show("Unable to save settings.\n\n" + _settingsService.LastError,
             "FluxPlayer settings", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -528,7 +557,7 @@ public partial class SettingsPanel : UserControl
             "Reset settings", MessageBoxButton.YesNo, MessageBoxImage.Warning);
         if (result == MessageBoxResult.Yes)
         {
-            if (!SaveOrNotify(new AppSettings())) return;
+            if (!SaveOrNotify(new AppSettings(), preserveLibraryViews: false)) return;
             Reload();
         }
     }

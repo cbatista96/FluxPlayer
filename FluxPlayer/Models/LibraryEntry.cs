@@ -11,6 +11,9 @@ public sealed record LibraryEntry
     public string Artist { get; init; } = "";
     public string Album { get; init; } = "";
     public string Genre { get; init; } = "";
+    public int Year { get; init; }
+    public int TrackNumber { get; init; }
+    public int Rating { get; init; }
     public long DurationMs { get; init; }
     public long Size { get; init; }
     public DateTime ModifiedUtc { get; init; }
@@ -22,6 +25,8 @@ public sealed record LibraryEntry
     [JsonIgnore] public string LabelText => string.Join("; ", Labels.IsDefault ? ImmutableArray<string>.Empty : Labels);
     public bool MetadataRead { get; init; }
     public string Kind { get; init; } = "Audio";
+    [JsonIgnore] public long RemainingMs { get; init; }
+    [JsonIgnore] public string Remaining => DurationMs > 0 ? FluxPlayer.Models.PlaybackHistoryEntry.FormatTime(RemainingMs) : "—";
     public string Format => MediaFormats.Extension(Path).TrimStart('.').ToUpperInvariant();
     public string Duration => DurationMs > 0 ? TimeSpan.FromMilliseconds(DurationMs).ToString(DurationMs >= 3_600_000 ? @"h\:mm\:ss" : @"m\:ss") : "—";
     public string Folder => MediaFormats.IsNetwork(Path) ? "Network" : System.IO.Path.GetDirectoryName(Path) ?? "";

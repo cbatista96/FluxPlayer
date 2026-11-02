@@ -19,17 +19,21 @@ public sealed class VlcWpfRenderer : IDisposable
     private readonly List<Image> _mirrors = new();
 
     public BitmapSource? CurrentBitmap => _bitmap;
+    private long _submittedFrames, _presentedFrames, _skippedNotifications;
+    public (long Submitted, long Presented, long Skipped) Counters => (Interlocked.Read(ref _submittedFrames), Interlocked.Read(ref _presentedFrames), Interlocked.Read(ref _skippedNotifications));
 
     public void AddMirror(Image mirror)
     {
         if (mirror == null) return;
         if (!_mirrors.Contains(mirror)) _mirrors.Add(mirror);
+        if (_engine?.SubtitleBridge != null && !_subtitleMirrors.ContainsKey(mirror)) _subtitleMirrors[mirror] = new WpfSubtitleOverlay(_engine, mirror, () => (_section?.Width ?? 0, _section?.Height ?? 0, _viewport));
         if (_bitmap != null) mirror.Source = _bitmap;
     }
 
     public void RemoveMirror(Image mirror)
     {
         _mirrors.Remove(mirror);
+        if (_subtitleMirrors.Remove(mirror, out var overlay)) overlay.Dispose();
         if (mirror != null) mirror.Source = null;
     }
 
@@ -47,6 +51,10 @@ public sealed class VlcWpfRenderer : IDisposable
     private int _displayPending;
     private int _formatGeneration;
     private readonly Action<uint>? _sourceFormatChanged;
+    private readonly MediaService? _engine;
+    private WpfSubtitleOverlay? _subtitles;
+    private readonly Dictionary<Image, WpfSubtitleOverlay> _subtitleMirrors = new();
+    private Int32Rect _viewport;
 
     private sealed class FrameSection
     {
@@ -93,7 +101,37 @@ public sealed class VlcWpfRenderer : IDisposable
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern bool CloseHandle(IntPtr hObject);
 
-    public VlcWpfRenderer(MediaService engine, Image image) : this(engine.MediaPlayer, image, engine.ReportVideoSurfaceChroma) { }
+    public VlcWpfRenderer(MediaService engine, Image image) : this(engine.MediaPlayer, image, engine.ReportVideoSurfaceChroma)
+    {
+        _engine = engine; engine.RegisterCropPresenter(true); engine.PresentationCropChanged += OnCropChanged;
+        if (engine.SubtitleBridge != null) _subtitles = new WpfSubtitleOverlay(engine, image, () => (_section?.Width ?? 0, _section?.Height ?? 0, _viewport));
+    }
+
+    private void OnCropChanged(object? sender, EventArgs e) => _image.Dispatcher.BeginInvoke(new Action(ApplyViewport));
+    private void ApplyViewport()
+    {
+        if (_disposed) return;
+        var state = _engine?.PresentationCrop;
+        var presentation = _engine?.Presentation;
+        lock (_bufferLock)
+        {
+            if (_section is not { } section) return;
+            _viewport = new Int32Rect(0, 0, section.Width, section.Height);
+            if (state is { Crop: { } crop, Width: > 0, Height: > 0 })
+            {
+                int left = (int)((long)crop.Left * section.Width / state.Value.Width), top = (int)((long)crop.Top * section.Height / state.Value.Height);
+                int right = (int)((long)(crop.Left + crop.Width) * section.Width / state.Value.Width), bottom = (int)((long)(crop.Top + crop.Height) * section.Height / state.Value.Height);
+                _viewport = new Int32Rect(left, top, Math.Clamp(right - left, 1, section.Width - left), Math.Clamp(bottom - top, 1, section.Height - top));
+            }
+            _bitmap = (InteropBitmap)Imaging.CreateBitmapSourceFromMemorySection(section.Handle, _viewport.Width, _viewport.Height, PixelFormats.Bgr32, section.Pitch, _viewport.Y * section.Pitch + _viewport.X * 4);
+            _image.Source = _bitmap; foreach (var mirror in _mirrors) mirror.Source = _bitmap;
+            if (presentation != null)
+            {
+                var stretch = presentation.Stretch(_viewport.Width, _viewport.Height); var transforms = new TransformGroup(); transforms.Children.Add(new ScaleTransform(stretch.X * (presentation.MirrorHorizontal ? -1 : 1), stretch.Y * (presentation.FlipVertical ? -1 : 1))); transforms.Children.Add(new RotateTransform(presentation.Rotation));
+                _image.LayoutTransform = transforms; foreach (var mirror in _mirrors) mirror.LayoutTransform = transforms;
+            }
+        }
+    }
 
     public VlcWpfRenderer(LibVLCSharp.Shared.MediaPlayer mp, Image image, Action<uint>? sourceFormatChanged = null)
     {
@@ -158,10 +196,7 @@ public sealed class VlcWpfRenderer : IDisposable
                 if (_disposed || generation != Volatile.Read(ref _formatGeneration))
                     return;
 
-                _bitmap = (InteropBitmap)Imaging.CreateBitmapSourceFromMemorySection(
-                    section.Handle, w, h, PixelFormats.Bgr32, pitch, 0);
-                _image.Source = _bitmap;
-                foreach (var m in _mirrors) m.Source = _bitmap;
+                ApplyViewport();
             }
             catch { }
             finally
@@ -212,9 +247,10 @@ public sealed class VlcWpfRenderer : IDisposable
     private void OnDisplay(IntPtr opaque, IntPtr picture)
     {
         if (_disposed) return;
+        Interlocked.Increment(ref _submittedFrames);
 
         // Bound queued UI work: drop redundant notifications when composition falls behind.
-        if (Interlocked.Exchange(ref _displayPending, 1) != 0) return;
+        if (Interlocked.Exchange(ref _displayPending, 1) != 0) { Interlocked.Increment(ref _skippedNotifications); return; }
 
         try
         {
@@ -223,7 +259,7 @@ public sealed class VlcWpfRenderer : IDisposable
                 try
                 {
                     if (!_disposed)
-                        _bitmap?.Invalidate();
+                    { _bitmap?.Invalidate(); Interlocked.Increment(ref _presentedFrames); }
                 }
                 catch { }
                 finally
@@ -248,7 +284,9 @@ public sealed class VlcWpfRenderer : IDisposable
             if (s == null || s.View == IntPtr.Zero || s.Width < 2 || s.Height < 2) return false;
 
             byte* basePtr = (byte*)s.View;
-            int sw = s.Width, sh = s.Height, pitch = s.Pitch;
+            var viewport = _viewport.Width > 0 && _viewport.X + _viewport.Width <= s.Width && _viewport.Y + _viewport.Height <= s.Height ? _viewport : new Int32Rect(0, 0, s.Width, s.Height);
+            basePtr += (long)viewport.Y * s.Pitch + viewport.X * 4;
+            int sw = viewport.Width, sh = viewport.Height, pitch = s.Pitch;
             int i = 0;
             for (int y = 0; y < dh; y++)
             {
@@ -273,6 +311,9 @@ public sealed class VlcWpfRenderer : IDisposable
     {
         if (_disposed) return;
         _disposed = true;
+        _subtitles?.Dispose(); _subtitles = null;
+        foreach (var overlay in _subtitleMirrors.Values) overlay.Dispose(); _subtitleMirrors.Clear();
+        if (_engine != null) { _engine.PresentationCropChanged -= OnCropChanged; _engine.RegisterCropPresenter(false); }
 
         try
         {

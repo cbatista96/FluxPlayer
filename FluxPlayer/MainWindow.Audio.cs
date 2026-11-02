@@ -11,6 +11,24 @@ namespace FluxPlayer;
 
 public partial class MainWindow
 {
+    private LibraryCollectionsWindow? _collectionsWindow;
+    private PlaybackHistoryWindow? _historyWindow;
+    private void PlaybackHistory_Click(object sender, RoutedEventArgs e)
+    {
+        if (_historyWindow != null) { _historyWindow.Activate(); return; }
+        _historyWindow = new(this, _vm); _historyWindow.Closed += (_, _) => _historyWindow = null; _historyWindow.Show();
+    }
+    private AdvancedCueWindow? _advancedCueWindow;
+    private void AdvancedCue_Click(object sender, RoutedEventArgs e)
+    {
+        if (_advancedCueWindow != null) { _advancedCueWindow.Activate(); return; }
+        _advancedCueWindow = new(this, _vm); _advancedCueWindow.Closed += (_, _) => _advancedCueWindow = null; _advancedCueWindow.Show();
+    }
+    private void LibraryCollections_Click(object sender, RoutedEventArgs e)
+    {
+        if (_collectionsWindow != null) { _collectionsWindow.Activate(); return; }
+        _collectionsWindow = new(this, _vm); _collectionsWindow.Closed += (_, _) => _collectionsWindow = null; _collectionsWindow.Show();
+    }
     private LibraryWindow? _libraryWindow;
     private CueSheetEditorWindow? _cueEditorWindow;
     private SnapshotScheduleWindow? _snapshotScheduleWindow;
@@ -23,6 +41,7 @@ public partial class MainWindow
     private Size _videoModeSize = new(1280, 760);
     private int _videoRotation;
     private bool _videoMirrored;
+    private bool _videoFlipped;
 
     private void InitializeAudioWorkspace()
     {
@@ -124,6 +143,8 @@ public partial class MainWindow
 
     private void MediaToolsMenu_Opened(object sender, RoutedEventArgs e)
     {
+        foreach (var item in ReplayGainMenu.Items.OfType<MenuItem>()) { item.IsCheckable = true; item.IsChecked = item.Tag?.ToString() == _vm.CurrentSettings.ReplayGainMode; }
+        foreach (var item in ChannelRoutingMenu.Items.OfType<MenuItem>()) { item.IsCheckable = true; item.IsChecked = item.Tag?.ToString() == _vm.CurrentSettings.AudioChannels; }
         _vm.RefreshOutputDevices(); OutputDevicesMenu.Items.Clear();
         foreach (var device in _vm.OutputDevices)
         {
@@ -163,9 +184,8 @@ public partial class MainWindow
     private void ReplayGainItem_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not MenuItem { Tag: string mode }) return;
-        _vm.CurrentSettings.ReplayGainMode = mode;
-        var service = new SettingsService(); var settings = service.Load();
-        settings.ReplayGainMode = mode; service.Save(settings);
+        if (!_vm.SetQuickAudioPreference("replaygain", mode)) return;
+        _runtimeSettings.ReplayGainMode = mode;
         ShowActionOsd("\uE9E9", "ReplayGain will apply when opening the next track");
     }
 
@@ -214,6 +234,29 @@ public partial class MainWindow
         _chapterEditorWindow.Show();
     }
     private LyricsEditorWindow? _lyricsEditorWindow;
+    private FileRenameWindow? _fileRenameWindow;
+    private void FileRename_Click(object sender, RoutedEventArgs e)
+    {
+        if (_fileRenameWindow != null) { _fileRenameWindow.Activate(); return; }
+        _fileRenameWindow = new FileRenameWindow(this, _vm);
+        _fileRenameWindow.Closed += (_, _) => _fileRenameWindow = null;
+        _fileRenameWindow.Show();
+    }
+    private FileRenameWindow? _organizationWindow;
+    private void OrganizeFiles_Click(object sender, RoutedEventArgs e)
+    {
+        if (_organizationWindow != null) { _organizationWindow.Activate(); return; }
+        _organizationWindow = new FileRenameWindow(this, _vm, organize: true);
+        _organizationWindow.Closed += (_, _) => _organizationWindow = null; _organizationWindow.Show();
+    }
+    private FolderBrowserWindow? _folderBrowserWindow;
+    private void BrowseMediaFolder_Click(object sender, RoutedEventArgs e)
+    {
+        if (_folderBrowserWindow != null) { _folderBrowserWindow.Activate(); return; }
+        _folderBrowserWindow = new FolderBrowserWindow(this, _vm);
+        _folderBrowserWindow.Closed += (_, _) => _folderBrowserWindow = null;
+        _folderBrowserWindow.Show();
+    }
     private void LyricsEditor_Click(object sender, RoutedEventArgs e)
     {
         if (_lyricsEditorWindow != null) { _lyricsEditorWindow.Activate(); return; }
@@ -237,21 +280,15 @@ public partial class MainWindow
     }
     private void RotateVideo_Click(object sender, RoutedEventArgs e) { _videoRotation = (_videoRotation + 90) % 360; ApplyImageOrientation(); }
     private void MirrorVideo_Click(object sender, RoutedEventArgs e) { _videoMirrored = !_videoMirrored; ApplyImageOrientation(); }
-    private void ResetOrientation_Click(object sender, RoutedEventArgs e) { _videoRotation = 0; _videoMirrored = false; ApplyImageOrientation(); }
+    private void ResetOrientation_Click(object sender, RoutedEventArgs e) { _videoRotation = 0; _videoMirrored = _videoFlipped = false; ApplyImageOrientation(); }
+    private void FlipVideo_Click(object sender, RoutedEventArgs e) { _videoFlipped = !_videoFlipped; ApplyImageOrientation(); }
     private void ApplyImageOrientation()
     {
-        VideoImage.RenderTransformOrigin = new Point(0.5, 0.5);
-        var transforms = new TransformGroup(); transforms.Children.Add(new ScaleTransform(_videoMirrored ? -1 : 1, 1));
-        transforms.Children.Add(new RotateTransform(_videoRotation)); VideoImage.LayoutTransform = transforms;
+        _vm.Engine.SetOrientation(_videoRotation, _videoMirrored, _videoFlipped);
     }
     private void SignalPath_Click(object sender, RoutedEventArgs e)
     {
-        string dsp = _vm.IsEqualizerEnabled ? $"Equalizer (10 bands), preamp {_vm.EffectiveEqualizerPreamp:0.0} dB" : "Equalizer disabled";
-        MediaToolsWindows.ShowText(this, "Signal path", _vm.GetMediaInfo() +
-            $"\n\nDecoder: LibVLC {_vm.LibVLC?.Version}\n{dsp}\nReplayGain: {_vm.CurrentSettings.ReplayGainMode}" +
-            $"\nPlayback profile: {_vm.Engine.GetActivePlaybackProfileName()}" +
-            (_vm.Engine.UsesSubtitleSoftwareFallback ? " (software subtitle composition)" : "") +
-            $"\nOutput: {_vm.CurrentSettings.AudioOutputDevice}\nVolume: {_vm.Volume:0}% · Speed: {_vm.PlaybackRate:0.##}×" +
-            "\n\nWindows shared output may resample the signal. This path does not guarantee bit-perfect playback or native DSD.");
+        if (_audioPathWindow != null) { _audioPathWindow.Activate(); return; }
+        _audioPathWindow = new(this, _vm); _audioPathWindow.Closed += (_, _) => _audioPathWindow = null; _audioPathWindow.Show();
     }
 }

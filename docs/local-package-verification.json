@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-31",
+  "selfContainedFilesVerified": true,
+  "nativeDspIncluded": true,
+  "nativeSubtitleBridgeIncluded": true,
+  "naudioIncluded": true,
+  "windowsOcrSdkRuntimeIncluded": true,
+  "matroskaToolsIncluded": true,
+  "upstreamMatroskaLicenseIncluded": true,
+  "applicationMatchesLatestPublish": true,
+  "noticesMatchSource": true,
+  "unsignedMsixSchemaPacking": true,
+  "archiveEntries": 810,
+  "sha256": "6a7bb3aa15f5bec7a68bdf8af5c94dc756388298fa218f8251fefa7f58997090",
+  "location": "artifacts/releases/local-online-ready",
+  "signed": false,
+  "published": false,
+  "packagedStartupAndCleanExit": true,
+  "packagedMatroskaToolsActualEditing": true
+}

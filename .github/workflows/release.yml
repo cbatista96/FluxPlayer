@@ -1,0 +1,83 @@
+name: Prepare Windows release
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Numeric release version
+        required: true
+        default: '1.4.0'
+      signed:
+        description: Require the configured code-signing certificate
+        type: boolean
+        default: false
+      publish_draft:
+        description: Upload assets into a draft GitHub release
+        type: boolean
+        default: false
+permissions:
+  contents: write
+jobs:
+  package:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '8.0.x'
+      - name: Validate input
+        shell: pwsh
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          if ($env:RELEASE_VERSION -notmatch '^\d+\.\d+\.\d+(\.\d+)?$') { throw 'Invalid numeric version.' }
+      - name: Build and managed regression
+        shell: pwsh
+        run: |
+          dotnet restore FluxPlayer.sln -p:Platform=x64
+          if ($LASTEXITCODE) { throw 'Restore failed' }
+          dotnet build FluxPlayer.sln -c Release -p:Platform=x64 --no-restore
+          if ($LASTEXITCODE) { throw 'Build failed' }
+          pwsh -NoProfile -File tools/Sync-PublicFeatures.ps1 -Verify
+          if ($LASTEXITCODE) { throw 'Feature inventory is stale' }
+          dotnet run --project FluxPlayer.Tests/FluxPlayer.Tests.csproj -c Release --no-build -- --managed-only
+          if ($LASTEXITCODE) { throw 'Regression failed' }
+      - name: Import signing certificate
+        if: inputs.signed
+        shell: pwsh
+        env:
+          SIGNING_PFX_BASE64: ${{ secrets.SIGNING_PFX_BASE64 }}
+          SIGNING_PFX_PASSWORD: ${{ secrets.SIGNING_PFX_PASSWORD }}
+        run: |
+          if (-not $env:SIGNING_PFX_BASE64) { throw 'Signing secrets are required.' }
+          $pfx = Join-Path $env:RUNNER_TEMP 'release-signing.pfx'
+          [IO.File]::WriteAllBytes($pfx, [Convert]::FromBase64String($env:SIGNING_PFX_BASE64))
+          $certificate = Import-PfxCertificate -FilePath $pfx -Password (ConvertTo-SecureString $env:SIGNING_PFX_PASSWORD -AsPlainText -Force) -CertStoreLocation Cert:\CurrentUser\My
+          "RELEASE_CERT_THUMBPRINT=$($certificate.Thumbprint)" >> $env:GITHUB_ENV
+      - name: Package
+        shell: pwsh
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+          REQUIRE_SIGNING: ${{ inputs.signed }}
+        run: |
+          $options = @{ Version=$env:RELEASE_VERSION }
+          if ($env:REQUIRE_SIGNING -eq 'true') { $options.RequireSigning=$true; $options.CertificateThumbprint=$env:RELEASE_CERT_THUMBPRINT }
+          ./tools/Build-Release.ps1 @options
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FluxPlayer-${{ inputs.version }}-win-x64
+          path: |
+            artifacts/releases/${{ inputs.version }}/*.zip
+            artifacts/releases/${{ inputs.version }}/*.msix
+            artifacts/releases/${{ inputs.version }}/*.appinstaller
+            artifacts/releases/${{ inputs.version }}/*.json
+            artifacts/releases/${{ inputs.version }}/SHA256SUMS.txt
+      - name: Create draft release
+        if: inputs.publish_draft
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          $files = Get-ChildItem -LiteralPath "artifacts/releases/$env:RELEASE_VERSION" -File | Select-Object -ExpandProperty FullName
+          gh release create "v$env:RELEASE_VERSION" @files --draft --title "FluxPlayer $env:RELEASE_VERSION" --notes-file docs/RELEASE_NOTES.md
+          if ($LASTEXITCODE) { throw 'Draft creation failed' }

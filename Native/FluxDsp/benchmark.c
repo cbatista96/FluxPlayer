@@ -19,7 +19,7 @@ static double SecondsNow(void)
     return (double)value.QuadPart / (double)frequency.QuadPart;
 }
 
-static __declspec(noinline) void RunCase(unsigned count, unsigned active)
+static __declspec(noinline) void RunCase(unsigned count, unsigned active, uint32_t effects)
 {
     static const float iso31[] = { 20,25,31.5f,40,50,63,80,100,125,160,200,250,315,400,500,630,
         800,1000,1250,1600,2000,2500,3150,4000,5000,6300,8000,10000,12500,16000,20000 };
@@ -31,6 +31,18 @@ static __declspec(noinline) void RunCase(unsigned count, unsigned active)
     config.sequence = 2; config.enabled = 1; config.band_count = (int32_t)count;
     config.bandwidth = count == 20 ? (float)(log(1000.0) / log(2.0) / 19.0) : 1.f / 3.f;
     config.anti_clip = 1;
+    if (effects) {
+        static const float defaults[24] = { 6,120,.25f,-18,4,10,150,0,-1,0,1.3f,250,.3f,.25f,.2f,.45f,.3f,.3f,3,.25f,.8f,8,700,0 };
+        config.effects.flags = effects; memcpy(config.effects.values, defaults, sizeof(defaults));
+        for (unsigned index = 0; index < 64; index++) config.effects.matrix[index] = index % 9 == 0 ? 1.f : 0.f;
+        config.effects.level_target_db = -18; config.effects.level_max_gain_db = 12; config.effects.level_response_ms = 500;
+        for (unsigned band = 0; band < 10; band++) { config.effects.parametric[band][0] = (float)(31.25 * pow(2.0, band)); config.effects.parametric[band][1] = band & 1 ? -3.f : 3.f; config.effects.parametric[band][2] = config.effects.parametric[band][3] = 1; }
+        if (effects & DSP_REAL_EFFECTS) {
+            sys->delay_frames = (unsigned)(sys->rate * 1.6) + 4; sys->channel_frames = sys->rate / 4 + 4;
+            sys->delay_ring = calloc((size_t)sys->delay_frames * sys->channels, sizeof(float)); sys->channel_ring = calloc((size_t)sys->channel_frames * sys->channels, sizeof(float));
+            if (!sys->delay_ring || !sys->channel_ring) exit(2);
+        }
+    }
     for (unsigned band = 0; band < count; band++) {
         config.frequencies[band] = count == 31 ? iso31[band] : (float)(20.0 * pow(1000.0, (double)band / (count - 1)));
         config.gains[band] = band < active ? (band & 1 ? -6.f : 6.f) : 0.f;
@@ -39,7 +51,8 @@ static __declspec(noinline) void RunCase(unsigned count, unsigned active)
     float input[960], output[960];
     for (unsigned frame = 0; frame < frames; frame++) {
         float value = (float)(0.1 * sin(2.0 * DSP_PI * 440.0 * frame / 48000.0));
-        input[frame * 2] = input[frame * 2 + 1] = value;
+        input[frame * 2] = effects & DSP_REAL_EFFECTS ? value * 2.5f : value;
+        input[frame * 2 + 1] = effects & DSP_REAL_EFFECTS ? (float)(0.22 * sin(2.0 * DSP_PI * 523.25 * frame / 48000.0)) : value;
     }
     filter_t filter = { 0 }; filter.p_sys = sys;
     block_t block = { 0 }; block.p_buffer = (uint8_t *)output; block.i_buffer = sizeof(output); block.i_nb_samples = frames;
@@ -50,8 +63,8 @@ static __declspec(noinline) void RunCase(unsigned count, unsigned active)
         checksum += output[iteration % 960];
     }
     double elapsed = SecondsNow() - start, cpu_ms = CpuMilliseconds() - cpu_start;
-    printf("bands=%u active=%u equivalent_audio_seconds=60 wall_ms=%.3f thread_cpu_ms=%.3f one_core_percent=%.4f checksum=%.8f\n",
-        count, active, elapsed * 1000.0, cpu_ms, cpu_ms / 600.0, checksum);
+    printf("bands=%u active=%u effects=%u equivalent_audio_seconds=60 wall_ms=%.3f thread_cpu_ms=%.3f one_core_percent=%.4f checksum=%.8f\n",
+        count, active, effects, elapsed * 1000.0, cpu_ms, cpu_ms / 600.0, checksum);
     double configure_start = SecondsNow(), worst = 0.0;
     for (int iteration = 0; iteration < 100; iteration++) {
         config.gains[0] = iteration & 1 ? 5.f : 6.f;
@@ -59,11 +72,13 @@ static __declspec(noinline) void RunCase(unsigned count, unsigned active)
         worst = fmax(worst, SecondsNow() - before);
     }
     printf("configuration_updates=100 mean_us=%.3f worst_us=%.3f\n", (SecondsNow() - configure_start) * 10000.0, worst * 1000000.0);
-    free(sys);
+    free(sys->delay_ring); free(sys->channel_ring); free(sys);
 }
 
 int main(void)
 {
-    RunCase(31, 0); RunCase(31, 3); RunCase(20, 20); RunCase(31, 31);
+    RunCase(31, 0, 0); RunCase(31, 3, 0); RunCase(20, 20, 0); RunCase(31, 31, 0);
+    RunCase(31, 0, 16384u); RunCase(31, 31, 32767u);
+    RunCase(31, 0, 32768u); RunCase(31, 0, 65536u); RunCase(31, 31, 131071u);
     return 0;
 }

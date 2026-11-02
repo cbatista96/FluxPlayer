@@ -61,7 +61,7 @@ public sealed partial class LibraryService
         {
             await using (var file = new FileStream(temporary, FileMode.CreateNew, FileAccess.Write, FileShare.None,
                 64 * 1024, FileOptions.Asynchronous | FileOptions.SequentialScan))
-                await JsonSerializer.SerializeAsync(file, new Store(1, _folders.ToArray(), _entries.Values.ToArray(), _lists.Values.ToArray()), cancellationToken: token).ConfigureAwait(false);
+                await JsonSerializer.SerializeAsync(file, new Store(1, _folders.ToArray(), _entries.Values.ToArray(), _lists.Values.ToArray(), _collections.Values.ToArray(), _consolidated.Values.ToArray()), cancellationToken: token).ConfigureAwait(false);
             token.ThrowIfCancellationRequested();
             File.Move(temporary, _path, true);
         }

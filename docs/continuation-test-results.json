@@ -1,0 +1,986 @@
+{
+  "date": "2026-10-30",
+  "build": "Release x64; zero warnings/errors",
+  "suites": [
+    "continuation-managed-results.json",
+    "continuation-native-results.json",
+    "continuation-hundred-results.json"
+  ],
+  "uniqueGroups": 192,
+  "passed": 192,
+  "failed": 0,
+  "limits": [
+    "Physical touch and phone/LAN acceptance pending",
+    "LRCLIB transport is simulated; no live-provider certification",
+    "OCR engine not installed on PATH",
+    "External integration batches remain unaccepted",
+    "Native backend probing emitted LibVLC subtitle composition diagnostics"
+  ],
+  "results": [
+    {
+      "name": "Advanced CUE: CD-TEXT, gaps, flags, exact frames, directive preservation, rebased copies and encodings",
+      "passed": true,
+      "ms": 21
+    },
+    {
+      "name": "Advanced tags: native containers, custom fields, clearing, covers and unchanged decoded PCM",
+      "passed": true,
+      "ms": 1023
+    },
+    {
+      "name": "Audio output profiles: independent bands, case-insensitive storage, validation and bounded persistence",
+      "passed": true,
+      "ms": 17
+    },
+    {
+      "name": "Audio production native: selected stream extraction, batch cancellation and measured gain/delay mixing",
+      "passed": true,
+      "ms": 984
+    },
+    {
+      "name": "Audio production: reviewed plans, collisions, invalid parameters and cancellation",
+      "passed": true,
+      "ms": 9
+    },
+    {
+      "name": "Batch rename: templates, conflicts, stale previews, cancellation, loaded files and retained library records",
+      "passed": true,
+      "ms": 42
+    },
+    {
+      "name": "Channel routing preferences: native mapping, legacy migration and persistence",
+      "passed": true,
+      "ms": 52
+    },
+    {
+      "name": "Continuation native: mobile page, pairing, commands, malformed input and shutdown",
+      "passed": true,
+      "ms": 109
+    },
+    {
+      "name": "Continuation: duplicate metadata consolidation, stale previews, rollback and persistence",
+      "passed": true,
+      "ms": 116
+    },
+    {
+      "name": "Continuation: extension manifests, real child processes, bounded output and cancellation",
+      "passed": true,
+      "ms": 769
+    },
+    {
+      "name": "Continuation: lyrics transport, matching, rate limits, exports and cancellation",
+      "passed": true,
+      "ms": 22
+    },
+    {
+      "name": "Continuation: touch seek, volume, pinch, pan and canceled contacts",
+      "passed": true,
+      "ms": 1
+    },
+    {
+      "name": "Conversion options: validated encoder rates, channel counts, bitrates and PCM depths",
+      "passed": true,
+      "ms": 1
+    },
+    {
+      "name": "CUE writing: frame round trips, multiple sources, editing, validation and original preservation",
+      "passed": true,
+      "ms": 7
+    },
+    {
+      "name": "CUE: relative paths, 75 frames per second and tracks",
+      "passed": true,
+      "ms": 2
+    },
+    {
+      "name": "Duplicate analysis: content hashes, stale sizes, missing files, cancellation and originals",
+      "passed": true,
+      "ms": 13
+    },
+    {
+      "name": "English defaults and legacy equalizer preset migration",
+      "passed": true,
+      "ms": 5
+    },
+    {
+      "name": "External chapters: OGM/XML round trips, editions, encodings, limits, entities and cancellation",
+      "passed": true,
+      "ms": 96
+    },
+    {
+      "name": "F0201: movie library survives profile restart and rejects stale editor",
+      "passed": true,
+      "ms": 16
+    },
+    {
+      "name": "F0202: series and episodes survive restart",
+      "passed": true,
+      "ms": 2
+    },
+    {
+      "name": "F0203: poster association decodes actual frozen bitmap",
+      "passed": true,
+      "ms": 13
+    },
+    {
+      "name": "F0204: fanart association decodes independently",
+      "passed": true,
+      "ms": 3
+    },
+    {
+      "name": "F0205: actor profile and biography persist",
+      "passed": true,
+      "ms": 0
+    },
+    {
+      "name": "F0206: synopsis edits are saved and searchable",
+      "passed": true,
+      "ms": 5
+    },
+    {
+      "name": "F0207: optional release date round trip",
+      "passed": true,
+      "ms": 1
+    },
+    {
+      "name": "F0208: classification filter",
+      "passed": true,
+      "ms": 0
+    },
+    {
+      "name": "F0209: watched movie state clears captured position",
+      "passed": true,
+      "ms": 4
+    },
+    {
+      "name": "F0210: watchlist and unwatched filters",
+      "passed": true,
+      "ms": 9
+    },
+    {
+      "name": "F0211: series-season dependent query excludes other seasons",
+      "passed": true,
+      "ms": 5
+    },
+    {
+      "name": "F0212: numbered episodes enforce unique identities",
+      "passed": true,
+      "ms": 1
+    },
+    {
+      "name": "F0213: season cover loads",
+      "passed": true,
+      "ms": 2
+    },
+    {
+      "name": "F0214: series banner loads",
+      "passed": true,
+      "ms": 1
+    },
+    {
+      "name": "F0215: cast characters and reverse profile credits",
+      "passed": true,
+      "ms": 0
+    },
+    {
+      "name": "F0216: watched episodes advance series",
+      "passed": true,
+      "ms": 4
+    },
+    {
+      "name": "F0217: series continuation selects earliest unfinished episode",
+      "passed": true,
+      "ms": 5
+    },
+    {
+      "name": "F0218: poster wall displays forty cards and next page",
+      "passed": true,
+      "ms": 420
+    },
+    {
+      "name": "F0219: trailer playback queues feature immediately next",
+      "passed": true,
+      "ms": 2675
+    },
+    {
+      "name": "F0220: TV library has large transport and keyboard list",
+      "passed": true,
+      "ms": 2
+    },
+    {
+      "name": "F0221: artist biography survives edit and restart",
+      "passed": true,
+      "ms": 1
+    },
+    {
+      "name": "F0222: composer linked to saved work",
+      "passed": true,
+      "ms": 2
+    },
+    {
+      "name": "F0223: production credits include job and role",
+      "passed": true,
+      "ms": 1
+    },
+    {
+      "name": "F0224: person relationships round trip and reject self-links",
+      "passed": true,
+      "ms": 7
+    },
+    {
+      "name": "F0225: discography ordered local release playback",
+      "passed": true,
+      "ms": 45
+    },
+    {
+      "name": "F0226: multiple metadata values round trip and duplicate rejection",
+      "passed": true,
+      "ms": 2
+    },
+    {
+      "name": "F0227: classical movement order survives restart and playback",
+      "passed": true,
+      "ms": 44
+    },
+    {
+      "name": "F0228: combined rating/date/attribute ordering",
+      "passed": true,
+      "ms": 1
+    },
+    {
+      "name": "F0229: thumbnail cache reuses frozen reduced artwork and releases source",
+      "passed": true,
+      "ms": 0
+    },
+    {
+      "name": "F0230: captured viewing position persists and resumes native playback",
+      "passed": true,
+      "ms": 50
+    },
+    {
+      "name": "F0231: FIR low/high/band-pass measured frequency responses",
+      "passed": true,
+      "ms": 16
+    },
+    {
+      "name": "F0232: offline convolution attenuates a rejected source frequency",
+      "passed": true,
+      "ms": 175
+    },
+    {
+      "name": "F0233: three resamplers render requested sample rates",
+      "passed": true,
+      "ms": 291
+    },
+    {
+      "name": "F0234: rectangular/triangular dither produce 16-bit PCM",
+      "passed": true,
+      "ms": 348
+    },
+    {
+      "name": "F0235: three noise-shaped quantizers produce valid audio",
+      "passed": true,
+      "ms": 355
+    },
+    {
+      "name": "F0236: two-pass sample normalization reaches target peak",
+      "passed": true,
+      "ms": 100
+    },
+    {
+      "name": "F0237: pitch changes preserve duration and double frequency",
+      "passed": true,
+      "ms": 102
+    },
+    {
+      "name": "F0238: tempo doubles speed while retaining pitch",
+      "passed": true,
+      "ms": 96
+    },
+    {
+      "name": "F0239: RIAA reproduction changes real source response",
+      "passed": true,
+      "ms": 64
+    },
+    {
+      "name": "F0240: DC and subsonic cleanup removes offset",
+      "passed": true,
+      "ms": 70
+    },
+    {
+      "name": "F0241: FFT spectrum locates known tone and peak envelope",
+      "passed": true,
+      "ms": 44
+    },
+    {
+      "name": "F0242: selected sonic analysis persists descriptors",
+      "passed": true,
+      "ms": 76
+    },
+    {
+      "name": "F0243: track similarity ranks available sources and excludes seed",
+      "passed": true,
+      "ms": 2
+    },
+    {
+      "name": "F0244: album aggregate similarity",
+      "passed": true,
+      "ms": 2
+    },
+    {
+      "name": "F0245: artist aggregate similarity",
+      "passed": true,
+      "ms": 0
+    },
+    {
+      "name": "F0246: Bilinear scaling",
+      "passed": true,
+      "ms": 160
+    },
+    {
+      "name": "F0247: Bicubic scaling",
+      "passed": true,
+      "ms": 142
+    },
+    {
+      "name": "F0248: Lanczos scaling",
+      "passed": true,
+      "ms": 143
+    },
+    {
+      "name": "F0249: Spline scaling",
+      "passed": true,
+      "ms": 142
+    },
+    {
+      "name": "F0250: aspect preserving reduction and no upscale",
+      "passed": true,
+      "ms": 143
+    },
+    {
+      "name": "F0251: deband renders decodable copy",
+      "passed": true,
+      "ms": 151
+    },
+    {
+      "name": "F0252: spatiotemporal denoise renders copy",
+      "passed": true,
+      "ms": 143
+    },
+    {
+      "name": "F0253: small motion stabilization renders copy",
+      "passed": true,
+      "ms": 153
+    },
+    {
+      "name": "F0254: motion interpolation emits requested frame rate",
+      "passed": true,
+      "ms": 259
+    },
+    {
+      "name": "F0255: local logo and rasterized caption overlays",
+      "passed": true,
+      "ms": 136
+    },
+    {
+      "name": "F0256: declared PQ HDR becomes tagged SDR",
+      "passed": true,
+      "ms": 148
+    },
+    {
+      "name": "F0257: Reinhard tone mapping output",
+      "passed": true,
+      "ms": 147
+    },
+    {
+      "name": "F0258: Hable tone mapping output",
+      "passed": true,
+      "ms": 145
+    },
+    {
+      "name": "F0259: reference luminance controls tone mapping",
+      "passed": true,
+      "ms": 153
+    },
+    {
+      "name": "F0260: explicit full input and limited output ranges",
+      "passed": true,
+      "ms": 143
+    },
+    {
+      "name": "F0291: bass crossover redirects low frequency into LFE",
+      "passed": true,
+      "ms": 125
+    },
+    {
+      "name": "F0292: named mono stereo 5.1 and 7.1 layouts",
+      "passed": true,
+      "ms": 272
+    },
+    {
+      "name": "F0293: independent output gain measured in PCM",
+      "passed": true,
+      "ms": 71
+    },
+    {
+      "name": "F0294: independent output delay measured at start",
+      "passed": true,
+      "ms": 69
+    },
+    {
+      "name": "F0295: stereo surround spread creates center and rear differences",
+      "passed": true,
+      "ms": 122
+    },
+    {
+      "name": "F0296: bounded arbitrary multichannel matrix",
+      "passed": true,
+      "ms": 70
+    },
+    {
+      "name": "F0297: two-source multichannel mix retains both inputs",
+      "passed": true,
+      "ms": 69
+    },
+    {
+      "name": "F0298: multichannel WAV and FLAC exports decode",
+      "passed": true,
+      "ms": 105
+    },
+    {
+      "name": "F0299: double precision graph retains tiny routed coefficients",
+      "passed": true,
+      "ms": 71
+    },
+    {
+      "name": "F0300: post-matrix channel permutation",
+      "passed": true,
+      "ms": 68
+    },
+    {
+      "name": "F0301: local LUT trilinear and tetrahedral interpolation",
+      "passed": true,
+      "ms": 270
+    },
+    {
+      "name": "F0302: three software deinterlacers and field orders",
+      "passed": true,
+      "ms": 478
+    },
+    {
+      "name": "F0303: stereo packed source to Dubois anaglyph",
+      "passed": true,
+      "ms": 223
+    },
+    {
+      "name": "F0304: four-edge overscan crop",
+      "passed": true,
+      "ms": 151
+    },
+    {
+      "name": "F0305: anamorphic sample aspect metadata",
+      "passed": true,
+      "ms": 148
+    },
+    {
+      "name": "F0306: exact image placement within canvas",
+      "passed": true,
+      "ms": 164
+    },
+    {
+      "name": "F0307: nine coefficient RGB transform",
+      "passed": true,
+      "ms": 146
+    },
+    {
+      "name": "F0308: excerpt luminance analysis and new-copy report",
+      "passed": true,
+      "ms": 51
+    },
+    {
+      "name": "F0309: SDR code value legalization",
+      "passed": true,
+      "ms": 150
+    },
+    {
+      "name": "F0310: declared BT2020 SDR gamut conversion",
+      "passed": true,
+      "ms": 171
+    },
+    {
+      "name": "F0311: ProRes 422 HQ actual encoder export",
+      "passed": true,
+      "ms": 161
+    },
+    {
+      "name": "F0312: HEVC / AAC actual encoder export",
+      "passed": true,
+      "ms": 313
+    },
+    {
+      "name": "F0313: AV1 / Opus actual encoder export",
+      "passed": true,
+      "ms": 499
+    },
+    {
+      "name": "F0314: MPEG-2 / MP2 actual encoder export",
+      "passed": true,
+      "ms": 132
+    },
+    {
+      "name": "F0315: MXF / DNxHR HQ actual encoder export",
+      "passed": true,
+      "ms": 216
+    },
+    {
+      "name": "F0316: AC-3 stereo actual encoder export",
+      "passed": true,
+      "ms": 158
+    },
+    {
+      "name": "F0317: E-AC-3 stereo actual encoder export",
+      "passed": true,
+      "ms": 124
+    },
+    {
+      "name": "F0318: RF64 / 24-bit PCM actual encoder export",
+      "passed": true,
+      "ms": 93
+    },
+    {
+      "name": "F0319: AIFF / 24-bit PCM actual encoder export",
+      "passed": true,
+      "ms": 94
+    },
+    {
+      "name": "F0320: DXD-rate / 24-bit PCM actual encoder export",
+      "passed": true,
+      "ms": 143
+    },
+    {
+      "name": "F0371: allowlisted ordered restoration chains reject arbitrary filters",
+      "passed": true,
+      "ms": 95
+    },
+    {
+      "name": "F0372: named recipes persist and portable JSON round trips",
+      "passed": true,
+      "ms": 61
+    },
+    {
+      "name": "F0373: impulsive click removal processes actual impulses",
+      "passed": true,
+      "ms": 88
+    },
+    {
+      "name": "F0374: clipped-sample reconstruction produces finite changed PCM",
+      "passed": true,
+      "ms": 14875
+    },
+    {
+      "name": "F0375: spectral denoise reduces stationary noise energy",
+      "passed": true,
+      "ms": 122
+    },
+    {
+      "name": "F0376: noise gate attenuates quiet passages",
+      "passed": true,
+      "ms": 120
+    },
+    {
+      "name": "F0377: speech half-cycle normalization alters envelope",
+      "passed": true,
+      "ms": 80
+    },
+    {
+      "name": "F0378: discrete center extraction isolates actual center signal",
+      "passed": true,
+      "ms": 79
+    },
+    {
+      "name": "F0379: two-source crossfade has expected duration and source content",
+      "passed": true,
+      "ms": 195
+    },
+    {
+      "name": "F0380: two-pass EBU loudness reaches measured target",
+      "passed": true,
+      "ms": 249
+    },
+    {
+      "name": "Folder browsing: media filters, navigation entries, Unicode, limits and cancellation",
+      "passed": true,
+      "ms": 7
+    },
+    {
+      "name": "Formats and protocols: extensions, URL queries, UNC paths and unknown files",
+      "passed": true,
+      "ms": 1
+    },
+    {
+      "name": "Genre and decade browsing: facets, queries, unknown years, saved criteria and library backup",
+      "passed": true,
+      "ms": 8
+    },
+    {
+      "name": "Library backup restore: validated merge, statistics, watches, invalid input and persistence",
+      "passed": true,
+      "ms": 31
+    },
+    {
+      "name": "Library browsing: exact artist/album facets, combined rules, missing tags and saved views",
+      "passed": true,
+      "ms": 169
+    },
+    {
+      "name": "Library column views: real WPF order, visibility, numeric sorting, persistence and limits",
+      "passed": true,
+      "ms": 48
+    },
+    {
+      "name": "Library queries: fields, phrases, exclusions, duration, size and dates",
+      "passed": true,
+      "ms": 4
+    },
+    {
+      "name": "Library: scanning, statistics, favorites, watching, backup and reopening",
+      "passed": true,
+      "ms": 1616
+    },
+    {
+      "name": "Local media native: converted device exports and extracted ZIP decoding",
+      "passed": true,
+      "ms": 283
+    },
+    {
+      "name": "Local media native: first-show calibration window is arranged and renders White Wash",
+      "passed": true,
+      "ms": 337
+    },
+    {
+      "name": "Local media: actual image decoding, bounded memory, albums, folder scans and failed saves",
+      "passed": true,
+      "ms": 42
+    },
+    {
+      "name": "Local media: device copy preview, collisions, cancellation, source guards and containment",
+      "passed": true,
+      "ms": 15
+    },
+    {
+      "name": "Local media: static calibration patterns and White Wash code values",
+      "passed": true,
+      "ms": 94
+    },
+    {
+      "name": "Local media: ZIP preview, safe extraction, traversal, duplicate, link and stale-source rejection",
+      "passed": true,
+      "ms": 91
+    },
+    {
+      "name": "LRC editing: validation, timestamp precision, safe copies, bounds and cancellation",
+      "passed": true,
+      "ms": 41
+    },
+    {
+      "name": "LRC: multiple timestamps, milliseconds, offsets and time lookup",
+      "passed": true,
+      "ms": 6
+    },
+    {
+      "name": "M3U8/PLS/XSPF: round trip, Unicode, relative paths, numeric order and blocked DTD",
+      "passed": true,
+      "ms": 15
+    },
+    {
+      "name": "Media catalog: ordered lists, protection, revisions, cross-list search, stations, bounded input and atomic failures",
+      "passed": true,
+      "ms": 32
+    },
+    {
+      "name": "Metadata patches: omitted fields, explicit clearing and input limits",
+      "passed": true,
+      "ms": 1
+    },
+    {
+      "name": "More thirty native: actual channel matrices and adaptive RMS leveling",
+      "passed": true,
+      "ms": 2628
+    },
+    {
+      "name": "More thirty native: global hotkey registration, conflicts and cleanup",
+      "passed": true,
+      "ms": 27
+    },
+    {
+      "name": "More thirty native: tag writes, ringtones, contact sheets, custom aspect and renderer counters",
+      "passed": true,
+      "ms": 1672
+    },
+    {
+      "name": "More thirty native: virtual transport, mute continuity, volume events and alarms",
+      "passed": true,
+      "ms": 4317
+    },
+    {
+      "name": "More thirty: fingerprint capture and byte-identical moved-file repair",
+      "passed": true,
+      "ms": 30
+    },
+    {
+      "name": "More thirty: recurring schedules, DST, priorities and interrupted series",
+      "passed": true,
+      "ms": 20
+    },
+    {
+      "name": "More thirty: smart queues, related tracks, album order and computed ratings",
+      "passed": true,
+      "ms": 12
+    },
+    {
+      "name": "More thirty: tag transformations, subtitle interval trees, aspect and input preferences",
+      "passed": true,
+      "ms": 5
+    },
+    {
+      "name": "More thirty: virtual skips, mutes, ordered segments and declarative scripts",
+      "passed": true,
+      "ms": 19
+    },
+    {
+      "name": "Multiband layouts: independent preset arrays, native frequency grids and persisted profiles",
+      "passed": true,
+      "ms": 142
+    },
+    {
+      "name": "Named playlist documents: M3U8/PLS/XSPF titles, order, missing paths, copies, entities and cancellation",
+      "passed": true,
+      "ms": 15
+    },
+    {
+      "name": "Native 15/20/31-band DSP: independent filters, flat level and measured headroom",
+      "passed": true,
+      "ms": 48272
+    },
+    {
+      "name": "Native audio DSP: measured ISO band centers and compensated preamp",
+      "passed": true,
+      "ms": 8864
+    },
+    {
+      "name": "Native channel routing: actual stereo, swap, mono, isolated channels and six-channel downmix",
+      "passed": true,
+      "ms": 11451
+    },
+    {
+      "name": "Native chapter navigation: external points, seek, source reset and duration validation",
+      "passed": true,
+      "ms": 255
+    },
+    {
+      "name": "Native engine: PCM detection and duration independent of file extension",
+      "passed": true,
+      "ms": 12
+    },
+    {
+      "name": "Native EQ layouts: live switching, restored curves, output profiles and settings reload",
+      "passed": true,
+      "ms": 1091
+    },
+    {
+      "name": "Native folder playback: explicit play with autoplay off, enqueue and stale selections",
+      "passed": true,
+      "ms": 93
+    },
+    {
+      "name": "Native HTTP radio: no unsolicited connections, real stream decoding and automatic audio workspace",
+      "passed": true,
+      "ms": 489
+    },
+    {
+      "name": "Native organization and column views: tagged folders, loaded files, queue, bookmarks, remembered volume and persistence",
+      "passed": true,
+      "ms": 585
+    },
+    {
+      "name": "Native output profiles: live application, mute, boost limit, opt-out, startup and failed save",
+      "passed": true,
+      "ms": 565
+    },
+    {
+      "name": "Native per-file memory: audio selection, disabled/external subtitles, volume, mute, restart and changed sources",
+      "passed": true,
+      "ms": 2733
+    },
+    {
+      "name": "Native playback history: disabled startup, listening versus seek/pause, switching, restart, opt-out and durable clear",
+      "passed": true,
+      "ms": 1737
+    },
+    {
+      "name": "Native quick audio preferences: routing, mute/volume continuity, ReplayGain and failed-save isolation",
+      "passed": true,
+      "ms": 361
+    },
+    {
+      "name": "Native rename integration: loaded source protection, queue relocation and saved paths",
+      "passed": true,
+      "ms": 101
+    },
+    {
+      "name": "Native saved playlists: isolated edits, named enqueue, unavailable paths and explicit play with autoplay off",
+      "passed": true,
+      "ms": 136
+    },
+    {
+      "name": "Native subtitle styles: actual text color, font size and margin in displayed frames",
+      "passed": true,
+      "ms": 9028
+    },
+    {
+      "name": "Nested library collections: hierarchy, scoped views, backup merging, membership, relocation and rollback",
+      "passed": true,
+      "ms": 50
+    },
+    {
+      "name": "Organization: metadata folders, root confinement, preflight, retained index, loaded files and cancellation",
+      "passed": true,
+      "ms": 42
+    },
+    {
+      "name": "Per-file preferences: validation, finite volume, bounded history and persisted options",
+      "passed": true,
+      "ms": 9
+    },
+    {
+      "name": "Personal labels: batch edits, queries, persistence, backups, atomic limits, cancellation and failed save",
+      "passed": true,
+      "ms": 31
+    },
+    {
+      "name": "Playback history: atomic sessions, UTC, bounded retention, export, cancellation, corrupt stores and clearing",
+      "passed": true,
+      "ms": 34
+    },
+    {
+      "name": "Portable and named profiles: isolated data, option parsing and settings persistence",
+      "passed": true,
+      "ms": 57
+    },
+    {
+      "name": "Scheduled capture: limit, skipped intervals, non-overlap and cancellation",
+      "passed": true,
+      "ms": 190
+    },
+    {
+      "name": "Settings categories: production placement, curated shortcuts and real WPF action forwarding",
+      "passed": true,
+      "ms": 33
+    },
+    {
+      "name": "Subtitle correction: offset, two anchors, drift, zero clipping, export, limits and cancellation",
+      "passed": true,
+      "ms": 198
+    },
+    {
+      "name": "Subtitle style profiles: validation, normalized settings, case-insensitive persistence and limits",
+      "passed": true,
+      "ms": 15
+    },
+    {
+      "name": "Subtitles: SRT/VTT/ASS, timing and style cleanup",
+      "passed": true,
+      "ms": 6
+    },
+    {
+      "name": "Tag templates: selective fields, numeric limits, custom validation, safe copies and bounded input",
+      "passed": true,
+      "ms": 13
+    },
+    {
+      "name": "Ten features native: actual picture pixels, crop geometry, external audio selection and transport continuity",
+      "passed": true,
+      "ms": 4876
+    },
+    {
+      "name": "Ten features native: audiobook resume/rate/completion and disconnected offline podcast playback",
+      "passed": true,
+      "ms": 1685
+    },
+    {
+      "name": "Ten features native: restored sessions, duplicate labels, staged positions and explicit transport",
+      "passed": true,
+      "ms": 207
+    },
+    {
+      "name": "Ten features: durable playback sessions, queue labels, duplicate identities and failed writes",
+      "passed": true,
+      "ms": 29
+    },
+    {
+      "name": "Ten features: listening statistics, UTC windows, audio-only totals and safe CSV copies",
+      "passed": true,
+      "ms": 6
+    },
+    {
+      "name": "Ten features: OPML interchange, XML limits, audiobook shelf, bookmarks, completion and corrupt stores",
+      "passed": true,
+      "ms": 16
+    },
+    {
+      "name": "Ten features: personal ratings, numeric library queries, persistence and clearing",
+      "passed": true,
+      "ms": 12
+    },
+    {
+      "name": "Ten features: RSS/Atom retrieval, offline downloads, cancellation, refresh preservation and publication failures",
+      "passed": true,
+      "ms": 358
+    },
+    {
+      "name": "Thirty features native: actual stereo-eye pixels, zoom/pan, vertical flip and coherent snapshots",
+      "passed": true,
+      "ms": 1191
+    },
+    {
+      "name": "Thirty features native: fourteen audio effects and measured input/output signal path",
+      "passed": true,
+      "ms": 10766
+    },
+    {
+      "name": "Thirty features native: parallel audio conversion, joining, video transcoding and mobile output",
+      "passed": true,
+      "ms": 1202
+    },
+    {
+      "name": "Thirty features native: RMS, true peak, ReplayGain, tempo estimates and safe measurement export",
+      "passed": true,
+      "ms": 234
+    },
+    {
+      "name": "Thirty features native: scheduled playlist start/stop and volume fade with mute/manual override",
+      "passed": true,
+      "ms": 1186
+    },
+    {
+      "name": "Thirty features: audio effect schema validation and finite parameter limits",
+      "passed": true,
+      "ms": 0
+    },
+    {
+      "name": "Thirty features: bounded zoom, pan, side-by-side and top/bottom geometry",
+      "passed": true,
+      "ms": 0
+    },
+    {
+      "name": "Thirty features: durable one-time schedules, DST rules, claims, failed saves and cancellable volume fades",
+      "passed": true,
+      "ms": 151
+    }
+  ],
+  "finalFocusedRecheck": {
+    "failed": 0,
+    "passed": 5,
+    "groups": 5
+  }
+}

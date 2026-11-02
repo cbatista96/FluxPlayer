@@ -120,6 +120,8 @@ public partial class MainViewModel : ObservableObject
         _mediaService = mediaService;
         _settingsService = settingsService;
         _settings = initialSettings ?? _settingsService.Load();
+        _filePreferences = FilePlaybackPreference.Sanitize(_settings.FilePlaybackPreferences);
+        _fileMemoryToken = _settings.FilePlaybackMemoryToken;
         if (_settings.AutomaticallyApplyAudioOutputProfiles && _settings.AudioOutputProfiles.TryGetValue(_settings.AudioOutputDevice, out var outputProfile))
             outputProfile.Apply(_settings);
         _library = library;
@@ -163,24 +165,32 @@ public partial class MainViewModel : ObservableObject
         _mediaService.VoutChanged += OnVoutChanged;
         _mediaService.TracksChanged += OnTracksChanged;
         _mediaService.VideoSurfaceChanged += OnTracksChanged;
-        _mediaService.Playing += (_, _) => RunOnUi(() =>
+        _mediaService.Playing += (_, _) => PostOnUi(() =>
         {
             if (_shuttingDown) return;
+            if (IsRealtimeAudio) { IsPlaying = true; IsBuffering = false; HistoryPlaying(); return; }
             IsPlaying = true;
             IsBuffering = false;
             ApplyCurrentPlaybackOptions();
             RefreshNowPlaying();
+            HistoryPlaying();
 
-            _mediaService.SetMute(IsMuted);
+            ApplyEffectiveMute();
             _mediaService.SetVolume((int)Volume);
         });
-        _mediaService.Paused += (_, _) => RunOnUi(() => IsPlaying = false);
-        _mediaService.Stopped += (_, _) => RunOnUi(() =>
+        _mediaService.Paused += (_, _) => PostOnUi(() => { if (_shuttingDown) return; IsPlaying = false; HistoryPaused(); CheckpointSpoken(); });
+        _mediaService.Stopped += (_, _) => PostOnUi(() =>
         {
+            if (_shuttingDown || _mediaService.IsDisposed || IsRealtimeAudio) return;
+            // An old source can notify Stop after its replacement has opened. Query only
+            // after returning from the native callback, and keep the new transport state.
+            if (_mediaService.MediaPlayer.State is not (LibVLCSharp.Shared.VLCState.Stopped or LibVLCSharp.Shared.VLCState.Ended or LibVLCSharp.Shared.VLCState.Error)) return;
             IsPlaying = false;
             IsBuffering = false;
             ResetTimeDisplay();
         });
+        InitializePlaybackSchedule();
+        InitializeRealtimeAudio();
     }
 
     [RelayCommand]
@@ -326,6 +336,7 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void ClearPlaylist()
     {
+        _restoredSession = null;
         foreach (var q in _upNext) q.QueuePosition = 0;
         _upNext.Clear();
         Playlist.Clear();
@@ -339,6 +350,7 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void PlayPause()
     {
+        if (!IsRealtimeAudio) AuxiliaryAudioStopRequested?.Invoke();
         if (!HasMedia)
         {
             if (Playlist.Count > 0) PlayAt(Math.Clamp(CurrentIndex, 0, Playlist.Count - 1));
@@ -351,6 +363,14 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void Stop()
     {
+        AuxiliaryAudioStopRequested?.Invoke();
+        CancelRealtimeStart();
+        CancelLinkedEdition();
+        _relatedGeneration++;
+        ResetVirtualTransport();
+        CancelVolumeFade();
+        CheckpointSpoken(clear: true);
+        FinishHistory("Stopped");
         _mediaService.Stop();
         ResetTimeDisplay();
     }
@@ -365,7 +385,7 @@ public partial class MainViewModel : ObservableObject
             SyncTimeDisplay(0);
             return;
         }
-        int next = Shuffle ? Random.Shared.Next(Playlist.Count) :
+        int next = Shuffle ? SmartNext() :
                    CurrentIndex > 0 ? CurrentIndex - 1 : Playlist.Count - 1;
         PlayAt(next);
     }
@@ -375,7 +395,7 @@ public partial class MainViewModel : ObservableObject
     {
         if (!Playlist.Any()) return;
         if (TryPlayQueued()) return;
-        int next = Shuffle ? Random.Shared.Next(Playlist.Count) :
+        int next = Shuffle ? SmartNext() :
                    CurrentIndex < Playlist.Count - 1 ? CurrentIndex + 1 : 0;
         PlayAt(next);
     }
@@ -473,8 +493,9 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void ToggleMute()
     {
+        StopDirectPcmForControl();
         IsMuted = !IsMuted;
-        _mediaService.SetMute(IsMuted);
+        ApplyEffectiveMute();
         OnPropertyChanged(nameof(VolumeIcon));
     }
 
@@ -574,13 +595,21 @@ public partial class MainViewModel : ObservableObject
 
     partial void OnVolumeChanged(double value)
     {
+        StopDirectPcmForControl();
+        if (!_settingFadeVolume) CancelVolumeFade();
         if (_applyingAudioProfile) { OnPropertyChanged(nameof(VolumeIcon)); return; }
         _mediaService.SetVolume((int)value);
-        if (value > 0 && IsMuted) { IsMuted = false; _mediaService.SetMute(false); }
+        if (value > 0 && IsMuted && !_restoringFilePreference && !_settingFadeVolume) { IsMuted = false; ApplyEffectiveMute(); }
+        if (_settings.RememberFileVolume) RememberFilePreference(old => old with { Volume = value });
         OnPropertyChanged(nameof(VolumeIcon));
     }
 
-    partial void OnPlaybackRateChanged(float value) => _mediaService.SetRate(value);
+    partial void OnPlaybackRateChanged(float value)
+    {
+        StopDirectPcmForControl();
+        if (IsRealtimeAudio && _realtimeOptions != null) { _ = RestartRealtime(_realtimeOptions with { PlaybackRate = value, StartSeconds = Engine.GetTime() / 1000d }, !Engine.IsPlaying); return; }
+        _mediaService.SetRate(value);
+    }
 
     partial void OnAspectRatioChanged(string value)
     {
@@ -594,12 +623,23 @@ public partial class MainViewModel : ObservableObject
 
     partial void OnSelectedSubtitleTrackChanged(TrackInfo? value)
     {
+        if (!_refreshingTracks && _bilingualFirst != null) ClearBilingual();
         if (!_refreshingTracks && value != null && _mediaService.MediaPlayer.Spu != value.Id) _mediaService.SetSubtitleTrack(value.Id);
+        if (!_refreshingTracks && !_restoringFilePreference && value != null && _settings.RememberFileSubtitles)
+        {
+            _rememberedSubtitleApplied = true;
+            RememberFilePreference(old => old with { Subtitle = new(value.Id, value.Name), ExternalSubtitle = value.Id < 0 ? old.ExternalSubtitle : null });
+        }
     }
 
     partial void OnSelectedAudioTrackChanged(TrackInfo? value)
     {
         if (!_refreshingTracks && value != null && _mediaService.GetAudioTrack() != value.Id) _mediaService.SetAudioTrack(value.Id);
+        if (!_refreshingTracks && !_restoringFilePreference && value != null && _settings.RememberFileAudioTrack)
+        {
+            _rememberedAudioApplied = true;
+            RememberFilePreference(old => old with { Audio = new(value.Id, value.Name) });
+        }
     }
 
     [RelayCommand]
@@ -725,7 +765,11 @@ public partial class MainViewModel : ObservableObject
 
     public void PlayAt(int index)
     {
+        AuxiliaryAudioStopRequested?.Invoke();
+        CancelRealtimeStart();
         if (index < 0 || index >= Playlist.Count) return;
+        CheckpointSpoken(clear: true);
+        PrepareHistory(Playlist[index]);
 
         Dequeue(Playlist[index]);
         RememberResumePosition();
@@ -739,6 +783,7 @@ public partial class MainViewModel : ObservableObject
 
         CurrentIndex = index;
         CurrentItem = Playlist[index];
+        SourceEnhancementsChanged();
         ResetNowPlaying(CurrentItem);
         CurrentItem.IsPlaying = true;
         WindowTitle = $"FluxPlayer  —  {CurrentItem.Title}";
@@ -752,16 +797,23 @@ public partial class MainViewModel : ObservableObject
                            _resumePositions.TryGetValue(ResumeKey(CurrentItem.FilePath), out var saved)
             ? saved
             : -1;
+        _pendingPositionExplicit = false;
+        if (_restoredSession is { } restored && restored.Index == index && restored.Path == CurrentItem.FilePath)
+        { _pendingResumeMs = restored.Position; _pendingPositionExplicit = true; }
+        _restoredSession = null;
 
         Interlocked.Exchange(ref _outroThresholdMs, -1);
         Volatile.Write(ref _outroTriggered, 0);
         LoadBookmarksForCurrent();
 
+        BeginFilePreferences(CurrentItem.FilePath);
+        ApplyAutomaticMediaProfile(CurrentItem.FilePath);
         _mediaService.PlayFile(CurrentItem.FilePath);
     }
 
     private readonly Dictionary<string, long> _resumePositions = new(StringComparer.OrdinalIgnoreCase);
     private long _pendingResumeMs = -1;
+    private bool _pendingPositionExplicit;
 
     public event EventHandler<long>? PlaybackResumed;
 
@@ -796,6 +848,7 @@ public partial class MainViewModel : ObservableObject
 
     private void OnTimeChanged(object? sender, MediaPlayerTimeChangedEventArgs e)
     {
+        if (IsRealtimeAudio) return;
         long guardTarget = Interlocked.Read(ref _seekGuardTargetMs);
         if (guardTarget >= 0)
         {
@@ -825,7 +878,7 @@ public partial class MainViewModel : ObservableObject
         }
 
         long outroAt = Interlocked.Read(ref _outroThresholdMs);
-        if (outroAt > 0 && e.Time >= outroAt && Interlocked.Exchange(ref _outroTriggered, 1) == 0)
+        if (_linkedChapters == null && outroAt > 0 && e.Time >= outroAt && Interlocked.Exchange(ref _outroTriggered, 1) == 0)
         {
             Application.Current?.Dispatcher.InvokeAsync(() => OutroSkipped?.Invoke(this, EventArgs.Empty));
             OnEndReached(this, EventArgs.Empty);
@@ -847,6 +900,9 @@ public partial class MainViewModel : ObservableObject
         {
             Volatile.Write(ref _timeUpdatePending, 0);
             long time = Interlocked.Read(ref _latestTimeMs);
+            if (CheckLinkedChapter(time)) return;
+            if (ApplyVirtualEdit(time)) return;
+            UpdateBilingual(time);
             CurrentTime = FormatTime(TimeSpan.FromMilliseconds(time));
             UpdateAudioPosition(time);
 
@@ -857,6 +913,7 @@ public partial class MainViewModel : ObservableObject
 
     private void OnLengthChanged(object? sender, MediaPlayerLengthChangedEventArgs e)
     {
+        if (IsRealtimeAudio) return;
         Application.Current?.Dispatcher.InvokeAsync(() =>
         {
             TotalDurationMs = e.Length;
@@ -868,11 +925,13 @@ public partial class MainViewModel : ObservableObject
                 CurrentItem.DurationMs = e.Length;
             }
 
-            if (_pendingResumeMs > 0 && e.Length > 0)
+            if ((_pendingPositionExplicit || _pendingResumeMs > 0) && e.Length > 0)
             {
                 long resumeAt = _pendingResumeMs;
+                bool explicitPosition = _pendingPositionExplicit;
                 _pendingResumeMs = -1;
-                if (resumeAt < e.Length - 5_000)
+                _pendingPositionExplicit = false;
+                if (explicitPosition || resumeAt < e.Length - 5_000)
                 {
                     _mediaService.SeekTo(resumeAt);
                     PlaybackResumed?.Invoke(this, resumeAt);
@@ -896,6 +955,7 @@ public partial class MainViewModel : ObservableObject
 
     private void OnMediaChanged(object? sender, MediaPlayerMediaChangedEventArgs e)
     {
+        if (IsRealtimeAudio) return;
         if (_shuttingDown) return;
         int token = Interlocked.Increment(ref _mediaChangeToken);
         RunOnUi(() => IsBuffering = true);
@@ -914,8 +974,7 @@ public partial class MainViewModel : ObservableObject
             if (dispatcher == null || dispatcher.HasShutdownStarted)
                 return;
 
-            await dispatcher.InvokeAsync(RefreshTracks);
-            await dispatcher.InvokeAsync(RefreshNowPlaying);
+            await dispatcher.InvokeAsync(() => { if (!_shuttingDown && token == _mediaChangeToken) { RefreshTracks(); RefreshNowPlaying(); } });
         }
         catch (InvalidOperationException)
         {
@@ -936,6 +995,11 @@ public partial class MainViewModel : ObservableObject
     {
         Application.Current?.Dispatcher.InvokeAsync(() =>
         {
+            if (HandleRealtimeEnd()) return;
+            if (AdvanceLinkedChapter()) return;
+            if (HandleVirtualEnd()) return;
+            FinishHistory("Completed");
+            CheckpointSpoken(completed: true, clear: true);
             if (StopAfterCurrent)
             {
                 StopAfterCurrent = false;
@@ -965,7 +1029,7 @@ public partial class MainViewModel : ObservableObject
                     break;
                 case "Next":
                     if (CurrentIndex < Playlist.Count - 1) Next();
-                    else Stop();
+                    else if (!TryRelatedAutoplay()) Stop();
                     break;
                 case "Close":
                     PlaybackCloseRequested?.Invoke(this, EventArgs.Empty);
@@ -1004,6 +1068,7 @@ public partial class MainViewModel : ObservableObject
                 ?? AudioTracks.FirstOrDefault(track => track.Id >= 0) ?? AudioTracks.FirstOrDefault();
         }
         finally { _refreshingTracks = false; }
+        RestoreFileTracks();
     }
 
     private void ResetTimeDisplay()
@@ -1040,14 +1105,20 @@ public partial class MainViewModel : ObservableObject
         dispatcher.InvokeAsync(action);
     }
 
+    // Native callbacks can run synchronously inside Play/Stop. Defer work that queries libVLC
+    // until the callback has returned, even when it happens on the dispatcher thread.
+    private static void PostOnUi(Action action) => Application.Current?.Dispatcher.InvokeAsync(action);
+
     public void SaveSettings()
     {
         RememberResumePosition();
         double? equalizerLeft = _settings.EqualizerWindowLeft, equalizerTop = _settings.EqualizerWindowTop;
         _settings = _settingsService.Load();
         _settings.EqualizerWindowLeft = equalizerLeft; _settings.EqualizerWindowTop = equalizerTop;
+        SyncFilePreferenceReset();
 
         _settings.ResumePositions = new Dictionary<string, long>(_resumePositions);
+        _settings.FilePlaybackPreferences = new(_filePreferences, StringComparer.OrdinalIgnoreCase);
         _settings.Bookmarks = _bookmarks.Where(kv => kv.Value.Count > 0)
             .ToDictionary(kv => kv.Key, kv => kv.Value.ToList());
         _settings.Volume = Volume;
@@ -1075,6 +1146,8 @@ public partial class MainViewModel : ObservableObject
     public void ReloadSettingsFromDisk()
     {
         _settings = _settingsService.Load();
+        HistoryPreferenceChanged();
+        SyncFilePreferenceReset();
         _mediaService.PlaybackSettings = _settings;
         _applyingAudioProfile = true;
         try
@@ -1088,6 +1161,7 @@ public partial class MainViewModel : ObservableObject
         }
         finally { _applyingAudioProfile = false; }
         _mediaService.SetAudioDelay(AudioDelayMs * 1000L); _mediaService.ApplyAudioChannelRouting(); PushEqualizer();
+        ApplyConfiguredAudioEffects();
         OnPropertyChanged(nameof(SeekStepSeconds));
         OnPropertyChanged(nameof(SeekLargeStepSeconds));
         OnPropertyChanged(nameof(VolumeStep));
@@ -1267,8 +1341,12 @@ public partial class MainViewModel : ObservableObject
 
     private void OnEncounteredError(object? sender, EventArgs e)
     {
-        Application.Current?.Dispatcher.InvokeAsync(() =>
-            ErrorOccurred?.Invoke(this, "Unable to play the file"));
+        PostOnUi(() =>
+        {
+            if (_shuttingDown) return;
+            FinishHistory("Error");
+            ErrorOccurred?.Invoke(this, "Unable to play the file");
+        });
     }
 
     public string GetMediaInfo()

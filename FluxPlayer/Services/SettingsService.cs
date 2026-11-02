@@ -7,6 +7,7 @@ namespace FluxPlayer.Services;
 public class SettingsService
 {
     private readonly string SettingsPath;
+    public string DataDirectory => Path.GetDirectoryName(SettingsPath)!;
     public string? LastError { get; private set; }
 
     public SettingsService(string? dataDirectory = null) =>
@@ -90,8 +91,27 @@ public class SettingsService
 
     private static void Normalize(AppSettings settings)
     {
+        try { (settings.Experience ??= new()).Validate(); } catch (ArgumentException) { settings.Experience = new(); }
+        try { (settings.Enhancements ??= new()).Validate(); } catch (ArgumentException) { settings.Enhancements = new(); }
+        if (settings.AspectRatio is not ("Auto" or "Stretch")) { try { settings.AspectRatio = FluxPlayer.Models.CustomAspect.Parse(settings.AspectRatio ?? ""); } catch (ArgumentException) { settings.AspectRatio = "Auto"; } }
+        try { (settings.AudioEffects ??= new()).Validate(); } catch (ArgumentException) { settings.AudioEffects = new(); }
+        settings.PicturePresets = (settings.PicturePresets ?? new()).Where(pair => !string.IsNullOrWhiteSpace(pair.Key) && pair.Key.Length <= 80 && !pair.Key.Any(char.IsControl) && pair.Value?.IsValid == true)
+            .DistinctBy(pair => pair.Key.Trim(), StringComparer.OrdinalIgnoreCase).Take(32).ToDictionary(pair => pair.Key.Trim(), pair => pair.Value, StringComparer.OrdinalIgnoreCase);
+        if (settings.ActivePicturePreset == null || !settings.PicturePresets.ContainsKey(settings.ActivePicturePreset)) settings.ActivePicturePreset = "";
+        settings.FilePlaybackPreferences = FilePlaybackPreference.Sanitize(settings.FilePlaybackPreferences);
+        settings.LibraryColumnView = LibraryColumnViews.Normalize(settings.LibraryColumnView);
+        var libraryViews = new Dictionary<string, LibraryColumnView>(StringComparer.OrdinalIgnoreCase);
+        foreach (var pair in settings.LibraryColumnViews ?? new())
+        {
+            if (libraryViews.Count >= 16) break;
+            string name = pair.Key.Trim(); var layout = LibraryColumnViews.Normalize(pair.Value);
+            if (name.Length is >= 1 and <= 80 && !name.Any(char.IsControl) && layout != null) libraryViews[name] = layout;
+        }
+        settings.LibraryColumnViews = libraryViews;
         // The public source currently ships a single English interface.
         settings.Language = "English";
+        settings.PlaybackHistoryLimit = Math.Clamp(settings.PlaybackHistoryLimit, 1, PlaybackHistoryService.MaximumEntries);
+        settings.PlaybackHistoryDays = Math.Clamp(settings.PlaybackHistoryDays, 1, 3650);
         settings.AudioChannels = AudioChannelRouting.Normalize(settings.AudioChannels);
         settings.EqualizerPreset = EqualizerPresets.Normalize(settings.EqualizerPreset);
         SubtitleStyle.Normalize(SubtitleStyle.Capture(settings)).Apply(settings);

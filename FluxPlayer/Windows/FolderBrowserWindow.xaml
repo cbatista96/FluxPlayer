@@ -1,0 +1,23 @@
+<ui:FluentWindow x:Class="FluxPlayer.Windows.FolderBrowserWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml" Title="Browse media folder · FluxPlayer" Width="960" Height="660" MinWidth="760" MinHeight="500" ExtendsContentIntoTitleBar="True" WindowStartupLocation="CenterOwner">
+ <Grid Margin="24,18,24,20">
+  <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+  <StackPanel Margin="0,0,0,18"><TextBlock Text="Browse media folders" FontSize="25" FontWeight="SemiBold"/><TextBlock Text="Open a folder to browse supported media. Double-click a folder to enter it or a file to play it." TextWrapping="Wrap" Margin="0,6,0,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/></StackPanel>
+  <StackPanel Grid.Row="1" Margin="0,0,0,12">
+   <TextBox x:Name="FolderPath" IsReadOnly="True" Padding="10,7" AutomationProperties.Name="Current media folder"/>
+   <WrapPanel Margin="0,10,0,0">
+    <Button Content="Choose folder…" Click="Choose_Click" Padding="12,7" Margin="0,0,8,8"/>
+    <Button x:Name="ParentButton" Content="Up one folder" Click="Parent_Click" Padding="12,7" Margin="0,0,8,8"/>
+    <Button Content="Refresh" Click="Refresh_Click" Padding="12,7" Margin="0,0,8,8"/>
+    <ComboBox x:Name="KindFilter" Width="130" SelectedIndex="0" SelectionChanged="Kind_Changed" Margin="0,0,8,8" AutomationProperties.Name="Folder media type"><ComboBoxItem Content="All media"/><ComboBoxItem Content="Audio"/><ComboBoxItem Content="Video"/></ComboBox>
+    <Grid Width="200" Margin="0,0,0,8">
+     <TextBox x:Name="Search" Padding="10,7" TextChanged="Search_Changed" MaxLength="200" AutomationProperties.Name="Filter file names" ToolTip="Filter media filenames; folders remain visible"/>
+     <TextBlock Text="Filter filenames…" Margin="12,0" VerticalAlignment="Center" IsHitTestVisible="False" Foreground="{DynamicResource TextFillColorSecondaryBrush}"><TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding Text, ElementName=Search}" Value=""><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock>
+    </Grid>
+   </WrapPanel>
+  </StackPanel>
+  <DataGrid x:Name="Files" Grid.Row="2" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Extended" EnableRowVirtualization="True" VirtualizingPanel.VirtualizationMode="Recycling" RowHeight="38" GridLinesVisibility="None" HeadersVisibility="Column" MouseDoubleClick="Open_Click" PreviewKeyDown="Files_KeyDown">
+   <DataGrid.Columns><DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="2*" MinWidth="200"/><DataGridTextColumn Header="Type" Binding="{Binding Kind}" Width="85"/><DataGridTextColumn Header="Size" Binding="{Binding SizeText}" Width="110"/><DataGridTextColumn Header="Modified (UTC)" Binding="{Binding ModifiedUtc, StringFormat=yyyy-MM-dd HH:mm}" Width="150"/></DataGrid.Columns>
+  </DataGrid>
+  <StackPanel Grid.Row="3" Margin="0,14,0,0"><WrapPanel><Button Content="Open / Play selected" Click="Open_Click" Padding="14,8"/><Button Content="Add selected to playlist" Click="Add_Click" Padding="14,8" Margin="8,0,0,0"/><Button Content="Add all visible media" Click="AddAll_Click" Padding="14,8" Margin="8,0,0,0"/></WrapPanel><TextBlock x:Name="Status" Text="Choose a media folder." TextWrapping="Wrap" Margin="0,12,0,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/></StackPanel>
+ </Grid>
+</ui:FluentWindow>

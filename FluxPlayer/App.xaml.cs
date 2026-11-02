@@ -60,6 +60,8 @@ public partial class App : Application
         bool resumePerFile = FeatureCatalog.IsEnabled(startupSettings, FeatureCatalog.ResumePlaybackPerFile);
 
         var effectiveHardwareDecoding = startupSettings.HardwareDecoding;
+        string selectedDecoder = startupSettings.Enhancements.GpuPolicy.Resolve(GpuRenderPolicy.Detect(), effectiveHardwareDecoding);
+        effectiveHardwareDecoding &= selectedDecoder != "none";
 
         string? effectiveVideoOutput = null;
 
@@ -71,7 +73,7 @@ public partial class App : Application
             ultraFastStartup: ultraFastStartup,
             enableDiagnosticLogging: localTelemetry,
             resumePlaybackPerFile: resumePerFile,
-            subtitleStyle: SubtitleStyle.Capture(startupSettings)));
+            subtitleStyle: SubtitleStyle.Capture(startupSettings), hardwareDecoder: selectedDecoder, wpfSubtitleComposition: true));
         services.AddSingleton<MainViewModel>(sp => new MainViewModel(
             sp.GetRequiredService<MediaService>(),
             sp.GetRequiredService<SettingsService>(),

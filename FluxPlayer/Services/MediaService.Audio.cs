@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using FluxPlayer.Models;
 using LibVLCSharp.Shared;
 using System.Globalization;
@@ -149,9 +150,11 @@ public partial class MediaService
         var audio = tracks.Where(t => t.TrackType == TrackType.Audio).ToArray();
         string technical = string.Join(" · ", audio.Select(t =>
             $"{FourCCToString(t.Codec).ToUpperInvariant()} · {t.Data.Audio.Rate / 1000.0:0.###} kHz · {t.Data.Audio.Channels} ch"));
+        string date = media.Meta(MetadataType.Date) ?? "";
+        int year = date.Length >= 4 && int.TryParse(date.AsSpan(0, 4), out int parsed) ? Math.Clamp(parsed, 0, 9999) : 0;
         return new(media.Meta(MetadataType.Title) ?? "", media.Meta(MetadataType.Artist) ?? "",
             media.Meta(MetadataType.Album) ?? "", media.Meta(MetadataType.Genre) ?? "",
-            media.Meta(MetadataType.ArtworkURL) ?? "", media.Duration, audio.Length > 0, video, technical);
+            media.Meta(MetadataType.ArtworkURL) ?? "", media.Duration, audio.Length > 0, video, technical, year, int.TryParse((media.Meta(MetadataType.TrackNumber) ?? "").Split('/')[0], out int trackNumber) ? Math.Clamp(trackNumber, 0, 65535) : 0);
     }
 
     private static bool IsCoverCodec(uint codec) => FourCCToString(codec).ToLowerInvariant().Trim() is "jpeg" or "png" or "mjpg";
@@ -202,14 +205,30 @@ public partial class MediaService
             {
                 token.ThrowIfCancellationRequested();
                 if (IsSourceInUse(path)) return false;
+                if (patch.Custom?.Count > 0 && !EmbeddedCustomTags.Supports(file)) return false;
                 if (patch.Title != null) file.Tag.Title = patch.Title;
                 if (patch.Artist != null) file.Tag.Performers = patch.Artist.Length == 0 ? Array.Empty<string>() : new[] { patch.Artist };
                 if (patch.Album != null) file.Tag.Album = patch.Album;
                 if (patch.Genre != null) file.Tag.Genres = patch.Genre.Length == 0 ? Array.Empty<string>() : new[] { patch.Genre };
+                foreach (var pair in patch.Extra ?? System.Collections.Immutable.ImmutableDictionary<string, string>.Empty)
+                {
+                    var field = AdvancedTagFields.Get(pair.Key); field.Write(file.Tag, field.Normalize(pair.Value));
+                }
+                if (patch.Custom?.Count > 0) EmbeddedCustomTags.Apply(file, patch.Custom);
                 // Once started, a file save finishes before cancellation is observed.
                 file.Save();
             }
             using var saved = TagLib.File.Create(path, TagLib.ReadStyle.None | TagLib.ReadStyle.PictureLazy);
+            foreach (var pair in patch.Extra ?? System.Collections.Immutable.ImmutableDictionary<string, string>.Empty)
+            {
+                var field = AdvancedTagFields.Get(pair.Key);
+                if (field.Read(saved.Tag) != field.Normalize(pair.Value)) return false;
+            }
+            if (patch.Custom?.Count > 0)
+            {
+                var custom = EmbeddedCustomTags.Read(saved);
+                if (patch.Custom.Any(pair => custom.GetValueOrDefault(pair.Key, "") != pair.Value)) return false;
+            }
             return (patch.Title == null || (saved.Tag.Title ?? "") == patch.Title)
                 && (patch.Artist == null || string.Join("; ", saved.Tag.Performers) == patch.Artist)
                 && (patch.Album == null || (saved.Tag.Album ?? "") == patch.Album)
@@ -217,5 +236,24 @@ public partial class MediaService
         }
         catch (Exception ex) when (ex is TagLib.UnsupportedFormatException or TagLib.CorruptFileException)
         { return false; }
+    }
+
+    public async Task<MetadataPatch?> ReadTagDetailsAsync(string path, CancellationToken token = default)
+    {
+        if (_disposed || MediaFormats.IsNetwork(path) || !File.Exists(path)) return null;
+        await _durationParseGate.WaitAsync(token).ConfigureAwait(false);
+        try
+        {
+            return await Task.Run(() =>
+            {
+                token.ThrowIfCancellationRequested();
+                using var file = TagLib.File.Create(path, TagLib.ReadStyle.None | TagLib.ReadStyle.PictureLazy);
+                var tag = file.Tag;
+                return new MetadataPatch(tag.Title ?? "", string.Join("; ", tag.Performers), tag.Album ?? "", string.Join("; ", tag.Genres),
+                    AdvancedTagFields.All.ToImmutableDictionary(field => field.Key, field => field.Read(tag)), EmbeddedCustomTags.Read(file));
+            }, token).ConfigureAwait(false);
+        }
+        catch (Exception e) when (e is TagLib.UnsupportedFormatException or TagLib.CorruptFileException) { return null; }
+        finally { _durationParseGate.Release(); }
     }
 }

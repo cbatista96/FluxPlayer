@@ -64,6 +64,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
     {
         InitializeComponent();
         _vm = vm;
+        InitializeExternalExperience();
         DataContext = _vm;
         _runtimeSettings = _vm.CurrentSettings;
 
@@ -310,6 +311,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
 
         Loaded += (_, _) =>
         {
+            InitializeEnhancements();
             _foregroundWatchdogTimer?.Start();
             if (!_vm.IsAudioMode) _videoHealthTimer.Start();
             ForceReapplyBackdrop();
@@ -338,6 +340,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
 
         Closing += (_, _) =>
         {
+            _globalHotkeys?.Dispose(); _globalHotkeys = null;
             _libraryWindow?.Close();
             if (_vm.IsAudioMode) RememberAudioSize();
             _equalizerWindow?.Close();
@@ -615,7 +618,9 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         double rowW = ControlRow.ActualWidth;
         if (rowW <= 0) return;
 
-        var tiers = new FrameworkElement[] { ToolbarTier1, ToolbarTier2, ToolbarTier3, ToolbarTier4 };
+        var options = _vm.CurrentSettings.Enhancements; var groups = OptionalToolbar;
+        var tiers = options.ToolbarOrder.Reverse().Where(key => !options.HiddenToolbar.Contains(key)).Select(key => groups[key]).ToArray();
+        foreach (string key in options.HiddenToolbar) groups[key].Visibility = Visibility.Collapsed;
         var tierW = tiers.Select(NaturalWidth).ToArray();
         double audioW = NaturalWidth(LeftAudioGroup);
         double speedW = NaturalWidth(LeftSpeedGroup);
@@ -647,7 +652,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         LeftSpeedGroup.Visibility = showSpeed ? Visibility.Visible : Visibility.Collapsed;
         LeftAudioGroup.Visibility = showAudio ? Visibility.Visible : Visibility.Collapsed;
 
-        bool anyCollapsed = visibleTiers < tiers.Length || !showSpeed || !showAudio;
+        bool anyCollapsed = visibleTiers < tiers.Length || options.HiddenToolbar.Length > 0 || !showSpeed || !showAudio;
         ToolbarMoreBtn.Visibility = anyCollapsed ? Visibility.Visible : Visibility.Collapsed;
         if (!anyCollapsed) ToolbarMorePopup.IsOpen = false;
     }
@@ -1129,6 +1134,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
 
     private void ShowVolumeOsd()
     {
+        if (!_vm.CurrentSettings.Enhancements.OsdEnabled) return;
         if (!IsFeatureEnabled(FeatureCatalog.FullOsd))
             return;
 
@@ -1198,6 +1204,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
 
     private void ShowActionOsd(string iconGlyph, string text)
     {
+        if (!_vm.CurrentSettings.Enhancements.OsdEnabled) return;
         if (!IsFeatureEnabled(FeatureCatalog.FullOsd))
             return;
         if (_settingsWindow != null && _settingsWindow.IsVisible)
@@ -1522,6 +1529,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
             if (IsVisible) Activate();
         };
         _equalizerWindow = win;
+        win.Loaded += (_, _) => ConfigureEqualizerDock();
         win.Show();
     }
 
@@ -1615,6 +1623,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
 
         ApplyRuntimeFeatureOptions();
         RebuildKeyMap();
+        ApplyEnhancementUi();
         ApplyTopmostPolicy();
         ApplyFeatureSettings();
         _backdropDirty = true;
@@ -2113,11 +2122,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         try
         {
             if (_vm.MediaPlayer == null) return;
-            _vm.MediaPlayer.SetAdjustFloat(LibVLCSharp.Shared.VideoAdjustOption.Brightness, 1.0f);
-            _vm.MediaPlayer.SetAdjustFloat(LibVLCSharp.Shared.VideoAdjustOption.Contrast, 1.0f);
-            _vm.MediaPlayer.SetAdjustFloat(LibVLCSharp.Shared.VideoAdjustOption.Saturation, 1.0f);
-            _vm.MediaPlayer.SetAdjustFloat(LibVLCSharp.Shared.VideoAdjustOption.Hue, 0.0f);
-            _vm.MediaPlayer.SetAdjustFloat(LibVLCSharp.Shared.VideoAdjustOption.Gamma, 1.0f);
+            _vm.Engine.ApplyPicture(new VideoPicture());
             ShowActionOsd("", "Picture reset");
         }
         catch { }
@@ -2128,18 +2133,10 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         try
         {
             if (_vm.MediaPlayer == null) return;
-            _vm.MediaPlayer.SetAdjustInt(LibVLCSharp.Shared.VideoAdjustOption.Enable, 1);
-            var opt = filter switch
-            {
-                "brightness" => LibVLCSharp.Shared.VideoAdjustOption.Brightness,
-                "contrast" => LibVLCSharp.Shared.VideoAdjustOption.Contrast,
-                "saturation" => LibVLCSharp.Shared.VideoAdjustOption.Saturation,
-                "gamma" => LibVLCSharp.Shared.VideoAdjustOption.Gamma,
-                _ => LibVLCSharp.Shared.VideoAdjustOption.Brightness
-            };
-            float current = _vm.MediaPlayer.AdjustFloat(opt);
+            var picture = _vm.Engine.AppliedPicture;
+            float current = filter switch { "contrast" => picture.Contrast, "saturation" => picture.Saturation, "gamma" => picture.Gamma, _ => picture.Brightness };
             float newVal = Math.Clamp(current + delta, 0f, 2f);
-            _vm.MediaPlayer.SetAdjustFloat(opt, newVal);
+            _vm.Engine.ApplyPicture(filter switch { "contrast" => picture with { Contrast = newVal }, "saturation" => picture with { Saturation = newVal }, "gamma" => picture with { Gamma = Math.Max(.1f, newVal) }, _ => picture with { Brightness = newVal } });
             ShowActionOsd("", $"{filter} {newVal:0.00}");
         }
         catch { }
@@ -2210,6 +2207,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
 
     private void MainContextMenu_Opened(object sender, RoutedEventArgs e)
     {
+        RefreshQuickSettings();
         int seek = _vm.SeekStepSeconds;
         int audioStep = Math.Clamp(_runtimeSettings.AudioDelayStepMs, 10, 1000);
         int subStep = Math.Clamp(_runtimeSettings.SubtitleDelayStepMs, 10, 1000);
@@ -2382,8 +2380,10 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
             _vm.AspectRatio = tag;
     }
 
+    private ComboBoxItem? _customAspectItem;
     private void SelectAspectInCombo(string ratio)
     {
+        AspectCombo.Width = Math.Clamp(60 + ratio.Length * 7, 92, 140);
         foreach (ComboBoxItem item in AspectCombo.Items)
         {
             if (item.Tag?.ToString() == ratio)
@@ -2392,7 +2392,14 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
                 return;
             }
         }
-        AspectCombo.SelectedIndex = 0;
+        if (_customAspectItem == null)
+        {
+            _customAspectItem = new ComboBoxItem();
+            AspectCombo.Items.Add(_customAspectItem);
+        }
+        _customAspectItem.Content = ratio;
+        _customAspectItem.Tag = ratio;
+        AspectCombo.SelectedItem = _customAspectItem;
     }
 
     private void MediaInfoBtn_Click(object sender, RoutedEventArgs e)

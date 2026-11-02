@@ -45,7 +45,7 @@ public static class BatchTagService
                         else if (string.Equals(path, excludedSource, StringComparison.OrdinalIgnoreCase) || engine.IsSourceInUse(path))
                             result = new(source, TagEditOutcome.Skipped, "The file is loaded in the player. Open another file or clear the playlist before editing it.");
                         else if (!await engine.SaveMetadataPatchAsync(path, patch, token).ConfigureAwait(false))
-                            result = new(source, TagEditOutcome.Failed, "The format or permissions did not allow the requested tags to be saved.");
+                            result = new(source, TagEditOutcome.Failed, "The format or permissions did not allow all requested tags to be verified. Supported edits may already be written; review the file.");
                         else
                         {
                             // Once a write completes, finish its index refresh before honoring cancellation.
@@ -67,7 +67,7 @@ public static class BatchTagService
                 {
                     result = new(source, TagEditOutcome.Skipped, "Canceled before this file was written."); canceled = true;
                 }
-                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or VLCException or InvalidOperationException)
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or VLCException or InvalidOperationException or NotSupportedException)
                 { result = new(source, TagEditOutcome.Failed, ex.Message); }
                 results.Add(result); progress?.Report(new(results.Count, sources.Length, result));
                 if (canceled) break;

@@ -10,23 +10,26 @@ if ($items.Count -eq 0) { throw 'The feature catalog must not be empty.' }
 $ids = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
 foreach ($item in $items) {
     if (-not $ids.Add($item.Id)) { throw "Duplicate feature ID: $($item.Id)" }
-    if ($item.Status -notin @('implemented', 'pending')) { throw "Invalid status: $($item.Id)" }
-    if ($item.Status -eq 'implemented' -and [string]::IsNullOrWhiteSpace($item.Evidence)) {
+    if ($item.Status -notin @('implemented', 'implemented_unverified', 'pending')) { throw "Invalid status: $($item.Id)" }
+    if ($item.Status -in @('implemented', 'implemented_unverified') -and [string]::IsNullOrWhiteSpace($item.Evidence)) {
         throw "Implemented features need source or validation evidence: $($item.Id)"
     }
 }
 $done = @($items | Where-Object Status -eq 'implemented').Count
+$unverified = @($items | Where-Object Status -eq 'implemented_unverified').Count
+$pending = @($items | Where-Object Status -eq 'pending').Count
 $lines = [Collections.Generic.List[string]]::new()
 $lines.Add('# Feature checklist')
 $lines.Add('')
-$lines.Add("**$done implemented · $($items.Count - $done) pending · $($items.Count) tracked capabilities.**")
+$lines.Add("**$done implemented · $unverified implemented but untested · $pending pending · $($items.Count) tracked capabilities.**")
 $lines.Add('')
 $lines.Add('Each capability appears exactly once. Completing it moves the same stable ID from Pending to Implemented. A setting or catalog entry alone does not complete a feature. Source references describe the implementation; validation limits are documented in [Testing](docs/TESTING.md).')
+$lines.Add('New code that has not been built or tested belongs to Implemented — untested, with unchecked boxes representing pending verification. It is excluded from the verified implementation count. Each regression report applies only to its documented source checkpoint.')
 $lines.Add('')
 $lines.Add('Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Sync-PublicFeatures.ps1`; CI rejects an outdated checklist.')
-foreach ($status in @('implemented', 'pending')) {
+foreach ($status in @('implemented', 'implemented_unverified', 'pending')) {
     $sectionItems = @($items | Where-Object Status -eq $status)
-    $title = if ($status -eq 'implemented') { 'Implemented' } else { 'Pending' }
+    $title = if ($status -eq 'implemented') { 'Implemented' } elseif ($status -eq 'implemented_unverified') { 'Implemented — untested' } else { 'Pending' }
     $check = if ($status -eq 'implemented') { 'x' } else { ' ' }
     $lines.Add('')
     $lines.Add("## $title ($($sectionItems.Count))")
@@ -52,4 +55,4 @@ if ($Verify) {
 } else {
     [IO.File]::WriteAllText($outputPath, $content, [Text.UTF8Encoding]::new($false))
 }
-Write-Output "$done implemented; $($items.Count - $done) pending; $($items.Count) capabilities."
+Write-Output "$done implemented; $unverified implemented but untested; $pending pending; $($items.Count) capabilities."

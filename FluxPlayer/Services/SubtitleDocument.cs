@@ -11,7 +11,7 @@ public sealed record SubtitleCue(long StartMs, long EndMs, string Text)
 
 public static partial class SubtitleDocument
 {
-    public static SubtitleCue[] Read(string path)
+    public static SubtitleCue[] Read(string path, bool preserveLineBreaks = false)
     {
         if (new FileInfo(path).Length > SubtitleEditingService.MaximumFileBytes) throw new InvalidDataException("The subtitle file exceeds 16 MB.");
         string text = File.ReadAllText(path).Replace("\r\n", "\n");
@@ -22,7 +22,7 @@ public static partial class SubtitleDocument
             {
                 var parts = line[9..].Split(',', 10);
                 if (parts.Length == 10 && TryTime(parts[1], out long start) && TryTime(parts[2], out long end))
-                    cues.Add(new(start, end, AssTags().Replace(parts[9], "").Replace("\\N", " ").Replace("\\n", " ")));
+                    cues.Add(new(start, end, AssTags().Replace(parts[9], "").Replace("\\N", preserveLineBreaks ? "\n" : " ").Replace("\\n", preserveLineBreaks ? "\n" : " ")));
             }
         }
         else
@@ -30,7 +30,7 @@ public static partial class SubtitleDocument
             foreach (Match match in TimingBlock().Matches(text))
             {
                 if (TryTime(match.Groups[1].Value, out long start) && TryTime(match.Groups[2].Value, out long end))
-                    cues.Add(new(start, end, HtmlTags().Replace(match.Groups[3].Value, "").Replace('\n', ' ').Trim()));
+                    cues.Add(new(start, end, System.Net.WebUtility.HtmlDecode(HtmlTags().Replace(match.Groups[3].Value, "")).Replace('\n', preserveLineBreaks ? '\n' : ' ').Trim()));
             }
         }
         if (cues.Count > SubtitleEditingService.MaximumCues) throw new InvalidDataException("The subtitle file exceeds 100,000 cues.");
@@ -44,11 +44,11 @@ public static partial class SubtitleDocument
         ms = 0;
         var parts = input.Trim().Replace(',', '.').Split(':');
         if (parts.Length is < 2 or > 3) return false;
-        if (!double.TryParse(parts[^1], NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out double seconds)
+        if (!decimal.TryParse(parts[^1], NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out decimal seconds)
             || !int.TryParse(parts[^2], out int minutes) || seconds is < 0 or >= 60 || minutes is < 0 or >= 60) return false;
         int hours = 0;
         if (parts.Length == 3 && (!int.TryParse(parts[0], out hours) || hours < 0)) return false;
-        ms = hours * 3_600_000L + minutes * 60_000L + (long)(seconds * 1000);
+        ms = hours * 3_600_000L + minutes * 60_000L + decimal.ToInt64(seconds * 1000);
         return true;
     }
 

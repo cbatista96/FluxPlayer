@@ -1,0 +1,1726 @@
+[
+  {
+    "endpoint": {
+      "Id": "{0.0.0.00000000}.{21dbe649-0ed0-4ad0-9d86-86821a482cf4}",
+      "Name": "Headset Earphone (Astro A50 Voice)",
+      "MixRate": 48000,
+      "Channels": 2
+    },
+    "formats": [
+      {
+        "Layout": "mono",
+        "Rate": 44100,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 44100,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 48000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 48000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 88200,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 88200,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 96000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 96000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 176400,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 176400,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 192000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 192000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 44100,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 44100,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 48000,
+        "Mode": "Shared",
+        "Supported": true,
+        "Detail": "Exact float32 format accepted by the driver; physical output not tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 48000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 88200,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 88200,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 96000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 96000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 176400,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 176400,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 192000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 192000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 44100,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 44100,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 48000,
+        "Mode": "Shared",
+        "Supported": true,
+        "Detail": "Exact float32 format accepted by the driver; physical output not tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 48000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 88200,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 88200,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 96000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 96000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 176400,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 176400,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 192000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 192000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 44100,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 44100,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 48000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 48000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 88200,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 88200,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 96000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 96000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 176400,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 176400,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 192000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 192000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 44100,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 44100,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 48000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 48000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 88200,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 88200,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 96000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 96000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 176400,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 176400,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 192000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 192000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      }
+    ],
+    "physicalOutputVerified": false
+  },
+  {
+    "endpoint": {
+      "Id": "{0.0.0.00000000}.{4c444e99-14cc-4331-a82e-c664dbf3676e}",
+      "Name": "Digital Audio (S/PDIF) (High Definition Audio Device)",
+      "MixRate": 48000,
+      "Channels": 2
+    },
+    "formats": [
+      {
+        "Layout": "mono",
+        "Rate": 44100,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 44100,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 48000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 48000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 88200,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 88200,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 96000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 96000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 176400,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 176400,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 192000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 192000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 44100,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 44100,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 48000,
+        "Mode": "Shared",
+        "Supported": true,
+        "Detail": "Exact float32 format accepted by the driver; physical output not tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 48000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 88200,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 88200,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 96000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 96000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 176400,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 176400,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 192000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 192000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 44100,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 44100,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 48000,
+        "Mode": "Shared",
+        "Supported": true,
+        "Detail": "Exact float32 format accepted by the driver; physical output not tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 48000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 88200,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 88200,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 96000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 96000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 176400,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 176400,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 192000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 192000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 44100,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 44100,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 48000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 48000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 88200,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 88200,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 96000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 96000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 176400,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 176400,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 192000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 192000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 44100,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 44100,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 48000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 48000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 88200,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 88200,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 96000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 96000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 176400,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 176400,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 192000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 192000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      }
+    ],
+    "physicalOutputVerified": false
+  },
+  {
+    "endpoint": {
+      "Id": "{0.0.0.00000000}.{7c8d0884-541c-48ce-a3b8-cdd68a9590e5}",
+      "Name": "Headphones (Astro A50 Game)",
+      "MixRate": 48000,
+      "Channels": 2
+    },
+    "formats": [
+      {
+        "Layout": "mono",
+        "Rate": 44100,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 44100,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 48000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 48000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 88200,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 88200,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 96000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 96000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 176400,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 176400,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 192000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 192000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 44100,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 44100,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 48000,
+        "Mode": "Shared",
+        "Supported": true,
+        "Detail": "Exact float32 format accepted by the driver; physical output not tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 48000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 88200,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 88200,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 96000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 96000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 176400,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 176400,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 192000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 192000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 44100,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 44100,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 48000,
+        "Mode": "Shared",
+        "Supported": true,
+        "Detail": "Exact float32 format accepted by the driver; physical output not tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 48000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 88200,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 88200,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 96000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 96000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 176400,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 176400,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 192000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 192000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 44100,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 44100,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 48000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 48000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 88200,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 88200,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 96000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 96000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 176400,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 176400,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 192000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 192000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 44100,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 44100,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 48000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 48000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 88200,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 88200,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 96000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 96000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 176400,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 176400,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 192000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 192000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      }
+    ],
+    "physicalOutputVerified": false
+  },
+  {
+    "endpoint": {
+      "Id": "{0.0.0.00000000}.{df0ec8f7-f2ba-4581-a5cf-d93c9b085c6f}",
+      "Name": "Altavoces (Echo Dot-9C0)",
+      "MixRate": 44100,
+      "Channels": 2
+    },
+    "formats": [
+      {
+        "Layout": "mono",
+        "Rate": 44100,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 44100,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 48000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 48000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 88200,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 88200,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 96000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 96000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 176400,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 176400,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 192000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "mono",
+        "Rate": 192000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 44100,
+        "Mode": "Shared",
+        "Supported": true,
+        "Detail": "Exact float32 format accepted by the driver; physical output not tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 44100,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 48000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 48000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 88200,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 88200,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 96000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 96000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 176400,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 176400,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 192000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "stereo",
+        "Rate": 192000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 44100,
+        "Mode": "Shared",
+        "Supported": true,
+        "Detail": "Exact float32 format accepted by the driver; physical output not tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 44100,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 48000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 48000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 88200,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 88200,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 96000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 96000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 176400,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 176400,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 192000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "2.1",
+        "Rate": 192000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 44100,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 44100,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 48000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 48000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 88200,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 88200,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 96000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 96000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 176400,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 176400,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 192000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "5.1(side)",
+        "Rate": 192000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 44100,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 44100,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 48000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 48000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 88200,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 88200,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 96000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 96000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 176400,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 176400,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 192000,
+        "Mode": "Shared",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      },
+      {
+        "Layout": "7.1",
+        "Rate": 192000,
+        "Mode": "Exclusive",
+        "Supported": false,
+        "Detail": "Exact format rejected; no fallback tested"
+      }
+    ],
+    "physicalOutputVerified": false
+  }
+]

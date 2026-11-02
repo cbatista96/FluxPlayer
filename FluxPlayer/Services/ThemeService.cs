@@ -10,6 +10,9 @@ namespace FluxPlayer.Services;
 
 public static class ThemeService
 {
+    private static Color? _customAccent;
+    private static bool _accentResourcesOverridden;
+    public static void SetCustomAccent(string hex) { if (hex == "" && _customAccent == null) return; _customAccent = hex == "" ? null : (Color)ColorConverter.ConvertFromString(hex); ApplyDialogPalette(_lastWpfUiTheme == ApplicationTheme.Light); }
     public static AppTheme GetTheme(Window window) =>
         _windowThemes.TryGetValue(window, out var box) ? box.Theme : AppTheme.DarkMica;
     [DllImport("dwmapi.dll", PreserveSig = true)]
@@ -89,6 +92,21 @@ public static class ThemeService
     private static readonly SolidColorBrush DarkInactiveBrush = Freeze(new SolidColorBrush(Color.FromRgb(0x20, 0x22, 0x28)));
 
     private static SolidColorBrush Freeze(SolidColorBrush b) { b.Freeze(); return b; }
+    private static double Luminance(Color color)
+    {
+        static double Linear(byte component) { double value = component / 255d; return value <= .04045 ? value / 12.92 : Math.Pow((value + .055) / 1.055, 2.4); }
+        return .2126 * Linear(color.R) + .7152 * Linear(color.G) + .0722 * Linear(color.B);
+    }
+    private static double Contrast(Color first, Color second)
+    { double a = Luminance(first), b = Luminance(second); return (Math.Max(a, b) + .05) / (Math.Min(a, b) + .05); }
+    private static Color ReadableAccent(Color accent, Color background)
+    {
+        if (Contrast(accent, background) >= 4.5) return accent;
+        Color target = Contrast(Colors.White, background) >= Contrast(Colors.Black, background) ? Colors.White : Colors.Black;
+        Color Blend(double amount) => Color.FromRgb((byte)Math.Round(accent.R + (target.R - accent.R) * amount), (byte)Math.Round(accent.G + (target.G - accent.G) * amount), (byte)Math.Round(accent.B + (target.B - accent.B) * amount));
+        double low = 0, high = 1; for (int i = 0; i < 20; i++) { double middle = (low + high) / 2; if (Contrast(Blend(middle), background) >= 4.5) high = middle; else low = middle; }
+        return Blend(high);
+    }
 
     private static void ApplyBackground(Window window)
     {
@@ -133,6 +151,7 @@ public static class ThemeService
         Set("FxChipBorder", 0x26FFFFFF, 0x24000000);
         Set("FxFooter", 0x14000000, 0x08000000);
         Set("FxAccentText", 0xFF60CDFF, 0xFF005FB8);
+        Set("FxAccentFill", 0xFF60CDFF, 0xFF005FB8);
         Set("FxAccentSoft", 0x1A60CDFF, 0x14005FB8);
         Set("FxAccentBorder", 0x4060CDFF, 0x55005FB8);
         Set("FxDangerText", 0xFFFFC2C2, 0xFFB42318);
@@ -145,6 +164,19 @@ public static class ThemeService
         Set("FxDialogSurface", 0xF71A1D26, 0xFAFBFBFD);
         Set("FxDialogBorder", 0x38FFFFFF, 0x26000000);
         Set("FxWarnText", 0xFFFFD27A, 0xFF8A5300);
+        if (_customAccent is { } accent)
+        {
+            _accentResourcesOverridden = true;
+            var brush = Freeze(new SolidColorBrush(accent)); Color readable = ReadableAccent(accent, light ? Color.FromRgb(251, 251, 253) : Color.FromRgb(26, 29, 38));
+            var text = Freeze(new SolidColorBrush(readable)); res["FxAccentTextBrush"] = text; res["FxAccentTextColor"] = readable;
+            Color soft = Color.FromArgb(30, accent.R, accent.G, accent.B), border = Color.FromArgb(90, accent.R, accent.G, accent.B);
+            res["FxAccentSoftBrush"] = Freeze(new SolidColorBrush(soft)); res["FxAccentSoftColor"] = soft;
+            res["FxAccentBorderBrush"] = Freeze(new SolidColorBrush(border)); res["FxAccentBorderColor"] = border;
+            res["AccentFillColorDefaultBrush"] = brush; res["AccentTextFillColorPrimaryBrush"] = text;
+            res["FxAccentFillBrush"] = brush; res["FxAccentFillColor"] = accent;
+            res["TextOnAccentFillColorPrimaryBrush"] = Contrast(Colors.Black, accent) >= Contrast(Colors.White, accent) ? Brushes.Black : Brushes.White;
+        }
+        else if (_accentResourcesOverridden) { res.Remove("AccentFillColorDefaultBrush"); res.Remove("AccentTextFillColorPrimaryBrush"); res.Remove("TextOnAccentFillColorPrimaryBrush"); _accentResourcesOverridden = false; }
     }
 
     public static void RemoveBackdrop(Window window)

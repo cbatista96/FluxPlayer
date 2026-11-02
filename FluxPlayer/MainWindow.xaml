@@ -28,10 +28,11 @@
             </MenuItem>
             <Separator />
 
-            <MenuItem Header="Play">
+            <MenuItem x:Name="CtxPlaybackRoot" Header="Play">
                 <MenuItem.Icon>
                     <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="14" />
                 </MenuItem.Icon>
+                <MenuItem x:Name="CtxPlaybackModeMenu" Header="Playback mode" />
                 <MenuItem Header="Play / pause" controls:HotkeyHint.Action="PlayPause" Click="CtxPlayPause_Click" />
                 <MenuItem Header="Previous" controls:HotkeyHint.Action="PreviousTrack" Click="CtxPrev_Click" />
                 <MenuItem Header="Next" controls:HotkeyHint.Action="NextTrack" Click="CtxNext_Click" />
@@ -53,9 +54,11 @@
                 <Separator />
                 <MenuItem Header="A-B loop" controls:HotkeyHint.Action="ToggleAbLoop" Click="CtxAbLoop_Click" />
                 <MenuItem Header="Export A-B clip..." Click="CtxExportClip_Click" />
-                <MenuItem Header="Repeat one" Click="CtxRepeatOne_Click" />
-                <MenuItem Header="Repeat all" Click="CtxRepeatAll_Click" />
-                <MenuItem Header="Shuffle playback" Click="CtxShuffle_Click" />
+                <MenuItem x:Name="CtxRepeatOffItem" Header="Repeat disabled" IsCheckable="True" Click="CtxRepeatOff_Click" />
+                <MenuItem x:Name="CtxRepeatOneItem" Header="Repeat one" IsCheckable="True" Click="CtxRepeatOne_Click" />
+                <MenuItem x:Name="CtxRepeatAllItem" Header="Repeat all" IsCheckable="True" Click="CtxRepeatAll_Click" />
+                <MenuItem x:Name="CtxShuffleItem" Header="Shuffle playback" IsCheckable="True" Click="CtxShuffle_Click" />
+                <Separator x:Name="CtxPlaybackActionSeparator" />
             </MenuItem>
 
             <MenuItem x:Name="CtxBookmarksMenu" Header="Bookmarks">
@@ -85,19 +88,21 @@
                 <MenuItem Header="After the current file" Tag="end" Click="CtxSleep_Click" />
             </MenuItem>
 
-            <MenuItem Header="Subtitles">
+            <MenuItem x:Name="CtxSubtitlesRoot" Header="Subtitles">
                 <MenuItem.Icon>
                     <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="14" />
                 </MenuItem.Icon>
                 <MenuItem Header="Load external subtitle..." Click="CtxLoadSub_Click" />
+                <MenuItem x:Name="CtxSubtitleTracks" Header="Subtitle track" />
                 <MenuItem Header="Show / hide" Click="CtxToggleSubs_Click" />
                 <Separator />
                 <MenuItem x:Name="CtxSubDelayPlusItem" Header="Delay subtitles" Click="CtxSubDelayPlus_Click" />
                 <MenuItem x:Name="CtxSubDelayMinusItem" Header="Advance subtitles" Click="CtxSubDelayMinus_Click" />
                 <MenuItem Header="Reset delay" Click="CtxSubDelayReset_Click" />
+                <Separator x:Name="CtxSubtitleActionSeparator" />
             </MenuItem>
 
-            <MenuItem Header="Video">
+            <MenuItem x:Name="CtxVideoRoot" Header="Video">
                 <MenuItem.Icon>
                     <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="14" />
                 </MenuItem.Icon>
@@ -118,20 +123,27 @@
                 <MenuItem Header="Increase contrast" Click="CtxContrastUp_Click" />
                 <MenuItem Header="Decrease contrast" Click="CtxContrastDown_Click" />
                 <MenuItem Header="Reset picture" Click="CtxResetVideo_Click" />
+                <Separator x:Name="CtxVideoActionSeparator" />
             </MenuItem>
 
-            <MenuItem Header="Audio">
+            <MenuItem x:Name="CtxAudioRoot" Header="Audio">
                 <MenuItem.Icon>
                     <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="14" />
                 </MenuItem.Icon>
                 <MenuItem x:Name="CtxVolumeUpItem" Header="Volume up" Click="CtxVolumeUp_Click" />
                 <MenuItem x:Name="CtxVolumeDownItem" Header="Volume down" Click="CtxVolumeDown_Click" />
-                <MenuItem Header="Mute" controls:HotkeyHint.Action="ToggleMute" Click="CtxMute_Click" />
+                <MenuItem x:Name="CtxMuteItem" Header="Mute" IsCheckable="True" controls:HotkeyHint.Action="ToggleMute" Click="CtxMute_Click" />
+                <MenuItem x:Name="CtxAudioTracks" Header="Audio track" />
                 <Separator />
                 <MenuItem Header="Equalizer..." controls:HotkeyHint.Action="ToggleEqualizer" Click="CtxEqualizer_Click" />
                 <Separator />
                 <MenuItem x:Name="CtxAudioDelayPlusItem" Header="Delay audio" Click="CtxAudioDelayPlus_Click" />
                 <MenuItem x:Name="CtxAudioDelayMinusItem" Header="Advance audio" Click="CtxAudioDelayMinus_Click" />
+                <Separator x:Name="CtxAudioActionSeparator" />
+            </MenuItem>
+
+            <MenuItem x:Name="CtxLibraryActions" Header="Library">
+                <MenuItem.Icon><TextBlock Text="&#xE8F1;" FontFamily="Segoe Fluent Icons" FontSize="14" /></MenuItem.Icon>
             </MenuItem>
 
             <Separator />
@@ -340,33 +352,158 @@
                     <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="15" />
                     <Button.ContextMenu>
                         <ContextMenu x:Name="MediaToolsMenu" Opened="MediaToolsMenu_Opened">
-                            <MenuItem Header="Media library" Click="LibraryButton_Click" />
-                            <MenuItem Header="Equalizer…" Click="EqualizerBtn_Click" />
-                            <MenuItem Header="Lyrics editor…" Click="LyricsEditor_Click" />
-                            <MenuItem Header="Batch audio converter…" Click="ConverterButton_Click" />
-                            <MenuItem x:Name="OutputDevicesMenu" Header="Output device" />
-                            <MenuItem Header="Audio output profiles…" Click="AudioOutputProfiles_Click" />
-                            <MenuItem Header="ReplayGain">
+                            <MenuItem Header="Open ZIP media…" Click="ArchiveMedia_Click" controls:SettingsAction.Category="Files" controls:SettingsAction.Section="Archives" />
+                            <MenuItem Header="Photo library and slideshows…" Click="PhotoLibrary_Click" controls:SettingsAction.Category="Library" controls:SettingsAction.Section="Photos" controls:SettingsAction.QuickAccess="True" />
+                            <MenuItem Header="Export music to a device folder…" Click="DeviceTransfer_Click" controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Device export" />
+                            <MenuItem Header="Movie library…" Click="MovieCatalog_Click" controls:SettingsAction.Category="Library" controls:SettingsAction.Section="Movies and television" controls:SettingsAction.QuickAccess="True" />
+                            <MenuItem Header="Series and episodes…" Click="SeriesCatalog_Click" controls:SettingsAction.Category="Library" controls:SettingsAction.Section="Movies and television" />
+                            <MenuItem Header="Artists, composers and actors…" Click="PeopleCatalog_Click" controls:SettingsAction.Category="Library" controls:SettingsAction.Section="People and credits" />
+                            <MenuItem Header="Classical collections…" Click="ClassicalCatalog_Click" controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Classical music" />
+                            <MenuItem Header="Offline audio processing…" Click="AudioLab_Click" controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Offline processing" />
+                            <MenuItem Header="Multichannel file mastering…" Click="ChannelMastering_Click" controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Multichannel mastering" />
+                            <MenuItem Header="Audio restoration and transitions…" Click="Restoration_Click" controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Restoration and transitions" />
+                            <MenuItem Header="Subtitle files and production…" Click="SubtitleProduction_Click" controls:SettingsAction.Category="Subtitles" controls:SettingsAction.Section="Files and production" />
+                            <MenuItem Header="Subsonic music library…" Click="Subsonic_Click" controls:SettingsAction.Category="Library" controls:SettingsAction.Section="Remote libraries" />
+                            <MenuItem Header="Jellyfin library…" Click="JellyfinLibrary_Click" controls:SettingsAction.Category="Library" controls:SettingsAction.Section="Personal media servers" />
+                            <MenuItem Header="Emby library…" Click="EmbyLibrary_Click" controls:SettingsAction.Category="Library" controls:SettingsAction.Section="Personal media servers" />
+                            <MenuItem Header="Plex library…" Click="PlexLibrary_Click" controls:SettingsAction.Category="Library" controls:SettingsAction.Section="Personal media servers" />
+                            <MenuItem Header="SQL catalogs and Focus…" Click="SqlIndex_Click" controls:SettingsAction.Category="Library" controls:SettingsAction.Section="Large catalogs and Focus" />
+                            <MenuItem Header="UPnP media and renderers…" Click="UpnpMedia_Click" controls:SettingsAction.Category="Playback" controls:SettingsAction.Section="Network devices" />
+                            <MenuItem Header="ListenBrainz listening…" Click="ListenBrainz_Click" controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Listening services" />
+                            <MenuItem Header="Last.fm listening…" Click="LastFm_Click" controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Listening services" />
+                            <MenuItem Header="Independent audio zones…" Click="AudioZones_Click" controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Independent zones" controls:SettingsAction.QuickAccess="True" />
+                            <MenuItem Header="Advanced Matroska chapters…" Click="AdvancedMatroska_Click" controls:SettingsAction.Category="Video" controls:SettingsAction.Section="Chapters and editions" />
+                            <MenuItem Header="Audio effect recipes…" Click="AudioPalette_Click" controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Offline effect recipes" />
+                            <MenuItem Header="Audio analysis and visualizations…" Click="AudioDiagnostics_Click" controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Signal and measurements" controls:SettingsAction.QuickAccess="True" />
+                            <MenuItem Header="Video filter recipes…" Click="VideoPalette_Click" controls:SettingsAction.Category="Video" controls:SettingsAction.Section="Offline filter recipes" />
+                            <MenuItem Header="Video quality diagnostics…" Click="VideoDiagnostics_Click" controls:SettingsAction.Category="Video" controls:SettingsAction.Section="Picture diagnostics" />
+                            <MenuItem Header="Subtitle quality and cleanup…" Click="SubtitleWorkshop_Click" controls:SettingsAction.Category="Subtitles" controls:SettingsAction.Section="Quality and cleanup" controls:SettingsAction.QuickAccess="True" />
+                            <MenuItem Header="Subsonic discovery and library actions…" Click="SubsonicActions_Click" controls:SettingsAction.Category="Library" controls:SettingsAction.Section="Remote libraries" />
+                            <MenuItem Header="Jellyfin library actions…" Click="JellyfinActions_Click" controls:SettingsAction.Category="Library" controls:SettingsAction.Section="Personal media servers" />
+                            <MenuItem Header="Emby library actions…" Click="EmbyActions_Click" controls:SettingsAction.Category="Library" controls:SettingsAction.Section="Personal media servers" />
+                            <MenuItem Header="Plex library actions…" Click="PlexActions_Click" controls:SettingsAction.Category="Library" controls:SettingsAction.Section="Personal media servers" />
+                            <MenuItem Header="UPnP capabilities and queue settings…" Click="UpnpActions_Click" controls:SettingsAction.Category="Playback" controls:SettingsAction.Section="Network devices" />
+                            <MenuItem Header="Alternate mpv playback session…" Click="MpvSession_Click" controls:SettingsAction.Category="Playback" controls:SettingsAction.Section="Alternative engines" controls:SettingsAction.QuickAccess="True" />
+                            <MenuItem Header="Kodi media-center integration…" Click="KodiIntegration_Click" controls:SettingsAction.Category="Library" controls:SettingsAction.Section="Home theater integration" />
+                            <MenuItem Header="MPD network-player integration…" Click="MpdIntegration_Click" controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Network players" />
+                            <MenuItem Header="Online lyrics · LRCLIB…" Click="OnlineLyrics_Click" controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Lyrics" controls:SettingsAction.QuickAccess="True" />
+                            <MenuItem Header="Burned-in subtitle OCR…" Click="SubtitleOcr_Click" controls:SettingsAction.Category="Subtitles" controls:SettingsAction.Section="Recognition and extraction" />
+                            <MenuItem Header="Mobile web remote…" Click="MobileRemote_Click" controls:SettingsAction.Category="Playback" controls:SettingsAction.Section="External control" controls:SettingsAction.QuickAccess="True" />
+                            <MenuItem Header="Desktop and HTPC integration…" Click="DesktopIntegration_Click" controls:SettingsAction.Category="General" controls:SettingsAction.Section="Desktop and HTPC" controls:SettingsAction.QuickAccess="True" />
+                            <MenuItem Header="MusicBrainz metadata and artwork…" Click="MusicMetadata_Click" controls:SettingsAction.Category="Library" controls:SettingsAction.Section="Online metadata" />
+                            <MenuItem Header="WebDAV media files…" Click="WebDav_Click" controls:SettingsAction.Category="Files" controls:SettingsAction.Section="Cloud and network" />
+                            <MenuItem Header="Online sources with yt-dlp…" Click="OnlineSource_Click" controls:SettingsAction.Category="Video" controls:SettingsAction.Section="Online sources" controls:SettingsAction.QuickAccess="True" />
+                            <MenuItem Header="Audio mastering formats…" Click="AudioMasteringFormats_Click" controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Production" />
+                            <MenuItem Header="Local external control…" Click="ExternalControl_Click" controls:SettingsAction.Category="Playback" controls:SettingsAction.Section="External control" />
+                            <MenuItem Header="Automatic media profiles…" Click="AutomaticProfiles_Click" controls:SettingsAction.Category="Playback" controls:SettingsAction.Section="Media profiles" />
+                            <MenuItem Header="Appearance and equalizer docking…" Click="Experience_Click" controls:SettingsAction.Category="General" controls:SettingsAction.Section="Appearance" />
+                            <MenuItem Header="Capture and recorded-audio synchronization…" Click="Capture_Click" controls:SettingsAction.Category="Video" controls:SettingsAction.Section="Capture" />
+                            <MenuItem Header="Television, guide and recordings…" Click="Television_Click" controls:SettingsAction.Category="Video" controls:SettingsAction.Section="Television" controls:SettingsAction.QuickAccess="True" />
+                            <MenuItem Header="FIR impulse designer…" Click="FirDesigner_Click" controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Offline processing" />
+                            <MenuItem Header="Source spectrum and waveform…" Click="SpectrumInspection_Click" controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Signal and measurements" controls:SettingsAction.QuickAccess="True" />
+                            <MenuItem Header="Sonic library discovery…" Click="SonicLibrary_Click" controls:SettingsAction.Category="Library" controls:SettingsAction.Section="Sonic discovery" />
+                            <MenuItem Header="Offline video processing…" Click="VideoLab_Click" controls:SettingsAction.Category="Video" controls:SettingsAction.Section="Offline processing" />
+                            <MenuItem Header="Video finishing and color…" Click="VideoFinishing_Click" controls:SettingsAction.Category="Video" controls:SettingsAction.Section="Finishing and color" />
+                            <MenuItem Header="Video mastering formats…" Click="VideoMasteringFormats_Click" controls:SettingsAction.Category="Video" controls:SettingsAction.Section="Production" />
+                            <MenuItem Header="TV library view…" Click="CinemaTheater_Click" controls:SettingsAction.Category="Video" controls:SettingsAction.Section="Presentation" controls:SettingsAction.QuickAccess="True" />
+                            <MenuItem Header="Display calibration patterns…" Click="Calibration_Click" controls:SettingsAction.Category="Video" controls:SettingsAction.Section="Display patterns" />
+                            <MenuItem Header="White Wash pattern…" Click="WhiteWash_Click" controls:SettingsAction.Category="Video" controls:SettingsAction.Section="Display patterns" />
+                            <MenuItem controls:SettingsAction.Category="Playback" controls:SettingsAction.Section="Virtual playback edits" controls:SettingsAction.QuickAccess="True" Header="Virtual skip, mute and segment edits…" Click="VirtualEdits_Click" />
+                            <MenuItem controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Spatial processing" Header="Logical channel matrix…" Tag="5" Click="AudioEffects_Click" />
+                            <MenuItem controls:SettingsAction.Category="Playback" controls:SettingsAction.Section="Queue recommendations" Header="Smart shuffle and related autoplay…" Tag="Playback recommendations" Click="PlayerPreferences_Click" />
+                            <MenuItem controls:SettingsAction.Category="Video" controls:SettingsAction.Section="Capture" Header="Thumbnail contact sheet…" Click="ContactSheet_Click" />
+                            <MenuItem controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Conversion" Header="Create ringtone…" Click="Ringtone_Click" />
+                            <MenuItem controls:SettingsAction.Category="Subtitles" controls:SettingsAction.Section="Bilingual display" controls:SettingsAction.QuickAccess="True" Header="Bilingual subtitles…" Click="Bilingual_Click" />
+                            <MenuItem controls:SettingsAction.Category="Video" controls:SettingsAction.Section="Picture and stereo" controls:SettingsAction.QuickAccess="True" Header="Custom aspect ratio…" Click="CustomAspect_Click" />
+                            <MenuItem controls:SettingsAction.Category="Video" controls:SettingsAction.Section="Diagnostics" controls:SettingsAction.QuickAccess="True" Header="Playback and renderer statistics…" Click="Statistics_Click" />
+                            <MenuItem controls:SettingsAction.Category="General" controls:SettingsAction.Section="Player presentation" Header="Playback OSD…" Tag="Playback OSD" Click="PlayerPreferences_Click" />
+                            <MenuItem controls:SettingsAction.Category="General" controls:SettingsAction.Section="Player presentation" Header="Player toolbar…" Tag="Player toolbar" Click="PlayerPreferences_Click" />
+                            <MenuItem controls:SettingsAction.Category="Mouse" controls:SettingsAction.Section="Directional gestures" Header="Mouse gestures…" Tag="Mouse gestures" Click="PlayerPreferences_Click" />
+                            <MenuItem controls:SettingsAction.Category="Mouse" controls:SettingsAction.Section="Touch gestures" Header="Touch gestures…" Tag="Touch gestures" Click="PlayerPreferences_Click" />
+                            <MenuItem controls:SettingsAction.Category="General" controls:SettingsAction.Section="Extensions" Header="Player extensions…" Click="PlayerExtensions_Click" />
+                            <MenuItem controls:SettingsAction.Category="General" controls:SettingsAction.Section="Player presentation" Header="Custom video HUD…" Click="HudLayout_Click" />
+                            <MenuItem controls:SettingsAction.Category="Video" controls:SettingsAction.Section="Renderer" Header="GPU decoding policy…" Click="GpuPolicy_Click" />
+                            <MenuItem controls:SettingsAction.Category="Library" controls:SettingsAction.Section="Synchronization" Header="Remote library synchronization…" Click="RemoteLibrarySync_Click" />
+                            <MenuItem controls:SettingsAction.Category="Subtitles" controls:SettingsAction.Section="Online providers" Header="Download subtitles · OpenSubtitles…" Click="SubtitleDownloads_Click" />
+                            <MenuItem controls:SettingsAction.Category="Playback" controls:SettingsAction.Section="External control" Header="Cast local media · Chromecast / DLNA…" Click="Casting_Click" />
+                            <MenuItem controls:SettingsAction.Category="Playback" controls:SettingsAction.Section="Chapters" Header="Ordered and linked chapter playback…" Click="LinkedChapters_Click" />
+                            <MenuItem controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Output and continuous playback" Header="Continuous PCM, DSP and exclusive output…" Click="RealtimeAudio_Click" />
+                            <MenuItem controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Output and continuous playback" Header="Native DSD · ASIO…" Click="NativeDsd_Click" />
+                            <MenuItem controls:SettingsAction.Category="Playback" controls:SettingsAction.Section="Diagnostics" Header="Local playback compatibility matrix…" Click="PlaybackCompatibility_Click" />
+                            <MenuItem controls:SettingsAction.Category="Video" controls:SettingsAction.Section="Renderer" Header="Native GPU video and HDR display state…" Click="NativeGpuVideo_Click" />
+                            <MenuItem controls:SettingsAction.Category="Keyboard" controls:SettingsAction.Section="System-wide transport" Header="Global transport shortcuts…" Tag="Global transport shortcuts" Click="PlayerPreferences_Click" />
+                            <MenuItem controls:SettingsAction.Category="Library" controls:SettingsAction.Section="Automatic mixes" Header="Artist mix…" Tag="0" Click="LibraryAutomation_Click" />
+                            <MenuItem controls:SettingsAction.Category="Library" controls:SettingsAction.Section="Automatic mixes" Header="Album mix…" Tag="1" Click="LibraryAutomation_Click" />
+                            <MenuItem controls:SettingsAction.Category="Library" controls:SettingsAction.Section="Personal ratings" Header="Computed listening ratings…" Tag="2" Click="LibraryAutomation_Click" />
+                            <MenuItem controls:SettingsAction.Category="Library" controls:SettingsAction.Section="Repair sources" Header="Fingerprint and repair moved files…" Tag="3" Click="LibraryAutomation_Click" />
+                            <MenuItem controls:SettingsAction.Category="Files" controls:SettingsAction.Section="Tag automation" Header="Tags from filename pattern…" Tag="0" Click="TagAutomation_Click" />
+                            <MenuItem controls:SettingsAction.Category="Files" controls:SettingsAction.Section="Tag automation" Header="Automatic track numbering…" Tag="1" Click="TagAutomation_Click" />
+                            <MenuItem controls:SettingsAction.Category="Files" controls:SettingsAction.Section="Tag automation" Header="Metadata case transformation…" Tag="2" Click="TagAutomation_Click" />
+                            <MenuItem controls:SettingsAction.Category="Files" controls:SettingsAction.Section="Tag automation" Header="Latin metadata transliteration…" Tag="3" Click="TagAutomation_Click" />
+                            <MenuItem controls:SettingsAction.Category="Library" controls:SettingsAction.Section="Browse and organize" controls:SettingsAction.QuickAccess="True" Header="Media library" Click="LibraryButton_Click" />
+                            <MenuItem controls:SettingsAction.Category="Library" controls:SettingsAction.Section="Browse and organize" controls:SettingsAction.QuickAccess="True" Header="Library collections…" Click="LibraryCollections_Click" />
+                            <MenuItem Header="Playback history…" Click="PlaybackHistory_Click" controls:SettingsAction.Category="Library" controls:SettingsAction.Section="History and statistics" />
+                            <MenuItem Header="Listening statistics…" Click="ListeningStatistics_Click" controls:SettingsAction.Category="Library" controls:SettingsAction.Section="History and statistics" />
+                            <MenuItem Header="Audiobooks…" Click="Audiobooks_Click" controls:SettingsAction.Category="Library" controls:SettingsAction.Section="Spoken media" />
+                            <MenuItem Header="Podcasts and downloads…" Click="Podcasts_Click" controls:SettingsAction.Category="Library" controls:SettingsAction.Section="Spoken media" />
+                            <MenuItem Header="Saved playback sessions…" Click="PlaybackSessions_Click" controls:SettingsAction.Category="Playback" controls:SettingsAction.Section="Queue and sessions" controls:SettingsAction.QuickAccess="True" />
+                            <MenuItem Header="Attach external audio…" Click="ExternalAudio_Click" controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Tracks" controls:SettingsAction.QuickAccess="True" />
+                            <MenuItem Header="Video crop…" Click="VideoCrop_Click" controls:SettingsAction.Category="Video" controls:SettingsAction.Section="Picture" controls:SettingsAction.QuickAccess="True" />
+                            <MenuItem Header="Picture presets…" Click="PicturePresets_Click" controls:SettingsAction.Category="Video" controls:SettingsAction.Section="Picture" controls:SettingsAction.QuickAccess="True" />
+                            <MenuItem controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="CUE documents" Header="Advanced CUE document editor…" Click="AdvancedCue_Click" />
+                            <MenuItem controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Output and processing" Header="Equalizer…" Click="EqualizerBtn_Click" />
+                            <MenuItem controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Equalization and tone" Header="Parametric equalizer…" Tag="0" Click="AudioEffects_Click" />
+                            <MenuItem controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Spatial processing" Header="Bass, stereo and headphones…" Tag="1" Click="AudioEffects_Click" controls:SettingsAction.QuickAccess="True" />
+                            <MenuItem controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Level and dynamics" Header="Compressor and limiter…" Tag="2" Click="AudioEffects_Click" />
+                            <MenuItem controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Time effects" Header="Echo, reverb, flanger and chorus…" Tag="3" Click="AudioEffects_Click" />
+                            <MenuItem controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Spatial processing" Header="Channel gain and delay…" Tag="4" Click="AudioEffects_Click" />
+                            <MenuItem controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Signal and measurements" Header="Audio measurements…" Click="AudioMeasurements_Click" />
+                            <MenuItem controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Conversion" Header="Join audio files…" Click="JoinAudio_Click" />
+                            <MenuItem controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Production" Header="Extract audio from video…" Click="ExtractAudio_Click" />
+                            <MenuItem controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Production" Header="Mix audio to a new file…" Click="MixAudio_Click" />
+                            <MenuItem controls:SettingsAction.Category="Video" controls:SettingsAction.Section="Conversion" Header="Video converter and mobile profiles…" Click="VideoConverter_Click" />
+                            <MenuItem controls:SettingsAction.Category="Video" controls:SettingsAction.Section="Picture and stereo" Header="Zoom, pan and stereo view…" Click="VideoView_Click" controls:SettingsAction.QuickAccess="True" />
+                            <MenuItem controls:SettingsAction.Category="Playback" controls:SettingsAction.Section="Scheduling" Header="Playback schedule…" Click="PlaybackSchedule_Click" />
+                            <MenuItem controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Level and dynamics" Header="Volume fade…" Click="VolumeFade_Click" controls:SettingsAction.QuickAccess="True" />
+                            <MenuItem controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Lyrics" Header="Lyrics editor…" Click="LyricsEditor_Click" />
+                            <MenuItem controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Conversion" Header="Batch audio converter…" Click="ConverterButton_Click" />
+                            <MenuItem controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Output and processing" controls:SettingsAction.QuickAccess="True" x:Name="OutputDevicesMenu" Header="Output device" />
+                            <MenuItem controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Output and processing" controls:SettingsAction.QuickAccess="True" Header="Audio output profiles…" Click="AudioOutputProfiles_Click" />
+                            <MenuItem x:Name="ReplayGainMenu" controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Output and processing" controls:SettingsAction.QuickAccess="True" Header="ReplayGain">
                                 <MenuItem Header="Disabled" Tag="none" Click="ReplayGainItem_Click" />
                                 <MenuItem Header="By track" Tag="track" Click="ReplayGainItem_Click" />
                                 <MenuItem Header="By album" Tag="album" Click="ReplayGainItem_Click" />
                             </MenuItem>
-                            <MenuItem x:Name="ChaptersMenu" Header="Chapters" />
+                            <MenuItem x:Name="ChannelRoutingMenu" Header="Channel routing" controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Output and processing" controls:SettingsAction.QuickAccess="True">
+                                <MenuItem Header="Original" Tag="Original" Click="QuickRouting_Click" />
+                                <MenuItem Header="Stereo" Tag="Stereo" Click="QuickRouting_Click" />
+                                <MenuItem Header="Reverse stereo" Tag="ReverseStereo" Click="QuickRouting_Click" />
+                                <MenuItem Header="Left channel" Tag="Left" Click="QuickRouting_Click" />
+                                <MenuItem Header="Right channel" Tag="Right" Click="QuickRouting_Click" />
+                                <MenuItem Header="Mono" Tag="Mono" Click="QuickRouting_Click" />
+                            </MenuItem>
+                            <MenuItem controls:SettingsAction.Category="Playback" controls:SettingsAction.Section="Chapters and navigation" controls:SettingsAction.QuickAccess="True" x:Name="ChaptersMenu" Header="Chapters" />
                             <Separator />
-                            <MenuItem Header="Edit tags for the current file…" Click="EditTagsButton_Click" />
-                            <MenuItem Header="Batch tag editor…" Click="BatchTagsButton_Click" />
-                            <MenuItem Header="Search external subtitles…" Click="SearchSubtitlesButton_Click" />
-                            <MenuItem Header="Subtitle timing editor…" Click="SubtitleTiming_Click" />
-                            <MenuItem Header="Subtitle style profiles…" Click="SubtitleStyles_Click" />
-                            <MenuItem Header="Chapter editor and external chapters…" Click="ChapterEditor_Click" />
-                            <MenuItem Header="Open CUE sheet…" Click="OpenCueButton_Click" />
-                            <MenuItem Header="Create or edit CUE sheet…" Click="EditCueButton_Click" />
-                            <MenuItem Header="Scheduled snapshots…" Click="ScheduledSnapshots_Click" />
+                            <MenuItem controls:SettingsAction.Category="Files" controls:SettingsAction.Section="Metadata" Header="Edit tags for the current file…" Click="EditTagsButton_Click" />
+                            <MenuItem controls:SettingsAction.Category="Files" controls:SettingsAction.Section="Metadata" Header="Batch tag editor…" Click="BatchTagsButton_Click" />
+                            <MenuItem controls:SettingsAction.Category="Files" controls:SettingsAction.Section="File organization" Header="Batch file rename…" Click="FileRename_Click" />
+                            <MenuItem controls:SettingsAction.Category="Files" controls:SettingsAction.Section="File organization" Header="Organize media files…" Click="OrganizeFiles_Click" />
+                            <MenuItem controls:SettingsAction.Category="Library" controls:SettingsAction.Section="Browse and organize" controls:SettingsAction.QuickAccess="True" Header="Browse media folder…" Click="BrowseMediaFolder_Click" />
+                            <MenuItem controls:SettingsAction.Category="Library" controls:SettingsAction.Section="Saved playlists" controls:SettingsAction.QuickAccess="True" Header="Saved playlists…" Click="SavedPlaylists_Click" />
+                            <MenuItem controls:SettingsAction.Category="Library" controls:SettingsAction.Section="Internet radio" controls:SettingsAction.QuickAccess="True" Header="Internet radio…" Click="InternetRadio_Click" />
+                            <MenuItem controls:SettingsAction.Category="Subtitles" controls:SettingsAction.Section="Find and edit subtitles" Header="Search external subtitles…" Click="SearchSubtitlesButton_Click" />
+                            <MenuItem controls:SettingsAction.Category="Subtitles" controls:SettingsAction.Section="Find and edit subtitles" controls:SettingsAction.QuickAccess="True" Header="Subtitle timing editor…" Click="SubtitleTiming_Click" />
+                            <MenuItem controls:SettingsAction.Category="Subtitles" controls:SettingsAction.Section="Subtitle appearance" controls:SettingsAction.QuickAccess="True" Header="Subtitle style profiles…" Click="SubtitleStyles_Click" />
+                            <MenuItem controls:SettingsAction.Category="Playback" controls:SettingsAction.Section="Chapters and navigation" Header="Chapter editor and external chapters…" Click="ChapterEditor_Click" />
+                            <MenuItem controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="CUE documents" Header="Open CUE sheet…" Click="OpenCueButton_Click" />
+                            <MenuItem controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="CUE documents" Header="Create or edit CUE sheet…" Click="EditCueButton_Click" />
+                            <MenuItem controls:SettingsAction.Category="Video" controls:SettingsAction.Section="Capture" Header="Scheduled snapshots…" Click="ScheduledSnapshots_Click" />
                             <Separator />
-                            <MenuItem Header="Rotate picture 90°" Click="RotateVideo_Click" />
-                            <MenuItem Header="Mirror picture" Click="MirrorVideo_Click" />
-                            <MenuItem Header="Reset orientation" Click="ResetOrientation_Click" />
-                            <MenuItem Header="Signal path and information" Click="SignalPath_Click" />
+                            <MenuItem controls:SettingsAction.Category="Video" controls:SettingsAction.Section="Picture orientation" controls:SettingsAction.QuickAccess="True" Header="Rotate picture 90°" Click="RotateVideo_Click" />
+                            <MenuItem controls:SettingsAction.Category="Video" controls:SettingsAction.Section="Picture orientation" controls:SettingsAction.QuickAccess="True" Header="Mirror picture" Click="MirrorVideo_Click" />
+                            <MenuItem controls:SettingsAction.Category="Video" controls:SettingsAction.Section="Picture orientation" controls:SettingsAction.QuickAccess="True" Header="Flip picture vertically" Click="FlipVideo_Click" />
+                            <MenuItem controls:SettingsAction.Category="Video" controls:SettingsAction.Section="Picture orientation" controls:SettingsAction.QuickAccess="True" Header="Reset orientation" Click="ResetOrientation_Click" />
+                            <MenuItem controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Signal and measurements" controls:SettingsAction.QuickAccess="True" Header="Signal path and levels…" Click="SignalPath_Click" />
                         </ContextMenu>
                     </Button.ContextMenu>
                 </Button>
@@ -438,6 +575,9 @@
             <Grid Grid.Column="0" x:Name="VideoGrid">
 
                 <Rectangle x:Name="VideoBackdrop" Fill="Black" IsHitTestVisible="False" />
+                <Image x:Name="UserIdleBackground" Stretch="UniformToFill" IsHitTestVisible="False" Opacity="0.2">
+                    <Image.Style><Style TargetType="Image"><Setter Property="Visibility" Value="Visible"/><Style.Triggers><DataTrigger Binding="{Binding HasMedia}" Value="True"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></Image.Style>
+                </Image>
 
                 <Grid x:Name="AmbientLayer" IsHitTestVisible="False" Opacity="0" Visibility="Collapsed">
                     <Image x:Name="AmbientImage" Stretch="Fill" RenderOptions.BitmapScalingMode="Linear" />
@@ -454,11 +594,16 @@
 
                 <Grid x:Name="VideoHostContainer" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="{Binding HasMedia, Converter={StaticResource BoolToVis}}">
                     <Image x:Name="VideoImage" Stretch="Uniform" StretchDirection="Both" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" SnapsToDevicePixels="True" UseLayoutRounding="True" RenderOptions.BitmapScalingMode="LowQuality" />
+                    <Border VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="24,0,24,24" Padding="14,7" Background="#B0181B22" CornerRadius="6" MaxHeight="200" MaxWidth="1000" ClipToBounds="True" IsHitTestVisible="False">
+                        <Border.Style><Style TargetType="Border"><Style.Triggers><DataTrigger Binding="{Binding BilingualText}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></Border.Style>
+                        <TextBlock Text="{Binding BilingualText}" TextWrapping="Wrap" TextAlignment="Center" FontFamily="Segoe UI" FontSize="24" Foreground="White"/>
+                    </Border>
                 </Grid>
 
                 <Grid x:Name="VideoMouseOverlay" Background="Transparent" MouseDown="VideoOverlay_MouseDown" MouseLeftButtonDown="VideoOverlay_MouseLeftButtonDown" MouseMove="VideoOverlay_MouseMoveDrag" MouseWheel="VideoOverlay_MouseWheel" />
 
                 <controls:AudioNowPlaying x:Name="AudioSurface" Visibility="Collapsed" />
+                <Canvas x:Name="CustomHudCanvas" Visibility="Collapsed" ClipToBounds="True" Panel.ZIndex="20" />
 
                 <Border x:Name="LockBadge" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,14,0,0" Padding="12,6,6,6" CornerRadius="18" Background="{StaticResource PopupSurfaceBrush}" BorderBrush="{StaticResource PopupBorderBrush}" BorderThickness="1" RenderTransformOrigin="0.5,0.5" Panel.ZIndex="50">
                     <Border.RenderTransform>

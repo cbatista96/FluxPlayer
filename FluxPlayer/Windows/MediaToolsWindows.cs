@@ -108,6 +108,8 @@ public static class MediaToolsWindows
             finally { save.IsEnabled = true; }
         };
         panel.Children.Add(save); panel.Children.Add(status);
+        var advanced = new Button { Content = "Advanced and selective tag editor…", HorizontalAlignment = HorizontalAlignment.Left, Padding = new Thickness(14, 8, 14, 8), Margin = new Thickness(0, 14, 0, 0) };
+        advanced.Click += (_, _) => new BatchTagEditorWindow(window, vm, new[] { path }).Show(); panel.Children.Add(advanced);
         window.Content = new ScrollViewer { Content = panel, VerticalScrollBarVisibility = ScrollBarVisibility.Auto };
         window.Show();
         try

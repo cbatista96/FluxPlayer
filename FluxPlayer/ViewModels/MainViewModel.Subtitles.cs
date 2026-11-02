@@ -12,7 +12,13 @@ public partial class MainViewModel
     public bool LoadExternalSubtitle(string path)
     {
         if (!HasMedia || !_mediaService.LoadSubtitle(path)) return false;
-        LoadedSubtitlePath = path; return true;
+        LoadedSubtitlePath = path;
+        if (!_restoringFilePreference && _settings.RememberFileSubtitles)
+        {
+            _rememberedSubtitleApplied = true;
+            RememberFilePreference(old => old with { Subtitle = null, ExternalSubtitle = System.IO.Path.GetFullPath(path) });
+        }
+        return true;
     }
 
     private void OnTracksChanged(object? sender, EventArgs e)

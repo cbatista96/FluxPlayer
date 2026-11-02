@@ -42,10 +42,11 @@
         <StackPanel Grid.Row="3" Margin="0,16,0,0">
             <WrapPanel>
                 <Button Content="Load CUE…" Click="Load_Click" Padding="16,8" Margin="0,0,8,8"/>
+                <Button Content="Advanced editor…" Click="Advanced_Click" Padding="16,8" Margin="0,0,8,8"/>
                 <Button Content="Play selected track" Click="Play_Click" Padding="16,8" Margin="0,0,8,8"/>
                 <Button Content="Save as…" Click="Save_Click" Padding="20,8" Margin="0,0,0,8"/>
             </WrapPanel>
-            <TextBlock Text="Saves audio FILE, TRACK, TITLE, PERFORMER and INDEX 01 entries. Other CUE directives are not retained; save an edited copy to keep the original."
+            <TextBlock Text="The basic table writes audio FILE/TRACK/TITLE/PERFORMER/INDEX 01. Loading extended directives opens the advanced editor, which preserves them and exports a separate copy."
                 TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
             <TextBlock x:Name="StatusText" Text="Add local files or load a CUE sheet. Up to 99 tracks." TextWrapping="Wrap" Margin="0,8,0,0"/>
         </StackPanel>

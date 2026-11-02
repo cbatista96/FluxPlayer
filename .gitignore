@@ -12,11 +12,21 @@
 TestResults/
 *.trx
 *.coverage*
+*_wpftmp.csproj
 
 # Local builds and installers: this repository publishes source only
 publish/
 artifacts/
 Data/
+# Embedded source catalogs, explicitly separated from runtime profile data
+!/FluxPlayer/Data/
+/FluxPlayer/Data/*
+!/FluxPlayer/Data/Interop/
+/FluxPlayer/Data/Interop/*
+!/FluxPlayer/Data/Interop/kodi-methods.json
+!/FluxPlayer/Data/Interop/kodi-types.json
+!/FluxPlayer/Data/Interop/mpd-commands.json
+!/FluxPlayer/Data/Interop/processing-expansion.json
 Profiles/
 portable.flag
 installer/output/
@@ -34,6 +44,7 @@ plugins.dat
 session-state/
 .claude/
 .codex/
+.codex-attachments/
 _wpfui_combobox_ref.txt
 FUNCIONALIDADES.md
 INSTRUCCIONES.md

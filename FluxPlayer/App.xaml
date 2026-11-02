@@ -50,7 +50,7 @@
                                         <ScaleTransform x:Name="boxScale" ScaleX="1" ScaleY="1" />
                                     </Grid.RenderTransform>
                                     <Border x:Name="frame" CornerRadius="4" BorderThickness="1" BorderBrush="{DynamicResource ControlStrongStrokeColorDefaultBrush}" Background="{DynamicResource ControlAltFillColorSecondaryBrush}" />
-                                    <Border x:Name="fill" CornerRadius="4" Opacity="0" Background="{DynamicResource FxAccentTextBrush}" RenderTransformOrigin="0.5,0.5">
+                                    <Border x:Name="fill" CornerRadius="4" Opacity="0" Background="{DynamicResource FxAccentFillBrush}" RenderTransformOrigin="0.5,0.5">
                                         <Border.RenderTransform>
                                             <ScaleTransform x:Name="fillScale" ScaleX="0.3" ScaleY="0.3" />
                                         </Border.RenderTransform>

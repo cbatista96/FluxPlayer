@@ -1,0 +1,8 @@
+{
+  "NativeWindowCreated": true,
+  "TenBitPqSourceDecoded": true,
+  "NativeVideoOutputStarted": true,
+  "PauseResumePassed": true,
+  "PhysicalHdrVerified": false,
+  "Scope": "Actual native Direct3D11 window and 10-bit PQ-tagged HEVC input, not proof of HDR swap-chain precision, measured luminance or calibrated color. See OS display state separately."
+}

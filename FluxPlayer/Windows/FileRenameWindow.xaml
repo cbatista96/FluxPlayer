@@ -1,0 +1,39 @@
+<ui:FluentWindow x:Class="FluxPlayer.Windows.FileRenameWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml" Title="Batch file rename · FluxPlayer" Width="1000" Height="660" MinWidth="800" MinHeight="540" ExtendsContentIntoTitleBar="True" WindowStartupLocation="CenterOwner">
+ <Grid Margin="24,18,24,20">
+  <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+  <StackPanel Margin="0,0,0,18">
+   <TextBlock x:Name="Heading" Text="Batch file rename" FontSize="25" FontWeight="SemiBold"/>
+   <TextBlock x:Name="Introduction" Text="Preview names before renaming. Files stay in their current folders and keep their extensions. Loaded files are skipped; existing destinations are never replaced." TextWrapping="Wrap" Margin="0,6,0,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+   <TextBlock Text="Sidecars, embedded tags and external playlists are not renamed or rewritten." TextWrapping="Wrap" Margin="0,6,0,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+  </StackPanel>
+  <StackPanel Grid.Row="1" Margin="0,0,0,12">
+   <StackPanel x:Name="OrganizationOptions" Visibility="Collapsed" Margin="0,0,0,12">
+    <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+     <TextBox x:Name="DestinationRoot" IsReadOnly="True" Padding="10,7" AutomationProperties.Name="Organization destination root" TextChanged="Pattern_Changed"/>
+     <Button Grid.Column="1" Content="Choose destination…" Click="Destination_Click" Padding="14,7" Margin="8,0,0,0"/>
+    </Grid>
+    <TextBlock Text="Folder template (below the chosen destination)" Margin="0,10,0,5" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+    <TextBox x:Name="FolderPattern" Text="{}{artist}/{album}" Padding="10,7" TextChanged="Pattern_Changed" AutomationProperties.Name="Organization folder template"/>
+   </StackPanel>
+   <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+    <TextBlock Text="Template" Margin="0,0,12,0" VerticalAlignment="Center"/>
+    <TextBox x:Name="Pattern" Grid.Column="1" Text="{}{index} - {artist} - {title}" Height="36" VerticalContentAlignment="Center" TextChanged="Pattern_Changed" AutomationProperties.Name="File name template"/>
+   </Grid>
+   <TextBlock Text="Tokens: {filename}, {title}, {artist}, {album}, {albumartist}, {genre}, {year}, {track}, {disc}, {index}. Tags are read only when previewing." Margin="0,8,0,10" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+   <WrapPanel>
+    <Button x:Name="AddButton" Content="Add files…" Click="Add_Click" Padding="14,8" Margin="0,0,8,0"/>
+    <Button x:Name="PreviewButton" Content="Preview names" Click="Preview_Click" Padding="14,8" Margin="0,0,8,0"/>
+    <Button x:Name="ApplyButton" Content="Rename previewed files" Click="Apply_Click" IsEnabled="False" Padding="14,8" Margin="0,0,8,0"/>
+    <Button x:Name="CancelButton" Content="Cancel job" Click="Cancel_Click" IsEnabled="False" Padding="14,8"/>
+   </WrapPanel>
+  </StackPanel>
+  <DataGrid x:Name="Files" Grid.Row="2" AutoGenerateColumns="False" IsReadOnly="True" EnableRowVirtualization="True" EnableColumnVirtualization="True" VirtualizingPanel.VirtualizationMode="Recycling" RowHeight="38" GridLinesVisibility="None" HeadersVisibility="Column">
+   <DataGrid.Columns>
+    <DataGridTemplateColumn Header="Source" Width="*"><DataGridTemplateColumn.CellTemplate><DataTemplate><TextBlock Text="{Binding SourceName}" ToolTip="{Binding Source}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="8,0"/></DataTemplate></DataGridTemplateColumn.CellTemplate></DataGridTemplateColumn>
+    <DataGridTemplateColumn Header="Preview destination" Width="*"><DataGridTemplateColumn.CellTemplate><DataTemplate><TextBlock Text="{Binding DestinationName}" ToolTip="{Binding Destination}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="8,0"/></DataTemplate></DataGridTemplateColumn.CellTemplate></DataGridTemplateColumn>
+    <DataGridTextColumn Header="Result" Binding="{Binding Status}" Width="200"/>
+   </DataGrid.Columns>
+  </DataGrid>
+  <TextBlock x:Name="Status" Grid.Row="3" Text="Add files or use the current playlist, then preview the names." Margin="0,14,0,0" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+ </Grid>
+</ui:FluentWindow>

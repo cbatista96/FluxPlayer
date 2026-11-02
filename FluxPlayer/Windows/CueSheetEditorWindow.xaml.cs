@@ -106,6 +106,13 @@ public partial class CueSheetEditorWindow : FluentWindow
         _busy = true;
         try
         {
+            string text = await CueDocument.ReadAsync(dialog.FileName);
+            if (CueDocument.RequiresPreservation(text))
+            {
+                new AdvancedCueWindow(this, _vm, dialog.FileName).Show();
+                StatusText.Text = "Opened the preserving editor for extended directives, comments or album metadata. The basic-table draft is unchanged.";
+                return;
+            }
             var tracks = await Task.Run(() => CueSheet.Read(dialog.FileName, requireExistingSources: false));
             if (tracks.Length is < 1 or > 99) throw new InvalidDataException("The editor supports CUE sheets containing 1–99 audio tracks.");
             _tracks.Clear();
@@ -114,9 +121,11 @@ public partial class CueSheetEditorWindow : FluentWindow
             Renumber(); _suggestedName = Path.GetFileNameWithoutExtension(dialog.FileName) + "_edited.cue";
             StatusText.Text = $"Loaded {tracks.Length} tracks. Unavailable source paths can be repaired in the table.";
         }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException) { StatusText.Text = ex.Message; }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or InvalidDataException or System.Text.DecoderFallbackException) { StatusText.Text = ex.Message; }
         finally { _busy = false; }
     }
+
+    private void Advanced_Click(object sender, RoutedEventArgs e) => new AdvancedCueWindow(this, _vm).Show();
 
     private void Play_Click(object sender, RoutedEventArgs e)
     {
@@ -143,7 +152,7 @@ public partial class CueSheetEditorWindow : FluentWindow
             await Task.Run(() => CueSheet.Write(dialog.FileName, tracks, overwrite));
             StatusText.Text = $"Saved {tracks.Length} tracks to {dialog.FileName}";
         }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException) { StatusText.Text = ex.Message; }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or InvalidDataException) { StatusText.Text = ex.Message; }
         finally { _busy = false; TracksGrid.IsEnabled = true; }
     }
 }

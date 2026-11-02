@@ -56,16 +56,16 @@ public static class FeatureCatalog
         new FeatureDefinition(AutoSkipIntroOutro, "Auto skip intro/outro", "Skip the intro and outro using configured durations."),
         new FeatureDefinition(PlayNextQueue, "Play next queue", "Right-click a playlist item > Play next. The playlist order is preserved."),
         new FeatureDefinition(PresentationLockControls, "Control lock", "Lock the keyboard and mouse for presentations (Ctrl+L or context menu)."),
-        new FeatureDefinition(VolumeNormalization, "Volume normalization", "Playback normalization is pending verified audio-filter processing. Conversion normalization is available in the converter."),
-        new FeatureDefinition(DynamicCompressorLimiter, "Compressor/limiter", "Pending a verified playback audio-filter chain."),
+        new FeatureDefinition(VolumeNormalization, "Adaptive RMS leveling", "Native linked RMS volume leveling in Audio > Level and dynamics. Not LUFS/EBU loudness compliance."),
+        new FeatureDefinition(DynamicCompressorLimiter, "Compressor/limiter", "Native linked compression and sample-peak limiting in Settings > Audio > Level and dynamics."),
         new FeatureDefinition(Equalizer31Band, "Equalizer + preamp", "10, 15, 20 or 31 independent native bands, preamplifier and 30 presets (E). Extended layouts require the native DSP module."),
-        new FeatureDefinition(AudioProfilesPerDevice, "Per-device profiles", "Save volume, the full equalizer layout, preamp and delay per output from Audio and video tools."),
-        new FeatureDefinition(HeadphoneCrossfeed, "Headphone crossfeed", "Reduce stereo headphone listening fatigue."),
+        new FeatureDefinition(AudioProfilesPerDevice, "Per-device profiles", "Save volume, the full equalizer layout, preamp and delay per output from Settings > Audio."),
+        new FeatureDefinition(HeadphoneCrossfeed, "Headphone crossfeed", "Blend a low-pass opposite-ear signal in Settings > Audio > Spatial processing."),
         new FeatureDefinition(AvSyncOverlayControls, "Overlay A/V adjustment", "Quick synchronization controls."),
         new FeatureDefinition(AutoDownloadSubtitles, "Subtitle downloads", "Search for subtitles automatically."),
-        new FeatureDefinition(LiveSubtitleSyncEditor, "Subtitle timing editor", "Live delay, cue navigation, two-anchor correction and SRT copy export from Audio and video tools."),
-        new FeatureDefinition(SubtitleStyleProfiles, "Subtitle style profiles", "Save default text styles from Audio and video tools. Restart FluxPlayer after changing styles."),
-        new FeatureDefinition(BilingualSubtitles, "Bilingual subtitles", "Display two subtitle tracks."),
+        new FeatureDefinition(LiveSubtitleSyncEditor, "Subtitle timing editor", "Live delay, cue navigation, two-anchor correction and SRT copy export from Settings > Subtitles."),
+        new FeatureDefinition(SubtitleStyleProfiles, "Subtitle style profiles", "Save default text styles from Settings > Subtitles. Restart FluxPlayer after changing styles."),
+        new FeatureDefinition(BilingualSubtitles, "Bilingual subtitles", "Display two local text subtitle documents together on the WPF picture, with an independent second-document offset."),
         new FeatureDefinition(SubtitleTextSearch, "Subtitle text search", "Search text in the loaded subtitle file."),
         new FeatureDefinition(BurnedSubtitlesOcr, "Burned-in subtitle OCR", "Experimental OCR for embedded subtitle text."),
         new FeatureDefinition(FullOsd, "Full OSD", "Show play/pause/seek/volume overlays.", true),
@@ -88,7 +88,7 @@ public static class FeatureCatalog
         new FeatureDefinition(PlaylistImportExport, "Import/export playlists", "M3U, M3U8, PLS and XSPF support.", true),
         new FeatureDefinition(ChromecastDlnaSender, "Chromecast/DLNA", "Send playback to network devices."),
         new FeatureDefinition(MobileRemoteWebUi, "Mobile remote control", "Control the player through a local web interface."),
-        new FeatureDefinition(ScheduledSnapshots, "Scheduled snapshots", "Start a bounded capture job from Audio and video tools > Scheduled snapshots."),
+        new FeatureDefinition(ScheduledSnapshots, "Scheduled snapshots", "Start a bounded capture job from Settings > Video > Scheduled snapshots."),
         new FeatureDefinition(ClipRecordingAb, "Export A-B clip", "Save the A-B range as an exact MP4 clip or a fast lossless copy (context menu > Playback)."),
         new FeatureDefinition(PluginsExtensions, "Plugins/extensions", "Enable an extensible architecture."),
     };
@@ -100,16 +100,13 @@ public static class FeatureCatalog
         MediaLibrary, WatchedFolders, FavoritesCollections, SubtitleTextSearch,
         LibraryAdvancedFilters, SmartPlaylists,
         ScheduledSnapshots, LiveSubtitleSyncEditor, SubtitleStyleProfiles, AudioProfilesPerDevice,
+        DynamicCompressorLimiter, HeadphoneCrossfeed, VolumeNormalization, BilingualSubtitles,
+        BurnedSubtitlesOcr, MobileRemoteWebUi, AdvancedTouchGestures, PluginsExtensions,
+        ConfigurableHud, AutoRenderProfileByGpu, AutoDownloadSubtitles, ChromecastDlnaSender,
     };
 
     private static readonly HashSet<string> PlannedKeys = new(StringComparer.OrdinalIgnoreCase)
     {
-        HeadphoneCrossfeed, AutoDownloadSubtitles,
-        VolumeNormalization, DynamicCompressorLimiter,
-        BilingualSubtitles, BurnedSubtitlesOcr,
-        ConfigurableHud, AdvancedTouchGestures, AutoRenderProfileByGpu,
-        ChromecastDlnaSender, MobileRemoteWebUi,
-        PluginsExtensions,
     };
 
     public const int CatalogVersion = 3;

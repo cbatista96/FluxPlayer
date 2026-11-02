@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FluxPlayer Remote</title>
+<style>
+:root{color-scheme:dark light;font-family:Segoe UI,system-ui,sans-serif;background:#191b20;color:#f5f5f7}*{box-sizing:border-box}body{margin:0;padding:24px 16px}main{max-width:620px;margin:auto}h1{font-size:26px;margin:0 0 8px}p{line-height:1.5;color:#c3c8d3}section{background:#24272e;border:1px solid #3c404a;border-radius:12px;padding:20px;margin:18px 0}label{display:block;margin:12px 0 6px}input,select,button{font:inherit;border:1px solid #4a505d;border-radius:7px;padding:12px;background:#30343d;color:inherit;min-height:44px}input[type=password],select{width:100%}input[type=range]{width:100%;accent-color:#65c8ff;padding:4px}.row{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}.row button{flex:1;min-width:88px}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #65c8ff;outline-offset:3px}.primary{background:#65c8ff;color:#10232e;border-color:#65c8ff}button:disabled{opacity:.45;cursor:default}#title{font-size:21px;overflow-wrap:anywhere}#status{min-height:24px}#player[hidden]{display:none}small{color:#c3c8d3}@media(prefers-color-scheme:light){:root{background:#f1f3f7;color:#20242b}section{background:#fff;border-color:#d4d8e0}input,select,button{background:#f7f8fa;border-color:#bfc6d2}p,small{color:#505969}.primary{background:#0067c0;color:#fff}}
+</style></head><body><main><h1>FluxPlayer Remote</h1><p>Control the queue already open on your computer. Use a trusted local network.</p>
+<section id="pair"><label for="code">Pairing code shown in FluxPlayer</label><input id="code" type="password" maxlength="64" autocomplete="off" spellcheck="false"><div class="row"><button id="connect" class="primary">Connect</button></div><small>The code stays in this page's memory and is cleared on disconnect or reload.</small></section>
+<p id="status" role="status" aria-live="polite">Not connected.</p>
+<section id="player" hidden><h2 id="title">No media</h2><div class="row"><button data-command="previous">Previous</button><button id="play" class="primary">Play</button><button data-command="next">Next</button><button data-command="stop">Stop</button></div>
+<label for="seek">Playback position</label><input id="seek" type="range" min="0" max="1" value="0"><small id="time">0:00 / 0:00</small>
+<label for="volume">Volume</label><input id="volume" type="range" min="0" max="100" value="70"><div class="row"><button id="mute">Mute</button><button id="refresh">Refresh</button><button id="disconnect">Disconnect</button></div>
+<label for="rate">Speed</label><select id="rate"><option value="0.5">0.5×</option><option value="0.75">0.75×</option><option value="1" selected>1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option><option value="2">2×</option></select>
+<label for="queue">Queue (up to 200 entries)</label><select id="queue"></select><div class="row"><button id="playEntry">Play selected entry</button></div></section></main>
+<script nonce="{{nonce}}">
+'use strict';
+let secret='',state=null,pending=false,timer=null,generation=0,active=null;
+const queued=[],el=id=>document.getElementById(id),message=text=>{el('status').textContent=text};
+function format(ms){const seconds=Math.floor(Math.max(0,ms)/1000);return Math.floor(seconds/60)+':'+String(seconds%60).padStart(2,'0')}
+function logout(){generation++;active?.abort();secret='';state=null;queued.length=0;clearTimeout(timer);el('code').value='';el('player').hidden=true;el('pair').hidden=false;message('Disconnected.')}
+async function request(command,value){
+ if(!secret)return;
+ if(pending){if(command){if(queued.length>=16){message('Wait for the queued controls to finish.');return}queued.push({command,value})}return}
+ pending=true;el('connect').disabled=true;clearTimeout(timer);
+ const ticket=generation,timeout=new AbortController();active=timeout;
+ const deadline=setTimeout(()=>timeout.abort(),10000);
+ try{
+  const options={signal:timeout.signal,cache:'no-store',credentials:'omit',headers:{Authorization:'Bearer '+secret}};
+  if(command){options.method='POST';options.headers['Content-Type']='application/json';options.body=JSON.stringify({command,value:value??0})}
+  const response=await fetch(command?'/control':'/state',options);
+  if(ticket!==generation)return;
+  if(response.status===401){logout();message('Pairing code rejected. Connect again.');return}
+  if(!response.ok)throw Error('Request failed ('+response.status+'). Refresh before retrying a command.');
+  const received=await response.json();if(ticket!==generation)return;
+  state=received;render();el('pair').hidden=true;el('player').hidden=false;message('Connected.');
+ }catch(error){if(ticket===generation){queued.length=0;message(error.name==='AbortError'?'Request timed out; a command may have applied. Refresh before retrying.':error.message)}}
+ finally{
+  clearTimeout(deadline);active=null;pending=false;el('connect').disabled=false;
+  if(ticket===generation&&secret){if(queued.length){const next=queued.shift();request(next.command,next.value)}else if(document.visibilityState==='visible')timer=setTimeout(()=>request(),2000)}
+ }
+}
+function render(){el('title').textContent=state.title||'No media';el('play').textContent=state.playing?'Pause':'Play';el('mute').textContent=state.muted?'Unmute':'Mute';if(document.activeElement!==el('seek')){el('seek').max=Math.max(1,state.duration);el('seek').value=Math.min(state.position,state.duration)}if(document.activeElement!==el('volume'))el('volume').value=state.volume;el('time').textContent=format(state.position)+' / '+format(state.duration);el('rate').value=String(state.rate);const list=el('queue'),prior=list.value;list.replaceChildren();for(const item of state.queue){const option=document.createElement('option');option.value=item.index;option.textContent=(item.index+1)+'. '+item.title;list.appendChild(option)}if([...list.options].some(option=>option.value===prior))list.value=prior;el('playEntry').disabled=state.queue.length===0}
+el('connect').onclick=()=>{const code=el('code').value.trim();if(!/^[0-9a-fA-F]{64}$/.test(code)){message('Enter the full 64-character pairing code.');return}secret=code.toUpperCase();el('code').value='';request()};el('disconnect').onclick=logout;el('refresh').onclick=()=>request();el('play').onclick=()=>request(state?.playing?'pause':'play');el('mute').onclick=()=>request('mute',state?.muted?0:1);el('seek').onchange=()=>request('seek',Number(el('seek').value));el('volume').onchange=()=>request('volume',Number(el('volume').value));el('rate').onchange=()=>request('rate',Number(el('rate').value));el('playEntry').onclick=()=>request('queue',Number(el('queue').value));document.querySelectorAll('[data-command]').forEach(button=>button.onclick=()=>request(button.dataset.command));document.addEventListener('visibilitychange',()=>{clearTimeout(timer);if(secret&&document.visibilityState==='visible')request()});window.addEventListener('pagehide',logout);
+</script></body></html>

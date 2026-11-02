@@ -1,11 +1,14 @@
 param(
     [Parameter(Mandatory=$true)][string]$NuGetRoot,
     [Parameter(Mandatory=$true)][string]$OutputPath,
-    [string]$BenchmarkOutput
+    [string]$BenchmarkOutput,
+    [string]$SourcePath = '',
+    [string]$ImportLibrary = 'fluxdsp.lib'
 )
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $PSScriptRoot
 $source = Join-Path $projectRoot 'Native/FluxDsp/fluxdsp.c'
+if ($SourcePath -ne '') { $source = [IO.Path]::GetFullPath($SourcePath) }
 $sdk = Join-Path $NuGetRoot 'videolan.libvlc.windows/3.0.21/build/x64'
 if (-not (Test-Path -LiteralPath (Join-Path $sdk 'include/vlc/plugins/vlc_filter.h'))) {
     throw 'Restore the pinned VideoLAN.LibVLC.Windows 3.0.21 package before building native DSP.'
@@ -23,7 +26,7 @@ New-Item -ItemType Directory -Path $folder -Force | Out-Null
 $nativeArguments = @('/nologo', '/LD', '/MT', '/O2', '/std:c17', '/W4', '/WX', '/volatile:ms',
     ('/external:I' + (Join-Path $sdk 'include/vlc/plugins')), ('/external:I' + (Join-Path $sdk 'include')), '/external:W0',
     ('/Fo' + $folder + '/'), $source, '/link', ('/LIBPATH:' + $sdk), 'libvlccore.lib', 'libvlc.lib', 'Ws2_32.lib',
-    ('/OUT:' + $output), ('/IMPLIB:' + (Join-Path $folder 'fluxdsp.lib')))
+    ('/OUT:' + $output), ('/IMPLIB:' + (Join-Path $folder $ImportLibrary)))
 & cl.exe @nativeArguments
 if ($LASTEXITCODE -ne 0) { throw "Native DSP compilation failed ($LASTEXITCODE)." }
 if ($BenchmarkOutput) {

@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using FluxPlayer.Models;
 
 namespace FluxPlayer.Services;
 
@@ -35,8 +36,9 @@ public static class ConversionService
     }
 
     public static async Task ConvertAsync(string source, string destination, ConversionProfile profile,
-        long durationMs, bool normalize, IProgress<double>? progress, CancellationToken token)
+        long durationMs, bool normalize, IProgress<double>? progress, CancellationToken token, ConversionOptions? options = null)
     {
+        options ??= new(); options.Validate(profile.Encoder); token.ThrowIfCancellationRequested();
         string executable = FindExecutable() ?? throw new FileNotFoundException("Install FFmpeg and add it to PATH to use the converter.");
         if (!File.Exists(source)) throw new FileNotFoundException("The source file could not be found.", source);
         if (File.Exists(destination)) throw new IOException("The destination file already exists. Choose a different name.");
@@ -50,9 +52,19 @@ public static class ConversionService
             RedirectStandardOutput = true,
             RedirectStandardError = true
         };
+        string encoder = options.PcmBits > 0 && profile.Encoder == "pcm_s24le" ? "pcm_s" + options.PcmBits.ToString(CultureInfo.InvariantCulture) + "le" : profile.Encoder;
         foreach (string value in new[] { "-nostdin", "-hide_banner", "-loglevel", "error", "-n", "-i", source,
-            "-map", "0:a:0", "-vn", "-map_metadata", "0", "-c:a", profile.Encoder }) start.ArgumentList.Add(value);
-        foreach (string value in profile.Arguments) start.ArgumentList.Add(value);
+            "-map", "0:a:0", "-vn", "-map_metadata", "0", "-c:a", encoder }) start.ArgumentList.Add(value);
+        for (int index = 0; index < profile.Arguments.Length; index++)
+        {
+            if (options.BitrateKbps > 0 && profile.Arguments[index] is "-b:a" or "-q:a") { index++; continue; }
+            start.ArgumentList.Add(profile.Arguments[index]);
+        }
+        void Option(string name, string value) { start.ArgumentList.Add(name); start.ArgumentList.Add(value); }
+        if (options.SampleRate > 0) Option("-ar", options.SampleRate.ToString(CultureInfo.InvariantCulture));
+        if (options.Channels > 0) Option("-ac", options.Channels.ToString(CultureInfo.InvariantCulture));
+        if (options.BitrateKbps > 0) Option("-b:a", options.BitrateKbps.ToString(CultureInfo.InvariantCulture) + "k");
+        if (options.PcmBits > 0 && profile.Encoder == "flac") { Option("-sample_fmt", options.PcmBits == 16 ? "s16" : "s32"); Option("-bits_per_raw_sample", options.PcmBits.ToString(CultureInfo.InvariantCulture)); }
         if (normalize) { start.ArgumentList.Add("-af"); start.ArgumentList.Add("loudnorm=I=-16:TP=-1.5:LRA=11"); }
         foreach (string value in new[] { "-threads", "2", "-progress", "pipe:1", "-nostats", temporary }) start.ArgumentList.Add(value);
         using var process = Process.Start(start) ?? throw new IOException("Unable to start FFmpeg.");

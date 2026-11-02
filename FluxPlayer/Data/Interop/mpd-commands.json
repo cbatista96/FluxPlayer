@@ -1,0 +1,874 @@
+[
+  {
+    "Key": "clearerror",
+    "Name": "clearerror",
+    "Group": "Queues and playlists",
+    "Prefix": "clearerror",
+    "Writes": true
+  },
+  {
+    "Key": "currentsong",
+    "Name": "currentsong",
+    "Group": "Playback",
+    "Prefix": "currentsong",
+    "Writes": false
+  },
+  {
+    "Key": "status",
+    "Name": "status",
+    "Group": "Playback",
+    "Prefix": "status",
+    "Writes": false
+  },
+  {
+    "Key": "stats",
+    "Name": "stats",
+    "Group": "Playback",
+    "Prefix": "stats",
+    "Writes": false
+  },
+  {
+    "Key": "consume",
+    "Name": "consume {STATE}",
+    "Group": "Playback",
+    "Prefix": "consume",
+    "Writes": true
+  },
+  {
+    "Key": "crossfade",
+    "Name": "crossfade {SECONDS}",
+    "Group": "Playback",
+    "Prefix": "crossfade",
+    "Writes": true
+  },
+  {
+    "Key": "mixrampdb",
+    "Name": "mixrampdb {deciBels}",
+    "Group": "Playback",
+    "Prefix": "mixrampdb",
+    "Writes": true
+  },
+  {
+    "Key": "mixrampdelay",
+    "Name": "mixrampdelay {SECONDS}",
+    "Group": "Playback",
+    "Prefix": "mixrampdelay",
+    "Writes": true
+  },
+  {
+    "Key": "random",
+    "Name": "random {STATE}",
+    "Group": "Playback",
+    "Prefix": "random",
+    "Writes": true
+  },
+  {
+    "Key": "repeat",
+    "Name": "repeat {STATE}",
+    "Group": "Playback",
+    "Prefix": "repeat",
+    "Writes": true
+  },
+  {
+    "Key": "setvol",
+    "Name": "setvol {VOL}",
+    "Group": "Playback",
+    "Prefix": "setvol",
+    "Writes": true
+  },
+  {
+    "Key": "single",
+    "Name": "single {STATE}",
+    "Group": "Playback",
+    "Prefix": "single",
+    "Writes": true
+  },
+  {
+    "Key": "replay-gain-mode",
+    "Name": "replay_gain_mode {MODE}",
+    "Group": "Playback",
+    "Prefix": "replay_gain_mode",
+    "Writes": true
+  },
+  {
+    "Key": "replay-gain-status",
+    "Name": "replay_gain_status",
+    "Group": "Playback",
+    "Prefix": "replay_gain_status",
+    "Writes": false
+  },
+  {
+    "Key": "volume",
+    "Name": "volume {CHANGE}",
+    "Group": "Playback",
+    "Prefix": "volume",
+    "Writes": true
+  },
+  {
+    "Key": "next",
+    "Name": "next",
+    "Group": "Playback",
+    "Prefix": "next",
+    "Writes": true
+  },
+  {
+    "Key": "pause",
+    "Name": "pause {STATE}",
+    "Group": "Playback",
+    "Prefix": "pause",
+    "Writes": true
+  },
+  {
+    "Key": "play",
+    "Name": "play [SONGPOS]",
+    "Group": "Playback",
+    "Prefix": "play",
+    "Writes": true
+  },
+  {
+    "Key": "playid",
+    "Name": "playid [SONGID]",
+    "Group": "Playback",
+    "Prefix": "playid",
+    "Writes": true
+  },
+  {
+    "Key": "previous",
+    "Name": "previous",
+    "Group": "Playback",
+    "Prefix": "previous",
+    "Writes": true
+  },
+  {
+    "Key": "seek",
+    "Name": "seek {SONGPOS} {TIME}",
+    "Group": "Playback",
+    "Prefix": "seek",
+    "Writes": true
+  },
+  {
+    "Key": "seekid",
+    "Name": "seekid {SONGID} {TIME}",
+    "Group": "Playback",
+    "Prefix": "seekid",
+    "Writes": true
+  },
+  {
+    "Key": "seekcur",
+    "Name": "seekcur {TIME}",
+    "Group": "Playback",
+    "Prefix": "seekcur",
+    "Writes": true
+  },
+  {
+    "Key": "stop",
+    "Name": "stop",
+    "Group": "Playback",
+    "Prefix": "stop",
+    "Writes": true
+  },
+  {
+    "Key": "add",
+    "Name": "add {URI} [POSITION]",
+    "Group": "Queues and playlists",
+    "Prefix": "add",
+    "Writes": true
+  },
+  {
+    "Key": "addid",
+    "Name": "addid {URI} [POSITION]",
+    "Group": "Queues and playlists",
+    "Prefix": "addid",
+    "Writes": true
+  },
+  {
+    "Key": "clear",
+    "Name": "clear",
+    "Group": "Queues and playlists",
+    "Prefix": "clear",
+    "Writes": true
+  },
+  {
+    "Key": "delete",
+    "Name": "delete [{POS} | {START:END}]",
+    "Group": "Queues and playlists",
+    "Prefix": "delete",
+    "Writes": true
+  },
+  {
+    "Key": "deleteid",
+    "Name": "deleteid {SONGID}",
+    "Group": "Queues and playlists",
+    "Prefix": "deleteid",
+    "Writes": true
+  },
+  {
+    "Key": "move",
+    "Name": "move [{FROM} | {START:END}] {TO}",
+    "Group": "Queues and playlists",
+    "Prefix": "move",
+    "Writes": true
+  },
+  {
+    "Key": "moveid",
+    "Name": "moveid {FROM} {TO}",
+    "Group": "Queues and playlists",
+    "Prefix": "moveid",
+    "Writes": true
+  },
+  {
+    "Key": "playlistfind",
+    "Name": "playlistfind {FILTER} [sort {TYPE}] [window {START:END}]",
+    "Group": "Queues and playlists",
+    "Prefix": "playlistfind",
+    "Writes": false
+  },
+  {
+    "Key": "playlistid",
+    "Name": "playlistid {SONGID}",
+    "Group": "Queues and playlists",
+    "Prefix": "playlistid",
+    "Writes": false
+  },
+  {
+    "Key": "playlistinfo",
+    "Name": "playlistinfo [[SONGPOS] | [START:END]]",
+    "Group": "Queues and playlists",
+    "Prefix": "playlistinfo",
+    "Writes": false
+  },
+  {
+    "Key": "playlistsearch",
+    "Name": "playlistsearch {FILTER} [sort {TYPE}] [window {START:END}]",
+    "Group": "Queues and playlists",
+    "Prefix": "playlistsearch",
+    "Writes": false
+  },
+  {
+    "Key": "plchanges",
+    "Name": "plchanges {VERSION} [START:END]",
+    "Group": "Queues and playlists",
+    "Prefix": "plchanges",
+    "Writes": false
+  },
+  {
+    "Key": "plchangesposid",
+    "Name": "plchangesposid {VERSION} [START:END]",
+    "Group": "Queues and playlists",
+    "Prefix": "plchangesposid",
+    "Writes": false
+  },
+  {
+    "Key": "prio",
+    "Name": "prio {PRIORITY} {START:END...}",
+    "Group": "Queues and playlists",
+    "Prefix": "prio",
+    "Writes": true
+  },
+  {
+    "Key": "prioid",
+    "Name": "prioid {PRIORITY} {ID...}",
+    "Group": "Queues and playlists",
+    "Prefix": "prioid",
+    "Writes": true
+  },
+  {
+    "Key": "rangeid",
+    "Name": "rangeid {ID} {START:END}",
+    "Group": "Queues and playlists",
+    "Prefix": "rangeid",
+    "Writes": true
+  },
+  {
+    "Key": "shuffle",
+    "Name": "shuffle [START:END]",
+    "Group": "Queues and playlists",
+    "Prefix": "shuffle",
+    "Writes": true
+  },
+  {
+    "Key": "swap",
+    "Name": "swap {SONG1} {SONG2}",
+    "Group": "Queues and playlists",
+    "Prefix": "swap",
+    "Writes": true
+  },
+  {
+    "Key": "swapid",
+    "Name": "swapid {SONG1} {SONG2}",
+    "Group": "Queues and playlists",
+    "Prefix": "swapid",
+    "Writes": true
+  },
+  {
+    "Key": "addtagid",
+    "Name": "addtagid {SONGID} {TAG} {VALUE}",
+    "Group": "Queues and playlists",
+    "Prefix": "addtagid",
+    "Writes": true
+  },
+  {
+    "Key": "cleartagid",
+    "Name": "cleartagid {SONGID} [TAG]",
+    "Group": "Queues and playlists",
+    "Prefix": "cleartagid",
+    "Writes": true
+  },
+  {
+    "Key": "listplaylist",
+    "Name": "listplaylist {NAME} [{START:END}]",
+    "Group": "Library and storage",
+    "Prefix": "listplaylist",
+    "Writes": false
+  },
+  {
+    "Key": "listplaylistinfo",
+    "Name": "listplaylistinfo {NAME} [{START:END}]",
+    "Group": "Library and storage",
+    "Prefix": "listplaylistinfo",
+    "Writes": false
+  },
+  {
+    "Key": "searchplaylist",
+    "Name": "searchplaylist {NAME} {FILTER} [window {START:END}]",
+    "Group": "Library and storage",
+    "Prefix": "searchplaylist",
+    "Writes": true
+  },
+  {
+    "Key": "listplaylists",
+    "Name": "listplaylists",
+    "Group": "Library and storage",
+    "Prefix": "listplaylists",
+    "Writes": false
+  },
+  {
+    "Key": "load",
+    "Name": "load {NAME} [START:END] [POSITION]",
+    "Group": "Queues and playlists",
+    "Prefix": "load",
+    "Writes": true
+  },
+  {
+    "Key": "playlistadd",
+    "Name": "playlistadd {NAME} {URI} [POSITION]",
+    "Group": "Queues and playlists",
+    "Prefix": "playlistadd",
+    "Writes": true
+  },
+  {
+    "Key": "playlistclear",
+    "Name": "playlistclear {NAME}",
+    "Group": "Queues and playlists",
+    "Prefix": "playlistclear",
+    "Writes": true
+  },
+  {
+    "Key": "playlistdelete",
+    "Name": "playlistdelete {NAME} {SONGPOS}",
+    "Group": "Queues and playlists",
+    "Prefix": "playlistdelete",
+    "Writes": true
+  },
+  {
+    "Key": "playlistlength",
+    "Name": "playlistlength {NAME}",
+    "Group": "Queues and playlists",
+    "Prefix": "playlistlength",
+    "Writes": true
+  },
+  {
+    "Key": "playlistmove",
+    "Name": "playlistmove {NAME} [{FROM} | {START:END}] {TO}",
+    "Group": "Queues and playlists",
+    "Prefix": "playlistmove",
+    "Writes": true
+  },
+  {
+    "Key": "rename",
+    "Name": "rename {NAME} {NEW_NAME}",
+    "Group": "Queues and playlists",
+    "Prefix": "rename",
+    "Writes": true
+  },
+  {
+    "Key": "rm",
+    "Name": "rm {NAME}",
+    "Group": "Queues and playlists",
+    "Prefix": "rm",
+    "Writes": true
+  },
+  {
+    "Key": "save",
+    "Name": "save {NAME} [MODE]",
+    "Group": "Queues and playlists",
+    "Prefix": "save",
+    "Writes": true
+  },
+  {
+    "Key": "count",
+    "Name": "count {FILTER} [group {GROUPTYPE}]",
+    "Group": "Library and storage",
+    "Prefix": "count",
+    "Writes": false
+  },
+  {
+    "Key": "find",
+    "Name": "find {FILTER} [sort {TYPE}] [window {START:END}]",
+    "Group": "Library and storage",
+    "Prefix": "find",
+    "Writes": false
+  },
+  {
+    "Key": "findadd",
+    "Name": "findadd {FILTER} [sort {TYPE}] [window {START:END}] [position POS]",
+    "Group": "Library and storage",
+    "Prefix": "findadd",
+    "Writes": true
+  },
+  {
+    "Key": "list",
+    "Name": "list {TYPE} {FILTER} [group {GROUPTYPE}]",
+    "Group": "Library and storage",
+    "Prefix": "list",
+    "Writes": false
+  },
+  {
+    "Key": "listall",
+    "Name": "listall [URI]",
+    "Group": "Library and storage",
+    "Prefix": "listall",
+    "Writes": false
+  },
+  {
+    "Key": "listallinfo",
+    "Name": "listallinfo [URI]",
+    "Group": "Library and storage",
+    "Prefix": "listallinfo",
+    "Writes": false
+  },
+  {
+    "Key": "listfiles",
+    "Name": "listfiles {URI}",
+    "Group": "Library and storage",
+    "Prefix": "listfiles",
+    "Writes": true
+  },
+  {
+    "Key": "lsinfo",
+    "Name": "lsinfo [URI]",
+    "Group": "Library and storage",
+    "Prefix": "lsinfo",
+    "Writes": false
+  },
+  {
+    "Key": "readcomments",
+    "Name": "readcomments {URI}",
+    "Group": "Library and storage",
+    "Prefix": "readcomments",
+    "Writes": false
+  },
+  {
+    "Key": "search",
+    "Name": "search {FILTER} [sort {TYPE}] [window {START:END}]",
+    "Group": "Library and storage",
+    "Prefix": "search",
+    "Writes": false
+  },
+  {
+    "Key": "searchadd",
+    "Name": "searchadd {FILTER} [sort {TYPE}] [window {START:END}] [position POS]",
+    "Group": "Library and storage",
+    "Prefix": "searchadd",
+    "Writes": true
+  },
+  {
+    "Key": "searchaddpl",
+    "Name": "searchaddpl {NAME} {FILTER} [sort {TYPE}] [window {START:END}] [position POS]",
+    "Group": "Library and storage",
+    "Prefix": "searchaddpl",
+    "Writes": true
+  },
+  {
+    "Key": "searchcount",
+    "Name": "searchcount {FILTER} [group {GROUPTYPE}]",
+    "Group": "Library and storage",
+    "Prefix": "searchcount",
+    "Writes": false
+  },
+  {
+    "Key": "update",
+    "Name": "update [URI]",
+    "Group": "Library and storage",
+    "Prefix": "update",
+    "Writes": true
+  },
+  {
+    "Key": "rescan",
+    "Name": "rescan [URI]",
+    "Group": "Library and storage",
+    "Prefix": "rescan",
+    "Writes": true
+  },
+  {
+    "Key": "mount",
+    "Name": "mount {PATH} {URI}",
+    "Group": "Library and storage",
+    "Prefix": "mount",
+    "Writes": true
+  },
+  {
+    "Key": "unmount",
+    "Name": "unmount {PATH}",
+    "Group": "Library and storage",
+    "Prefix": "unmount",
+    "Writes": true
+  },
+  {
+    "Key": "listmounts",
+    "Name": "listmounts",
+    "Group": "Library and storage",
+    "Prefix": "listmounts",
+    "Writes": false
+  },
+  {
+    "Key": "listneighbors",
+    "Name": "listneighbors",
+    "Group": "Library and storage",
+    "Prefix": "listneighbors",
+    "Writes": false
+  },
+  {
+    "Key": "sticker-get",
+    "Name": "sticker get {TYPE} {URI} {NAME}",
+    "Group": "Tags and stickers",
+    "Prefix": [
+      "sticker",
+      "get"
+    ],
+    "Writes": false
+  },
+  {
+    "Key": "sticker-set",
+    "Name": "sticker set {TYPE} {URI} {NAME} {VALUE}",
+    "Group": "Tags and stickers",
+    "Prefix": [
+      "sticker",
+      "set"
+    ],
+    "Writes": true
+  },
+  {
+    "Key": "sticker-inc",
+    "Name": "sticker inc {TYPE} {URI} {NAME} {VALUE}",
+    "Group": "Tags and stickers",
+    "Prefix": [
+      "sticker",
+      "inc"
+    ],
+    "Writes": true
+  },
+  {
+    "Key": "sticker-dec",
+    "Name": "sticker dec {TYPE} {URI} {NAME} {VALUE}",
+    "Group": "Tags and stickers",
+    "Prefix": [
+      "sticker",
+      "dec"
+    ],
+    "Writes": true
+  },
+  {
+    "Key": "sticker-delete",
+    "Name": "sticker delete {TYPE} {URI} [NAME]",
+    "Group": "Tags and stickers",
+    "Prefix": [
+      "sticker",
+      "delete"
+    ],
+    "Writes": true
+  },
+  {
+    "Key": "sticker-list",
+    "Name": "sticker list {TYPE} {URI}",
+    "Group": "Tags and stickers",
+    "Prefix": [
+      "sticker",
+      "list"
+    ],
+    "Writes": false
+  },
+  {
+    "Key": "sticker-find",
+    "Name": "sticker find {TYPE} {URI} {NAME} [sort {SORTTYPE}] [window {START:END}]",
+    "Group": "Tags and stickers",
+    "Prefix": [
+      "sticker",
+      "find"
+    ],
+    "Writes": false
+  },
+  {
+    "Key": "sticker-find-value",
+    "Name": "sticker find {TYPE} {URI} {NAME} = {VALUE} [sort {SORTTYPE}] [window {START:END}]",
+    "Group": "Tags and stickers",
+    "Prefix": [
+      "sticker",
+      "find"
+    ],
+    "Writes": false
+  },
+  {
+    "Key": "ping",
+    "Name": "ping",
+    "Group": "Capabilities",
+    "Prefix": "ping",
+    "Writes": false
+  },
+  {
+    "Key": "tagtypes",
+    "Name": "tagtypes",
+    "Group": "Tags and stickers",
+    "Prefix": "tagtypes",
+    "Writes": false
+  },
+  {
+    "Key": "tagtypes-disable",
+    "Name": "tagtypes disable {NAME...}",
+    "Group": "Tags and stickers",
+    "Prefix": [
+      "tagtypes",
+      "disable"
+    ],
+    "Writes": true
+  },
+  {
+    "Key": "tagtypes-enable",
+    "Name": "tagtypes enable {NAME...}",
+    "Group": "Tags and stickers",
+    "Prefix": [
+      "tagtypes",
+      "enable"
+    ],
+    "Writes": true
+  },
+  {
+    "Key": "tagtypes-clear",
+    "Name": "tagtypes clear",
+    "Group": "Tags and stickers",
+    "Prefix": [
+      "tagtypes",
+      "clear"
+    ],
+    "Writes": true
+  },
+  {
+    "Key": "tagtypes-all",
+    "Name": "tagtypes all",
+    "Group": "Tags and stickers",
+    "Prefix": [
+      "tagtypes",
+      "all"
+    ],
+    "Writes": true
+  },
+  {
+    "Key": "tagtypes-available",
+    "Name": "tagtypes available",
+    "Group": "Tags and stickers",
+    "Prefix": [
+      "tagtypes",
+      "available"
+    ],
+    "Writes": false
+  },
+  {
+    "Key": "protocol",
+    "Name": "protocol",
+    "Group": "Capabilities",
+    "Prefix": "protocol",
+    "Writes": false
+  },
+  {
+    "Key": "protocol-disable",
+    "Name": "protocol disable {FEATURE...}",
+    "Group": "Capabilities",
+    "Prefix": [
+      "protocol",
+      "disable"
+    ],
+    "Writes": true
+  },
+  {
+    "Key": "protocol-enable",
+    "Name": "protocol enable {FEATURE...}",
+    "Group": "Capabilities",
+    "Prefix": [
+      "protocol",
+      "enable"
+    ],
+    "Writes": true
+  },
+  {
+    "Key": "protocol-clear",
+    "Name": "protocol clear",
+    "Group": "Capabilities",
+    "Prefix": [
+      "protocol",
+      "clear"
+    ],
+    "Writes": true
+  },
+  {
+    "Key": "protocol-all",
+    "Name": "protocol all",
+    "Group": "Capabilities",
+    "Prefix": [
+      "protocol",
+      "all"
+    ],
+    "Writes": true
+  },
+  {
+    "Key": "protocol-available",
+    "Name": "protocol available",
+    "Group": "Capabilities",
+    "Prefix": [
+      "protocol",
+      "available"
+    ],
+    "Writes": false
+  },
+  {
+    "Key": "partition",
+    "Name": "partition {NAME}",
+    "Group": "Partitions and outputs",
+    "Prefix": "partition",
+    "Writes": true
+  },
+  {
+    "Key": "listpartitions",
+    "Name": "listpartitions",
+    "Group": "Library and storage",
+    "Prefix": "listpartitions",
+    "Writes": false
+  },
+  {
+    "Key": "newpartition",
+    "Name": "newpartition {NAME}",
+    "Group": "Partitions and outputs",
+    "Prefix": "newpartition",
+    "Writes": true
+  },
+  {
+    "Key": "delpartition",
+    "Name": "delpartition {NAME}",
+    "Group": "Partitions and outputs",
+    "Prefix": "delpartition",
+    "Writes": true
+  },
+  {
+    "Key": "moveoutput",
+    "Name": "moveoutput {OUTPUTNAME}",
+    "Group": "Queues and playlists",
+    "Prefix": "moveoutput",
+    "Writes": true
+  },
+  {
+    "Key": "disableoutput",
+    "Name": "disableoutput {ID}",
+    "Group": "Partitions and outputs",
+    "Prefix": "disableoutput",
+    "Writes": true
+  },
+  {
+    "Key": "enableoutput",
+    "Name": "enableoutput {ID}",
+    "Group": "Partitions and outputs",
+    "Prefix": "enableoutput",
+    "Writes": true
+  },
+  {
+    "Key": "toggleoutput",
+    "Name": "toggleoutput {ID}",
+    "Group": "Partitions and outputs",
+    "Prefix": "toggleoutput",
+    "Writes": true
+  },
+  {
+    "Key": "outputs",
+    "Name": "outputs",
+    "Group": "Partitions and outputs",
+    "Prefix": "outputs",
+    "Writes": false
+  },
+  {
+    "Key": "outputset",
+    "Name": "outputset {ID} {NAME} {VALUE}",
+    "Group": "Partitions and outputs",
+    "Prefix": "outputset",
+    "Writes": true
+  },
+  {
+    "Key": "commands",
+    "Name": "commands",
+    "Group": "Capabilities",
+    "Prefix": "commands",
+    "Writes": false
+  },
+  {
+    "Key": "notcommands",
+    "Name": "notcommands",
+    "Group": "Capabilities",
+    "Prefix": "notcommands",
+    "Writes": false
+  },
+  {
+    "Key": "urlhandlers",
+    "Name": "urlhandlers",
+    "Group": "Capabilities",
+    "Prefix": "urlhandlers",
+    "Writes": false
+  },
+  {
+    "Key": "decoders",
+    "Name": "decoders",
+    "Group": "Capabilities",
+    "Prefix": "decoders",
+    "Writes": false
+  },
+  {
+    "Key": "channels",
+    "Name": "channels",
+    "Group": "Capabilities",
+    "Prefix": "channels",
+    "Writes": false
+  },
+  {
+    "Key": "getvol",
+    "Name": "getvol",
+    "Group": "Playback",
+    "Prefix": [
+      "getvol"
+    ],
+    "Writes": false
+  },
+  {
+    "Key": "playlist",
+    "Name": "playlist",
+    "Group": "Queues and playlists",
+    "Prefix": [
+      "playlist"
+    ],
+    "Writes": false
+  },
+  {
+    "Key": "getfingerprint",
+    "Name": "getfingerprint {URI}",
+    "Group": "Library and storage",
+    "Prefix": [
+      "getfingerprint"
+    ],
+    "Writes": false
+  }
+]

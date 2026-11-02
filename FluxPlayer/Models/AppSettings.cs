@@ -4,6 +4,8 @@ namespace FluxPlayer.Models;
 
 public class AppSettings
 {
+    public ExperienceSettings Experience { get; set; } = new();
+    public PlayerEnhancements Enhancements { get; set; } = new();
     // Automatic detects decoded tracks; separate window sizes preserve each workspace.
     public PlayerModePreference PlayerModePreference { get; set; } = PlayerModePreference.Automatic;
     public double AudioWindowWidth { get; set; } = 820;
@@ -49,6 +51,16 @@ public class AppSettings
     public int SeekStepSeconds { get; set; } = 10;
     public int SeekLargeStepSeconds { get; set; } = 60;
     public bool RememberPlaybackSpeed { get; set; } = false;
+    public bool RememberFileVolume { get; set; }
+    public bool RememberFileAudioTrack { get; set; }
+    public bool RememberFileSubtitles { get; set; }
+    public bool KeepPlaybackHistory { get; set; }
+    public int PlaybackHistoryLimit { get; set; } = 1000;
+    public int PlaybackHistoryDays { get; set; } = 90;
+    public Dictionary<string, FilePlaybackPreference> FilePlaybackPreferences { get; set; } = new();
+    public string FilePlaybackMemoryToken { get; set; } = "";
+    public LibraryColumnView? LibraryColumnView { get; set; }
+    public Dictionary<string, LibraryColumnView> LibraryColumnViews { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public bool RememberAspectRatio { get; set; } = false;
     public string DefaultPlaybackOnEnd { get; set; } = "Next";
 
@@ -66,6 +78,8 @@ public class AppSettings
     public int Saturation { get; set; } = 0;
     public int Hue { get; set; } = 0;
     public int Gamma { get; set; } = 0;
+    public Dictionary<string, VideoPicture> PicturePresets { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+    public string ActivePicturePreset { get; set; } = "";
     public bool RestrictFullscreenCursor { get; set; } = false;
     public string FullscreenColor { get; set; } = "#000000";
     public bool AmbientLightEnabled { get; set; } = true;
@@ -86,6 +100,7 @@ public class AppSettings
     public Dictionary<string, AudioOutputProfile> AudioOutputProfiles { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public string AudioChannels { get; set; } = "Stereo";
     public bool NormalizeVolume { get; set; } = false;
+    public AudioEffects AudioEffects { get; set; } = new();
     public bool BoostVolume { get; set; } = false;
     public int VolumeBoostMaxPercent { get; set; } = 200;
     public int AudioDelayStepMs { get; set; } = 50;

@@ -12,6 +12,7 @@ public partial class MediaService
     private long _sourceGeneration;
     private volatile bool _opaqueVideoSurface;
     public bool UsesSubtitleSoftwareFallback { get; private set; }
+    public bool SubtitleBridgeDisabled { get; private set; }
     public bool HasOpaqueVideoSurface => _opaqueVideoSurface;
     public event EventHandler? VideoSurfaceChanged;
 
@@ -26,6 +27,15 @@ public partial class MediaService
     /// <summary>VLC 3 cannot blend YUVA subtitles into opaque D3D11 frames before memory output conversion.</summary>
     public async Task<bool> EnsureSubtitleCompositionAsync()
     {
+        bool restoreBridge = false;
+        if (SubtitleBridge != null && !SubtitleBridgeDisabled)
+        {
+            var status = SubtitleBridge.Status;
+            if (status.Error == 0) return false;
+            SubtitleBridgeDisabled = true;
+            restoreBridge = true;
+            WriteDiagnostic("Subtitle bitmap bridge unavailable; restoring native software composition.");
+        }
         if (_disposed) return false;
         CancellationToken token;
         try
@@ -45,7 +55,7 @@ public partial class MediaService
             lock (_playbackStateLock)
             {
                 if (_disposed || string.IsNullOrEmpty(_currentSourcePath)
-                    || !_opaqueVideoSurface || !_playbackProfiles[_activePlaybackProfileIndex].HardwareDecoding
+                    || !restoreBridge && (!_opaqueVideoSurface || !_playbackProfiles[_activePlaybackProfileIndex].HardwareDecoding)
                     || MediaPlayer.Spu < 0 || MediaPlayer.VideoTrackCount <= 0) return false;
                 if (Interlocked.CompareExchange(ref _recoveringProfile, 1, 0) != 0) return false;
                 ownsRecovery = true;

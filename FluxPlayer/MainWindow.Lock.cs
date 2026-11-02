@@ -20,6 +20,7 @@ public partial class MainWindow
 
     private void SetControlsLocked(bool locked)
     {
+        CancelTouch();
         if (_controlsLocked == locked) return;
         _controlsLocked = locked;
 

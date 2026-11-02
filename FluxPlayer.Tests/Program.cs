@@ -1,4 +1,5 @@
 using FluxPlayer.Models;
+using System.Collections.Immutable;
 using FluxPlayer.Services;
 using FluxPlayer.ViewModels;
 using System.Diagnostics;
@@ -11,11 +12,15 @@ internal static class Program
     private static readonly List<object> Results = new();
     private static string? TestFilter;
     private static bool ProbePendingAudioFilters;
+    private sealed class ImmediateRenameProgress(Action<RenameResult> report) : IProgress<RenameResult>
+    { public void Report(RenameResult value) => report(value); }
     private static readonly string Root = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../session-state/tests"));
 
     [STAThread]
     private static int Main(string[] args)
     {
+        string? fixture = args.FirstOrDefault(a => a.StartsWith("--extension-fixture=", StringComparison.Ordinal));
+        if (fixture != null) return ContinuationChecks.ExtensionFixture(fixture[20..]);
         TestFilter = args.FirstOrDefault(argument => argument.StartsWith("--filter=", StringComparison.Ordinal))?[9..];
         ProbePendingAudioFilters = args.Contains("--probe-pending-audio-filters", StringComparer.Ordinal);
         Directory.CreateDirectory(Root);
@@ -25,7 +30,18 @@ internal static class Program
         {
             try
             {
-                await RunAsync(args.Contains("--managed-only", StringComparer.Ordinal));
+                if (args.Contains("--interop-contracts-only", StringComparer.Ordinal))
+                {
+                    await KodiInteropContractChecks.Run(Root, Test);
+                    await MpdInteropContractChecks.Run(Root, Test);
+                    await InteropRobustnessChecks.Run(Root, Test);
+                }
+                else if (args.Contains("--server-action-guards-only", StringComparer.Ordinal))
+                    await ServerActionInputGuardChecks.Run(Test);
+                else if (args.Contains("--server-action-loopback-only", StringComparer.Ordinal))
+                    await ServerActionLoopbackChecks.Run(Root, Test);
+                else if (args.Contains("--hundred-only", StringComparer.Ordinal)) await HundredFeatureChecks.Run(Root, Test);
+                else await RunAsync(args.Contains("--managed-only", StringComparer.Ordinal), args.Contains("--skip-mpv", StringComparer.Ordinal));
                 if (Results.Count == 0) throw new ArgumentException("No test groups ran. Check the filter and optional dependencies.");
             }
             catch (Exception e) { Console.Error.WriteLine(e); exitCode = 1; }
@@ -49,7 +65,7 @@ internal static class Program
         catch (Exception e) { Results.Add(new { name, passed = false, error = e.ToString() }); throw; }
     }
 
-    private static async Task RunAsync(bool managedOnly)
+    private static async Task RunAsync(bool managedOnly, bool skipMpv)
     {
         string wav = Path.Combine(Root, "Audio test ñ.wav");
         WriteWave(wav, 8);
@@ -287,6 +303,78 @@ internal static class Program
             Assert(!LibraryQuery.Compile("format:mp3")(item) && !LibraryQuery.Compile("-album:\"Blue Train\"")(item), "Exclusion");
             Assert(LibraryQuery.Compile("\"Blue Train\" favorite:true")(item), "Phrase");
             return Task.CompletedTask;
+        });
+
+        await Test("Library browsing: exact artist/album facets, combined rules, missing tags and saved views", async () =>
+        {
+            var entries = new[]
+            {
+                new LibraryEntry { Path = "a.flac", Title = "One", Artist = "Café ñ", Album = "Shared", Genre = "Jazz", Favorite = true, PlayCount = 2, LastPlayedUtc = DateTime.UtcNow },
+                new LibraryEntry { Path = "b.flac", Title = "Two", Artist = "CAFÉ Ñ", Album = "shared", Genre = "Jazz", PlayCount = 1, LastPlayedUtc = DateTime.UtcNow.AddDays(-1) },
+                new LibraryEntry { Path = "c.flac", Title = "Three", Artist = "Café ñ duo", Album = "Shared", Genre = "Pop" },
+                new LibraryEntry { Path = "d.flac", Title = "Four", Artist = " ", Album = "", Genre = "Jazz" },
+                new LibraryEntry { Path = "e.flac", Title = "Five", Artist = "Unknown artist", Album = "Unknown album", Genre = "Jazz" },
+                new LibraryEntry { Path = "f.mkv", Title = "Film", Artist = "Director", Album = "Cinema", Kind = "Video" },
+                new LibraryEntry { Path = "g.flac", Title = "Quoted", Artist = "A \"B\": C", Album = "-album:other", Genre = "Jazz" }
+            };
+            entries[0] = entries[0] with { Labels = LibraryLabels.Parse("Road trip\nCafé") };
+            entries[1] = entries[1] with { Labels = LibraryLabels.Parse("ROAD TRIP") };
+            var all = LibraryBrowser.Browse(entries, "", 0, 0);
+            Assert(all.Entries.Length == 7 && all.Artists[0].Value == null && all.Artists[0].Count == 7, "All files and counts without opening media paths");
+            Assert(all.Artists.Single(item => item.Value == "Café ñ").Count == 2, "Case-insensitive artist grouping with Unicode");
+            var artist = LibraryBrowser.Browse(entries, "", 1, 0, "café ñ");
+            Assert(artist.Entries.Length == 2 && artist.Albums.Length == 2 && artist.Albums[1].Count == 2, "Exact artist excludes longer names; albums are scoped to that artist");
+            Assert(LibraryBrowser.Browse(entries, "", 0, 0, album: "SHARED").Entries.Length == 3, "Album browsing across artists");
+            Assert(LibraryBrowser.Browse(entries, "", 0, 0, "Café ñ", "Shared").Entries.Length == 2, "Artist and album intersection");
+            Assert(LibraryBrowser.Browse(entries, "genre:jazz", 1, 1, "Café ñ", "Shared").Entries.Single().Path == "a.flac", "Facets combine with query, kind and favorites");
+            Assert(LibraryBrowser.Browse(entries, "", 0, 2).Entries.Select(entry => entry.Path).SequenceEqual(new[] { "a.flac", "b.flac" }), "Recently played order preserved");
+            Assert(LibraryBrowser.Browse(entries, "", 0, 3).Entries.Select(entry => entry.Path).SequenceEqual(new[] { "a.flac", "b.flac" }), "Most played order preserved");
+            Assert(LibraryBrowser.Browse(entries, "", 0, 0, "", "").Entries.Single().Path == "d.flac", "Empty tags differ from all values");
+            Assert(LibraryBrowser.Browse(entries, "", 0, 0, "Unknown artist").Entries.Single().Path == "e.flac", "Literal unknown names differ from missing metadata");
+            Assert(LibraryBrowser.Browse(entries, "", 0, 0, "A \"B\": C", "-album:other").Entries.Single().Path == "g.flac", "Facet values do not become query syntax");
+            Assert(all.Labels[0].Count == 7 && all.Labels.Single(item => item.Value == "Road trip").Count == 2, "Multi-label totals count files once, not label assignments");
+            Assert(LibraryBrowser.Browse(entries, "", 0, 0, label: "road trip").Entries.Length == 2
+                && LibraryBrowser.Browse(entries, "", 0, 0, label: "Road").Entries.Length == 0, "Label browsing is exact and case insensitive");
+            Assert(LibraryBrowser.Browse(entries, "", 0, 0, label: "").Entries.Length == 5, "Unlabeled view excludes labeled files");
+            var labeledArtist = LibraryBrowser.Browse(entries, "", 0, 0, "Café ñ", "Shared", "Café");
+            Assert(labeledArtist.Entries.Single().Path == "a.flac" && labeledArtist.Labels[0].Count == 2, "Labels combine with exact artist and album");
+            var absent = LibraryBrowser.Browse(entries, "title:unavailable", 0, 0, "Café ñ", "Shared");
+            Assert(absent.Entries.Length == 0 && absent.Artists.Single(item => item.Value == "Café ñ").Count == 0
+                && absent.Albums.Single(item => item.Value == "Shared").Count == 0, "No-match selections remain visible without broadening results");
+            using var canceled = new CancellationTokenSource(); canceled.Cancel(); bool rejected = false;
+            try { LibraryBrowser.Browse(entries, "", 0, 0, token: canceled.Token); } catch (OperationCanceledException) { rejected = true; }
+            Assert(rejected, "Superseded browse work cancels");
+            var large = Enumerable.Range(0, 200_000).Select(index => entries[0] with
+            { Path = $"large-{index:D6}.flac", Artist = $"Artist {index % 1000:D4}", Album = $"Album {index % 5}" }).ToArray();
+            var largeView = LibraryBrowser.Browse(large, "", 1, 0, "Artist 0001");
+            Assert(largeView.Artists.Length == 1001 && largeView.Artists[0].Count == 200_000
+                && largeView.Entries.Length == 200 && largeView.Albums[0].Count == 200
+                && largeView.Labels[0].Count == 200, "Index-size snapshot retains exact counts and scoped results");
+            var legacy = JsonSerializer.Deserialize<SmartList>("{\"Name\":\"Old\",\"Query\":\"genre:jazz\",\"Kind\":1,\"Collection\":0}")!;
+            Assert(legacy.IsValid && legacy.Artist == null && legacy.Album == null, "Legacy playlists retain their full scope");
+            string folder = Path.Combine(Root, "browse-" + Guid.NewGuid().ToString("N")), backup = Path.Combine(folder, "backup.json");
+            var saved = new SmartList("Exact artist", "genre:jazz", 1, 0, "A \"B\": C", "-album:other", "Road trip");
+            await using (var library = new LibraryService(folder))
+            {
+                await library.SaveSmartListAsync(saved);
+                await library.SaveSmartListAsync(new SmartList("Missing tags", "", 0, 0, "", "", ""));
+                await library.ExportBackupAsync(backup);
+                rejected = false;
+                try { await library.SaveSmartListAsync(saved with { Artist = new string('x', 4097) }); } catch (ArgumentException) { rejected = true; }
+                Assert(rejected && (await library.SmartListsAsync()).Single(item => item.Name == saved.Name) == saved, "Invalid facets cannot replace a saved playlist");
+                rejected = false;
+                try { await library.SaveSmartListAsync(saved with { Label = "Road\ntrip" }); } catch (ArgumentException) { rejected = true; }
+                Assert(rejected, "Non-printable label criteria cannot be saved");
+            }
+            await using var reopened = new LibraryService(folder);
+            Assert((await reopened.SmartListsAsync()).Single(item => item.Name == saved.Name) == saved, "Exact browse criteria persist");
+            Assert((await reopened.SmartListsAsync()).Single(item => item.Name == "Missing tags") is { Artist: "", Album: "", Label: "" }, "Missing-tag and unlabeled selections persist separately from all");
+            await using var restored = new LibraryService(Path.Combine(folder, "restored"));
+            await restored.ImportBackupAsync(backup);
+            Assert((await restored.SmartListsAsync()).Single(item => item.Name == saved.Name) == saved, "Backup merging retains facets");
+            File.WriteAllText(backup, JsonSerializer.Serialize(new { Version = 1, Folders = Array.Empty<string>(), Entries = Array.Empty<LibraryEntry>(), Lists = new[] { saved with { Album = new string('x', 4097) } } }));
+            rejected = false; try { await restored.ImportBackupAsync(backup); } catch (InvalidDataException) { rejected = true; }
+            Assert(rejected && (await restored.SmartListsAsync()).Single(item => item.Name == saved.Name) == saved, "Invalid imported facets rejected without mutation");
         });
 
         await Test("Library: scanning, statistics, favorites, watching, backup and reopening", async () =>
@@ -618,8 +706,317 @@ internal static class Program
             return Task.CompletedTask;
         });
 
+        await Test("Batch rename: templates, conflicts, stale previews, cancellation, loaded files and retained library records", async () =>
+        {
+            string folder = Path.Combine(Root, "rename-" + Guid.NewGuid().ToString("N"));
+            string media = Path.Combine(folder, "media"); Directory.CreateDirectory(media);
+            string first = Path.Combine(media, "One ñ.wav"), second = Path.Combine(media, "Two.wav");
+            File.Copy(wav, first); File.Copy(wav, second);
+            byte[] original = File.ReadAllBytes(first);
+            await using var library = new LibraryService(Path.Combine(folder, "index"));
+            await library.ScanFolderAsync(media, false);
+            await library.ToggleFavoriteAsync(first);
+            await library.UpdateLabelsAsync(new[] { first }, new[] { "Road trip" }, LibraryLabelEdit.Add);
+            await library.RecordPlaybackAsync(first, new MediaMetadata("Indexed title", "Artist", "Album", "Genre", "", 8000, true, false, "PCM"));
+            var inputs = new[] { new RenameInput(first), new RenameInput(second) };
+            var plan = await FileRenameService.PreviewAsync(inputs, "{index} - {filename}");
+            Assert(plan.Length == 2 && plan[0].Destination.EndsWith("001 - One ñ.wav", StringComparison.Ordinal), "Ordered Unicode preview");
+            foreach (string invalid in new[] { "../{filename}", "{unsupported}", "../", "{filename}/child" })
+            {
+                bool refused = false; try { await FileRenameService.PreviewAsync(inputs, invalid); } catch (ArgumentException) { refused = true; }
+                Assert(refused && File.Exists(first) && File.Exists(second), "Invalid preview cannot change files");
+            }
+            bool duplicate = false; try { await FileRenameService.PreviewAsync(inputs, "same"); } catch (ArgumentException) { duplicate = true; }
+            Assert(duplicate, "Duplicate targets rejected");
+            File.WriteAllText(plan[1].Destination, "Existing destination");
+            bool conflict = false; try { await FileRenameService.ApplyAsync(plan, library, _ => false); } catch (IOException) { conflict = true; }
+            Assert(conflict && File.Exists(first) && !File.Exists(plan[0].Destination), "A later collision prevents the entire job from starting");
+            File.Delete(plan[1].Destination);
+            using (var canceled = new CancellationTokenSource())
+            {
+                canceled.Cancel();
+                try { await FileRenameService.ApplyAsync(plan, library, _ => false, token: canceled.Token); } catch (OperationCanceledException) { }
+                Assert(File.Exists(first) && File.Exists(second), "Cancellation before mutation");
+            }
+            DateTime stamp = File.GetLastWriteTimeUtc(second); File.SetLastWriteTimeUtc(second, stamp.AddMinutes(-5));
+            bool stale = false; try { await FileRenameService.ApplyAsync(plan, library, _ => false); } catch (IOException) { stale = true; }
+            Assert(stale && File.Exists(first), "Stale input blocks the whole preview"); File.SetLastWriteTimeUtc(second, stamp);
+            var result = await FileRenameService.ApplyAsync(plan, library, path => path == second);
+            Assert(result.Results.Count(item => item.Renamed) == 1 && result.Results.Single(item => !item.Renamed).Message.Contains("loaded"), "Loaded files skipped");
+            Assert(File.ReadAllBytes(plan[0].Destination).SequenceEqual(original) && !File.Exists(first) && File.Exists(second), "Only file names change");
+            var indexed = (await library.SnapshotAsync()).Single(entry => entry.Path == plan[0].Destination);
+            Assert(indexed.Favorite && indexed.PlayCount == 1 && indexed.Title == "Indexed title" && indexed.Labels.Contains("Road trip"), "Index identity and personal metadata retained");
+            await using var reopened = new LibraryService(Path.Combine(folder, "index"));
+            Assert((await reopened.SnapshotAsync()).Any(entry => entry.Path == plan[0].Destination && entry.Favorite), "Renamed library record persists");
+            var sanitized = await FileRenameService.PreviewAsync(new[] { new RenameInput(second, "A/B:Title", "Artist") }, "{title}");
+            Assert(Path.GetFileName(sanitized[0].Destination) == "A_B_Title.wav", "Metadata filename sanitization");
+            var reserved = await FileRenameService.PreviewAsync(new[] { new RenameInput(second) }, "CON");
+            Assert(Path.GetFileName(reserved[0].Destination) == "_CON.wav", "Reserved Windows device names protected");
+            var unchanged = await FileRenameService.PreviewAsync(new[] { new RenameInput(second) }, "{filename}");
+            Assert(!(await FileRenameService.ApplyAsync(unchanged, library, _ => false)).Results.Single().Renamed, "Unchanged names skipped");
+            string cancelFirst = Path.Combine(media, "Cancel one.wav"), cancelSecond = Path.Combine(media, "Cancel two.wav");
+            File.Copy(wav, cancelFirst); File.Copy(wav, cancelSecond);
+            var cancelPlan = await FileRenameService.PreviewAsync(new[] { new RenameInput(cancelFirst), new RenameInput(cancelSecond) }, "renamed {filename}");
+            using var midCancel = new CancellationTokenSource();
+            var canceledSummary = await FileRenameService.ApplyAsync(cancelPlan, library, _ => false,
+                new ImmediateRenameProgress(_ => midCancel.Cancel()), midCancel.Token);
+            Assert(canceledSummary.Canceled && canceledSummary.Results.Length == 1 && File.Exists(cancelPlan[0].Destination)
+                && File.Exists(cancelSecond) && !File.Exists(cancelPlan[1].Destination), "Cancellation retains completed renames and leaves the rest untouched");
+        });
+
+        await Test("Folder browsing: media filters, navigation entries, Unicode, limits and cancellation", async () =>
+        {
+            string folder = Path.Combine(Root, "folder-browser-" + Guid.NewGuid().ToString("N")); Directory.CreateDirectory(folder);
+            string child = Path.Combine(folder, "Album ñ"); Directory.CreateDirectory(child);
+            string audio = Path.Combine(folder, "Music ñ.wav"), video = Path.Combine(folder, "Clip.mkv");
+            File.Copy(wav, audio); File.WriteAllText(video, "extension classification only"); File.WriteAllText(Path.Combine(folder, "notes.txt"), "ignore");
+            File.Copy(wav, Path.Combine(child, "Nested.wav"));
+            byte[] before = File.ReadAllBytes(audio);
+            var all = await MediaFolderBrowser.ReadAsync(folder);
+            Assert(all.Items.Length == 3 && all.Items[0].IsFolder && all.Items[0].Path == child && all.Folder == folder, "Directories first, current folder only, exclude unrelated files");
+            var music = await MediaFolderBrowser.ReadAsync(folder, 1);
+            Assert(music.Items.Length == 2 && music.Items.Single(item => !item.IsFolder).Name == "Music ñ.wav", "Audio view keeps folders and Unicode names");
+            var movies = await MediaFolderBrowser.ReadAsync(folder, 2);
+            Assert(movies.Items.Single(item => !item.IsFolder).Path == video, "Video filter classifies filename without decoding");
+            Assert((await MediaFolderBrowser.ReadAsync(folder, search: "MUSIC Ñ")).Items.Length == 2, "Case-insensitive file-name filter retains folder navigation");
+            Assert((await MediaFolderBrowser.ReadAsync(child)).Items.Single().Name == "Nested.wav" && Directory.GetParent(child)?.FullName == folder, "Enter and parent folder navigation");
+            Assert((await MediaFolderBrowser.ReadAsync(folder, limit: 2)) is { Truncated: true, Items.Length: 2 }, "Bounded enumeration reports truncation");
+            using var canceled = new CancellationTokenSource(); canceled.Cancel(); bool rejected = false;
+            try { await MediaFolderBrowser.ReadAsync(folder, token: canceled.Token); } catch (OperationCanceledException) { rejected = true; }
+            Assert(rejected && File.ReadAllBytes(audio).SequenceEqual(before), "Cancellation and browsing preserve media bytes");
+        });
+
+        await Test("Per-file preferences: validation, finite volume, bounded history and persisted options", () =>
+        {
+            string directory = Path.Combine(Root, "file-preferences-" + Guid.NewGuid().ToString("N"));
+            var settings = new AppSettings { RememberFileVolume = true, RememberFileAudioTrack = true, RememberFileSubtitles = true };
+            var stamp = new FilePlaybackPreference(1, DateTime.UtcNow.Ticks, DateTime.UtcNow, double.NaN, new(2, "English"), new(-1, "Disabled"));
+            settings.FilePlaybackPreferences[Path.GetFullPath(wav)] = stamp;
+            settings.FilePlaybackPreferences["relative.wav"] = stamp;
+            settings.FilePlaybackPreferences[Path.Combine(Root, "bad.wav")] = stamp with { ModifiedTicks = -1 };
+            var clean = FilePlaybackPreference.Sanitize(settings.FilePlaybackPreferences);
+            Assert(clean.Count == 1 && clean.Values.Single().Volume == null && clean.Values.Single().Subtitle?.Id == -1, "Reject invalid identity/NaN while preserving Disabled");
+            settings.FilePlaybackPreferences = clean;
+            var service = new SettingsService(directory); Assert(service.Save(settings), "Persist preferences");
+            var loaded = service.Load();
+            Assert(loaded.RememberFileVolume && loaded.RememberFileAudioTrack && loaded.RememberFileSubtitles
+                && loaded.FilePlaybackPreferences.Single().Value.Audio?.Name == "English", "Independent options and track identity survive reload");
+            var many = Enumerable.Range(0, 1001).ToDictionary(index => Path.Combine(Root, $"remember-{index}.wav"),
+                index => stamp with { Volume = 999, UpdatedUtc = DateTime.UtcNow.AddMinutes(index) });
+            var bounded = FilePlaybackPreference.Sanitize(many);
+            Assert(bounded.Count == 1000 && !bounded.ContainsKey(Path.Combine(Root, "remember-0.wav")) && bounded.Values.All(item => item.Volume == 200), "Bound history to newest 1000 and clamp boost range");
+            return Task.CompletedTask;
+        });
+
+        await Test("Tag templates: selective fields, numeric limits, custom validation, safe copies and bounded input", async () =>
+        {
+            var patch = new MetadataPatch(Title: "", Extra: new Dictionary<string, string> { ["composer"] = "Composer ñ", ["year"] = "2026", ["lyrics"] = "First\nSecond" }.ToImmutableDictionary(), Custom: CustomTagFields.Parse("MOOD=Calm ñ\nSESSION=Evening=Live\nREMOVE="));
+            patch.Validate();
+            Assert(patch.Artist == null && patch.Title == "" && patch.Custom!["REMOVE"] == "", "Preserve versus explicit clear");
+            foreach (var invalid in new[]
+            {
+                new MetadataPatch(Extra: new Dictionary<string, string> { ["year"] = "2026.5" }.ToImmutableDictionary()),
+                new MetadataPatch(Extra: new Dictionary<string, string> { ["track"] = "-1" }.ToImmutableDictionary()),
+                new MetadataPatch(Extra: new Dictionary<string, string> { ["bpm"] = "1001" }.ToImmutableDictionary()),
+                new MetadataPatch(Extra: new Dictionary<string, string> { ["unknown"] = "x" }.ToImmutableDictionary())
+            })
+            { bool rejected = false; try { invalid.Validate(); } catch (ArgumentException) { rejected = true; } Assert(rejected, "Reject invalid advanced field"); }
+            foreach (string invalid in new[] { "MOOD=x\nmood=y", "1BAD=x", "BAD NAME=x", "MOOD", string.Join('\n', Enumerable.Range(0, 33).Select(index => $"FIELD{index}=x")) })
+            { bool rejected = false; try { CustomTagFields.Parse(invalid); } catch (ArgumentException) { rejected = true; } Assert(rejected, "Reject malformed custom input"); }
+            string folder = Path.Combine(Root, "tag-template-" + Guid.NewGuid().ToString("N")); Directory.CreateDirectory(folder);
+            string path = Path.Combine(folder, "Template ñ.json"); await TagEditTemplate.WriteAsync(path, patch);
+            var read = await TagEditTemplate.ReadAsync(path);
+            Assert(read.Title == "" && read.Artist == null && read.Extra!["lyrics"] == "First\nSecond" && read.Custom!["SESSION"] == "Evening=Live", "Template preserves selected fields, Unicode and multiline lyrics");
+            byte[] bytes = File.ReadAllBytes(path); bool refused = false;
+            try { await TagEditTemplate.WriteAsync(path, patch); } catch (IOException) { refused = true; }
+            Assert(refused && File.ReadAllBytes(path).SequenceEqual(bytes), "Template never overwrites an existing file");
+            using var canceled = new CancellationTokenSource(); canceled.Cancel(); string canceledPath = Path.Combine(folder, "canceled.json"); refused = false;
+            try { await TagEditTemplate.WriteAsync(canceledPath, patch, canceled.Token); } catch (OperationCanceledException) { refused = true; }
+            Assert(refused && !File.Exists(canceledPath) && !Directory.EnumerateFiles(folder).Any(file => file.EndsWith(".tmp")), "Canceled export cleans temporary files");
+            string invalidPath = Path.Combine(folder, "invalid.json");
+            foreach (string content in new[] { "{\"Version\":2,\"Patch\":{\"Title\":\"x\"}}", "{\"Version\":1,\"Patch\":{\"Typo\":\"x\"}}", "{\"Version\":1,\"Patch\":{\"Extra\":{\"year\":null}}}" })
+            {
+                File.WriteAllText(invalidPath, content); refused = false;
+                try { await TagEditTemplate.ReadAsync(invalidPath); } catch (Exception e) when (e is IOException or InvalidDataException or ArgumentException) { refused = true; }
+                Assert(refused, "Invalid template rejected before UI mutation");
+            }
+            using (var oversized = File.Create(invalidPath)) oversized.SetLength(2 * 1024 * 1024 + 1);
+            refused = false; try { await TagEditTemplate.ReadAsync(invalidPath); } catch (InvalidDataException) { refused = true; }
+            Assert(refused && File.ReadAllBytes(path).SequenceEqual(bytes), "Oversized input rejected while existing template remains intact");
+        });
+
+        await Test("Organization: metadata folders, root confinement, preflight, retained index, loaded files and cancellation", () => OrganizationChecks.Run(Root, wav));
+        await Test("Library column views: real WPF order, visibility, numeric sorting, persistence and limits", () => LibraryViewChecks.Run(Root));
+        await Test("Nested library collections: hierarchy, scoped views, backup merging, membership, relocation and rollback", () => CollectionChecks.Run(Root, wav));
+        await Test("Advanced CUE: CD-TEXT, gaps, flags, exact frames, directive preservation, rebased copies and encodings", () => AdvancedCueChecks.Run(Root, wav));
+        await Test("Conversion options: validated encoder rates, channel counts, bitrates and PCM depths", ConversionOptionChecks.Validate);
+        await Test("Settings categories: production placement, curated shortcuts and real WPF action forwarding", () => SettingsNavigationChecks.Managed(Root));
+        await Test("Playback history: atomic sessions, UTC, bounded retention, export, cancellation, corrupt stores and clearing", () => PlaybackHistoryChecks.Managed(Root));
+        await Test("Media catalog: ordered lists, protection, revisions, cross-list search, stations, bounded input and atomic failures", () => MediaCatalogChecks.Catalog(Root, wav));
+        await Test("Named playlist documents: M3U8/PLS/XSPF titles, order, missing paths, copies, entities and cancellation", () => MediaCatalogChecks.Playlists(Root, wav));
+        await Test("Genre and decade browsing: facets, queries, unknown years, saved criteria and library backup", () => MediaCatalogChecks.Facets(Root));
+
         // CI verifies managed services without requiring an interactive audio device.
+        await Test("More thirty: virtual skips, mutes, ordered segments and declarative scripts", () => MoreThirtyChecks.Edits(Root, wav));
+        await Test("More thirty: smart queues, related tracks, album order and computed ratings", () => MoreThirtyChecks.Queues(Root));
+        await Test("More thirty: tag transformations, subtitle interval trees, aspect and input preferences", MoreThirtyChecks.TextAndPresentation);
+        await Test("Continuation: touch seek, volume, pinch, pan and canceled contacts", ContinuationChecks.Touch);
+        await Test("Continuation: duplicate metadata consolidation, stale previews, rollback and persistence", () => ContinuationChecks.Duplicates(Root, wav));
+        await Test("Continuation: lyrics transport, matching, rate limits, exports and cancellation", () => ContinuationChecks.Lyrics(Root));
+        await Test("Continuation: extension manifests, real child processes, bounded output and cancellation", () => ContinuationChecks.Extensions(Root));
+        await Test("Completion: HUD geometry, GPU policies, adapter discovery and persistence", () => CompletionChecks.Preferences(Root));
+        await Test("Completion: automatic duplicate consolidation, durable exclusions and restored copies", () => CompletionChecks.Duplicates(Root, wav));
+        await Test("Completion: selected-file HTTP sharing, ranges and shutdown", () => CompletionChecks.Share(Root, wav));
+        await Test("Completion: subtitle provider login, movie hashes, validated downloads and origin guards", () => CompletionChecks.Subtitles(Root));
+        await Test("Completion: remote catalogue synchronization, ETag protection and conflicts", () => CompletionChecks.Sync(Root, wav));
+        await Test("Completion: nested ordered chapters, segment maps, language displays and changed sources", () => CompletionChecks.Linked(Root, wav));
+        await Test("Engine completion: ordered PCM effect chain and explicit speaker masks", EngineCompletionChecks.Chain);
+        await Test("Engine completion: real managed DLL effect loading and PCM processing", EngineCompletionChecks.Plugin);
+        await Test("Engine completion: DSP signal matrix across six rates and five speaker layouts", EngineCompletionChecks.QualityMatrix);
+        await Test("Engine completion: recursive whole linked editions, optional end times and cycle rejection", () => EngineCompletionChecks.LinkedEditions(Root));
+        await Test("Matroska completion: EBML metadata, unknown clusters, simple editions, discovery and stale/cycle guards", () => MatroskaInspectionChecks.Metadata(Root));
+        await Test("Engine completion: DSF native bitstream parsing and lossless bit-order conversion", () => EngineCompletionChecks.DsdFiles(Root));
+        await Test("Engine completion: DSDIFF raw channels, bit order and malformed/compressed source rejection", () => EngineCompletionChecks.DffFiles(Root));
+        await Test("Engine completion: native DSD driver-bound buffers and byte integrity", () => EngineCompletionChecks.NativeDsd(Root));
+        await SubtitleWorkshopAcceptanceChecks.Run(Root, Test);
+        await SqlAcceptanceChecks.Run(Root, Test);
+        await SubtitleProductionAcceptanceChecks.Run(Root, Test);
+        await RecordedAudioAcceptanceChecks.Run(Root, Test);
+        if (ConversionService.FindExecutable() != null)
+        {
+            await PaletteAcceptanceChecks.Run(Root, Test);
+            await DiagnosticAcceptanceChecks.Run(Root, Test);
+            await Test("Matroska completion: actual container metadata and embedded chapter extraction", () => MatroskaInspectionChecks.RealContainer(Root));
+            await Test("Engine completion: streaming gapless sample adjacency", () => EngineCompletionChecks.Stream(Root, 0));
+            await Test("Engine completion: streaming live crossfade samples", () => EngineCompletionChecks.Stream(Root, .25));
+            await Test("Engine completion: direct integer PCM byte preservation", () => EngineCompletionChecks.Direct(Root));
+        }
+        await Test("More thirty: recurring schedules, DST, priorities and interrupted series", () => MoreThirtyChecks.Schedules(Root));
+        await Test("More thirty: fingerprint capture and byte-identical moved-file repair", () => MoreThirtyChecks.Fingerprints(Root, wav));
+        await Test("Thirty features: audio effect schema validation and finite parameter limits", AdvancedDspChecks.Validation);
+        await Test("Thirty features: durable one-time schedules, DST rules, claims, failed saves and cancellable volume fades", () => ThirtyMediaChecks.Scheduling(Root));
+        await Test("Thirty features: bounded zoom, pan, side-by-side and top/bottom geometry", ThirtyMediaChecks.Viewport);
+        await Test("Ten features: RSS/Atom retrieval, offline downloads, cancellation, refresh preservation and publication failures", () => ExtendedMediaChecks.Podcasts(Root, wav));
+        await Test("Ten features: OPML interchange, XML limits, audiobook shelf, bookmarks, completion and corrupt stores", () => ExtendedMediaChecks.OpmlAndBooks(Root, wav));
+        await Test("Ten features: personal ratings, numeric library queries, persistence and clearing", () => ExtendedMediaChecks.Ratings(Root, wav));
+        await Test("Ten features: listening statistics, UTC windows, audio-only totals and safe CSV copies", () => ExtendedMediaChecks.Statistics(Root));
+        await Test("Ten features: durable playback sessions, queue labels, duplicate identities and failed writes", () => ExtendedMediaChecks.Sessions(Root, wav));
+        await Test("Local media: ZIP preview, safe extraction, traversal, duplicate, link and stale-source rejection", () => LocalMediaChecks.Archives(Root, wav));
+        await Test("Local media: device copy preview, collisions, cancellation, source guards and containment", () => LocalMediaChecks.Copies(Root, wav));
+        await Test("Local media: actual image decoding, bounded memory, albums, folder scans and failed saves", () => LocalMediaChecks.Photos(Root));
+        await Test("Local media: static calibration patterns and White Wash code values", () => LocalMediaChecks.Patterns(Root));
+        await Test("Audio production: reviewed plans, collisions, invalid parameters and cancellation", () => AudioProductionChecks.Plans(Root, wav));
+        await ServerActionInputGuardChecks.Run(Test);
+        await ServerActionLoopbackChecks.Run(Root, Test);
         if (managedOnly) return;
+        await LocalControlAcceptanceChecks.Run(Root, Test);
+        await AudioZoneAcceptanceChecks.Run(Root, Test);
+        if (skipMpv) Console.WriteLine("SKIP mpv native IPC acceptance: explicitly disabled; requires mpv.exe and MKVToolNix.");
+        else await MpvAcceptanceChecks.Run(Root, Test);
+        await AdvancedChapterAcceptanceChecks.Run(Root, Test);
+        await TelevisionAcceptanceChecks.Run(Root, Test);
+        await PersonalExperienceAcceptanceChecks.Run(Root, Test);
+        await WebDavAcceptanceChecks.Run(Root, Test);
+        await KodiInteropContractChecks.Run(Root, Test);
+        await MpdInteropContractChecks.Run(Root, Test);
+        await InteropRobustnessChecks.Run(Root, Test);
+        await SubsonicAcceptanceChecks.Run(Root, Test);
+        await WindowsOcrAcceptanceChecks.Run(Root, Test);
+        await JellyfinAcceptanceChecks.Run(Root, Test);
+        await PublicMetadataAcceptanceChecks.Run(Root, Test);
+        await OnlineSourceAcceptanceChecks.Run(Root, Test);
+        await MobileRemoteAcceptanceChecks.Run(Root, Test);
+        await Test("Native GPU output: actual Direct3D11 HWND, ten-bit PQ source, display query and owned transport", () => NativeGpuOutputChecks.Native(Root));
+        await Test("Compatibility native: six audio/five video codecs across four policies, malformed media and cancellation", () => CompatibilityAcceptanceChecks.Native(Root));
+        if ((Environment.GetEnvironmentVariable("PATH") ?? "").Split(Path.PathSeparator).Any(p => File.Exists(Path.Combine(p.Trim('"'), "mkvpropedit.exe"))))
+            await Test("Matroska tools native: actual nested/alternate chapter container editing, extraction and source preservation", () => MatroskaInspectionChecks.EditContainer(Root));
+        await Test("GPU subtitles native: styled WPF composition retains D3D11VA, pause and track disable", () => GpuSubtitleChecks.Native(Root));
+        await Test("GPU subtitles native: decoded ASS bitmaps, styled pixels and composed snapshot", () => GpuSubtitleChecks.Native(Root, true));
+        await Test("Engine completion native: silent WASAPI main transport and continuous queue transition", () => EngineCompletionChecks.WasapiMain(Root));
+        await Test("Engine completion native: actual endpoint format negotiation matrix without playback", () => EngineCompletionChecks.EndpointMatrix(Root));
+        await Test("Completion native: ordered segment playback, natural EOF continuation and manual stop", () => CompletionChecks.NativeLinked(Root, wav));
+        await Test("Completion native: actual settings panels, rendered layout and save forwarding", () => CompletionChecks.NativeUi(Root));
+        await Test("Continuation native: mobile page, pairing, commands, malformed input and shutdown", () => ContinuationChecks.Mobile(Root));
+        if (TestFilter == null && ConversionService.FindExecutable() != null) await HundredFeatureChecks.Run(Root, Test);
+        if (ConversionService.FindExecutable() != null) await Test("Audio production native: selected stream extraction, batch cancellation and measured gain/delay mixing", () => AudioProductionChecks.Native(Root));
+        await Test("Local media native: first-show calibration window is arranged and renders White Wash", LocalMediaChecks.InitialPatternWindow);
+        if (ConversionService.FindExecutable() != null) await Test("Local media native: converted device exports and extracted ZIP decoding", () => LocalMediaChecks.Conversion(Root, wav));
+        await Test("More thirty native: global hotkey registration, conflicts and cleanup", MoreThirtyChecks.GlobalRegistration);
+        await Test("More thirty native: actual channel matrices and adaptive RMS leveling", () => MoreThirtyChecks.NativeMatrix(Root));
+        await Test("More thirty native: virtual transport, mute continuity, volume events and alarms", () => MoreThirtyChecks.NativePlayback(Root, wav));
+        if (ConversionService.FindExecutable() != null) await Test("More thirty native: tag writes, ringtones, contact sheets, custom aspect and renderer counters", () => MoreThirtyChecks.TagsAndArtifacts(Root, wav));
+        await Test("Thirty features native: fourteen audio effects and measured input/output signal path", () => AdvancedDspChecks.Native(Root));
+        await Test("Thirty features native: scheduled playlist start/stop and volume fade with mute/manual override", () => ThirtyMediaChecks.NativeSchedule(Root, wav));
+        if (ConversionService.FindExecutable() != null)
+        {
+            await Test("Thirty features native: RMS, true peak, ReplayGain, tempo estimates and safe measurement export", () => ThirtyMediaChecks.Analysis(Root, wav));
+            await Test("Thirty features native: parallel audio conversion, joining, video transcoding and mobile output", () => ThirtyMediaChecks.Production(Root, wav));
+            await Test("Thirty features native: actual stereo-eye pixels, zoom/pan, vertical flip and coherent snapshots", () => ThirtyMediaChecks.NativeViewport(Root, wav));
+        }
+        await Test("Ten features native: audiobook resume/rate/completion and disconnected offline podcast playback", () => ExtendedMediaChecks.NativeSpoken(Root, wav));
+        await Test("Ten features native: restored sessions, duplicate labels, staged positions and explicit transport", () => ExtendedMediaChecks.NativeSessions(Root, wav));
+        if (ConversionService.FindExecutable() != null)
+            await Test("Ten features native: actual picture pixels, crop geometry, external audio selection and transport continuity", () => ExtendedMediaChecks.NativeVideo(Root, wav));
+        await Test("Native quick audio preferences: routing, mute/volume continuity, ReplayGain and failed-save isolation", () => SettingsNavigationChecks.Native(Root, wav));
+        await Test("Native playback history: disabled startup, listening versus seek/pause, switching, restart, opt-out and durable clear", () => PlaybackHistoryChecks.Native(Root, wav));
+        await Test("Native saved playlists: isolated edits, named enqueue, unavailable paths and explicit play with autoplay off", () => MediaCatalogChecks.Native(Root, wav));
+        await Test("Native HTTP radio: no unsolicited connections, real stream decoding and automatic audio workspace", () => MediaCatalogChecks.Radio(Root, wav));
+
+        if (ConversionService.FindExecutable() != null)
+            await Test("Advanced tags: native containers, custom fields, clearing, covers and unchanged decoded PCM", () => AdvancedMetadataChecks.Run(Root, wav));
+
+        if (ConversionService.FindExecutable() != null)
+            await Test("Real conversion options: measured rates, channels, PCM depths, MP3 bitrate and normalization", () => ConversionOptionChecks.Run(Root, wav));
+
+        if (ConversionService.FindExecutable() != null)
+            await Test("Native per-file memory: audio selection, disabled/external subtitles, volume, mute, restart and changed sources", () => FilePreferenceChecks.Run(Root, wav));
+
+        if (ConversionService.FindExecutable() != null)
+            await Test("Native organization and column views: tagged folders, loaded files, queue, bookmarks, remembered volume and persistence", () => NativeOrganizationChecks.Run(Root, wav));
+
+        await Test("Native folder playback: explicit play with autoplay off, enqueue and stale selections", async () =>
+        {
+            string folder = Path.Combine(Root, "folder-play-" + Guid.NewGuid().ToString("N")); Directory.CreateDirectory(folder);
+            string source = Path.Combine(folder, "selected ñ.wav"); File.Copy(wav, source);
+            var listing = await MediaFolderBrowser.ReadAsync(folder);
+            using var engine = new MediaService(hardwareDecoding: false, enableDiagnosticLogging: false);
+            await using var library = new LibraryService(Path.Combine(folder, "library"));
+            var vm = new MainViewModel(engine, new SettingsService(Path.Combine(folder, "settings")), new AppSettings { AutoPlay = false, Volume = 0 }, library);
+            Assert(vm.AddFolderSelection(listing.Items, false) == 1 && !vm.HasMedia, "Enqueue never starts transport");
+            Assert(vm.AddFolderSelection(listing.Items.Concat(listing.Items), true) == 1, "Explicit selection deduplicated");
+            await Until(() => Task.FromResult(vm.IsPlaying && vm.CurrentItem?.FilePath == source && engine.GetDuration() == 8000), 5000);
+            Assert(vm.Playlist.Count == 2 && vm.CurrentIndex == 1, "Explicit Play ignores automatic-open preference and selects newly added media");
+            Assert(vm.AddFolderSelection(new[] { listing.Items[0] with { Path = Path.Combine(folder, "missing.wav") } }, true) == 0 && vm.Playlist.Count == 2, "Stale selections do not disturb current playback");
+            await vm.ShutdownAsync();
+        });
+
+        await Test("Native rename integration: loaded source protection, queue relocation and saved paths", async () =>
+        {
+            string folder = Path.Combine(Root, "native-rename-" + Guid.NewGuid().ToString("N")); Directory.CreateDirectory(folder);
+            string active = Path.Combine(folder, "Active.wav"), pending = Path.Combine(folder, "Pending.wav"); File.Copy(wav, active); File.Copy(wav, pending);
+            var store = new SettingsService(Path.Combine(folder, "profile")); Assert(store.Save(new AppSettings { Volume = 0 }), "Isolated settings");
+            using var engine = new MediaService(hardwareDecoding: false, enableDiagnosticLogging: false);
+            await using var library = new LibraryService(Path.Combine(folder, "index"));
+            var vm = new MainViewModel(engine, store, library: library);
+            try
+            {
+                vm.AddFilesToPlaylist(new[] { active, pending }, true);
+                await Until(() => Task.FromResult(engine.IsPlaying && vm.HasMedia), 5000);
+                vm.PlayPauseCommand.Execute(null);
+                await Until(() => Task.FromResult(engine.MediaPlayer.State == LibVLCSharp.Shared.VLCState.Paused), 3000);
+                vm.RecentFilesList.Add(pending);
+                vm.ToggleQueueCommand.Execute(vm.Playlist[1]);
+                var plan = await FileRenameService.PreviewAsync(new[] { new RenameInput(active), new RenameInput(pending) }, "New {filename}");
+                var summary = await FileRenameService.ApplyAsync(plan, library, engine.IsSourceInUse,
+                    new ImmediateRenameProgress(result => { if (result.Renamed) Application.Current.Dispatcher.Invoke(() => vm.RelocateQueuedSource(result.Entry.Source, result.Entry.Destination)); }));
+                Assert(!summary.Results[0].Renamed && summary.Results[1].Renamed && File.Exists(active), "Paused source protected while pending file is renamed");
+                Assert(vm.Playlist[1].FilePath == plan[1].Destination && vm.RecentFilesList.Contains(plan[1].Destination), "Playlist and recent paths relocated");
+                Assert(vm.HasQueue && vm.Playlist[1].QueuePosition == 1, "Play-next queue retains the renamed item");
+                vm.SaveSettings(); Assert(store.Load().SavedPlaylist.Contains(plan[1].Destination), "Updated queue survives restart");
+                Assert(engine.MediaPlayer.State == LibVLCSharp.Shared.VLCState.Paused, "Renaming other files preserves paused transport");
+            }
+            finally { vm.StopCommand.Execute(null); await vm.ShutdownAsync(); }
+        });
 
         await Test("Native channel routing: actual stereo, swap, mono, isolated channels and six-channel downmix", () => AudioRoutingChecks.VerifyAsync(Root));
 
