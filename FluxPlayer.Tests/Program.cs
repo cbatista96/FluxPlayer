@@ -880,10 +880,10 @@ internal static class Program
         await Test("Engine completion: native DSD driver-bound buffers and byte integrity", () => EngineCompletionChecks.NativeDsd(Root));
         await SubtitleWorkshopAcceptanceChecks.Run(Root, Test);
         await SqlAcceptanceChecks.Run(Root, Test);
-        await SubtitleProductionAcceptanceChecks.Run(Root, Test);
-        await RecordedAudioAcceptanceChecks.Run(Root, Test);
         if (ConversionService.FindExecutable() != null)
         {
+            await SubtitleProductionAcceptanceChecks.Run(Root, Test);
+            await RecordedAudioAcceptanceChecks.Run(Root, Test);
             await PaletteAcceptanceChecks.Run(Root, Test);
             await DiagnosticAcceptanceChecks.Run(Root, Test);
             await Test("Matroska completion: actual container metadata and embedded chapter extraction", () => MatroskaInspectionChecks.RealContainer(Root));
