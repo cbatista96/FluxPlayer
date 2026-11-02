@@ -357,7 +357,7 @@ public partial class SettingsPanel : UserControl
         if (int.TryParse(OutroSkipBox.Text, out int oss))
             _settings.OutroSkipSeconds = Math.Clamp(oss, 0, 1800);
         _settings.FeatureFlags ??= new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
-        foreach (var item in _featureItems.Where(i => i.IsToggle))
+        foreach (var item in _featureItems)
             _settings.FeatureFlags[item.Key] = item.IsEnabled;
 
         if (!SaveOrNotify(_settings)) return;
@@ -585,19 +585,19 @@ public partial class SettingsPanel : UserControl
 
     private void EnableAllFeaturesBtn_Click(object sender, RoutedEventArgs e)
     {
-        foreach (var item in _featureItems.Where(i => i.IsToggle)) item.IsEnabled = true;
+        foreach (var item in _featureItems) item.IsEnabled = true;
         FeatureFlagsList.Items.Refresh();
     }
 
     private void DisableAllFeaturesBtn_Click(object sender, RoutedEventArgs e)
     {
-        foreach (var item in _featureItems.Where(i => i.IsToggle)) item.IsEnabled = false;
+        foreach (var item in _featureItems) item.IsEnabled = false;
         FeatureFlagsList.Items.Refresh();
     }
 
     private void RecommendedFeaturesBtn_Click(object sender, RoutedEventArgs e)
     {
-        foreach (var item in _featureItems.Where(i => i.IsToggle)) item.IsEnabled = item.DefaultEnabled;
+        foreach (var item in _featureItems) item.IsEnabled = item.DefaultEnabled;
         FeatureFlagsList.Items.Refresh();
     }
 
@@ -605,19 +605,17 @@ public partial class SettingsPanel : UserControl
     {
         _featureItems.Clear();
         _settings.FeatureFlags ??= new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
-        foreach (var def in FeatureCatalog.All.OrderBy(d => (int)FeatureCatalog.GetState(d.Key)))
+        // Capabilities the player always provides are reached through their own
+        // settings; this page is only the switches someone can actually turn.
+        foreach (var def in FeatureCatalog.All.Where(d => FeatureCatalog.GetState(d.Key) == FeatureState.Toggle))
         {
-            var state = FeatureCatalog.GetState(def.Key);
-            bool enabled = state == FeatureState.BuiltIn ||
-                (state == FeatureState.Toggle && (_settings.FeatureFlags.TryGetValue(def.Key, out var value)
-                    ? value : def.DefaultEnabled));
+            bool enabled = _settings.FeatureFlags.TryGetValue(def.Key, out var value) ? value : def.DefaultEnabled;
             _featureItems.Add(new FeatureToggleItem
             {
                 Key = def.Key,
                 Name = def.Name,
                 Description = def.Description,
                 DefaultEnabled = def.DefaultEnabled,
-                State = state,
                 IsEnabled = enabled
             });
         }
@@ -679,15 +677,6 @@ public partial class SettingsPanel : UserControl
         public string Description { get; init; } = string.Empty;
         public bool DefaultEnabled { get; init; }
         public bool IsEnabled { get; set; }
-        public FeatureState State { get; init; }
-        public bool IsToggle => State == FeatureState.Toggle;
-        public bool IsPlanned => State == FeatureState.Planned;
-        public string Badge => State switch
-        {
-            FeatureState.BuiltIn => "Built in",
-            FeatureState.Planned => "Planned",
-            _ => string.Empty
-        };
     }
 
     private sealed class HotkeyItem
