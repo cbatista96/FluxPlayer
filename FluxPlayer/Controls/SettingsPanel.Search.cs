@@ -97,6 +97,12 @@ public partial class SettingsPanel
 
     private void CustomizeMenu_Click(object sender, RoutedEventArgs e) => Application.Current.Windows.OfType<MainWindow>().FirstOrDefault()?.CustomizeMenu();
 
+    private void ChooseShader_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new Microsoft.Win32.OpenFileDialog { Title = Localizer.T("My shader file"), Filter = "Compiled pixel shader|*.ps|All files|*.*" };
+        if (dialog.ShowDialog(Window.GetWindow(this)) == true) CustomShaderBox.Text = dialog.FileName;
+    }
+
     private void Open(ListBoxItem? item)
     {
         if (item?.Tag is not SearchEntry entry) return;

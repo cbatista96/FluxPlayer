@@ -44,14 +44,15 @@ public static class WhisperSubtitles
         return args.ToArray();
     }
 
-    internal static string[] WhisperArguments(string model, string wav, string outputBase, string language, int threads) =>
-        ["-m", model, "-f", wav, "-l", NormalizeLanguage(language), "-t", Math.Clamp(threads, 1, 64).ToString(System.Globalization.CultureInfo.InvariantCulture), "-osrt", "-of", outputBase];
+    internal static string[] WhisperArguments(string model, string wav, string outputBase, string language, int threads, string? vadModel = null) =>
+        ["-m", model, "-f", wav, "-l", NormalizeLanguage(language), "-t", Math.Clamp(threads, 1, 64).ToString(System.Globalization.CultureInfo.InvariantCulture), "-osrt", "-of", outputBase, .. (string.IsNullOrEmpty(vadModel) ? [] : new[] { "--vad", "--vad-model", vadModel })];
 
     /// <summary>Returns the path of the new SRT, written beside <paramref name="destination"/>'s name without overwriting anything.</summary>
     public static async Task<string> Generate(string whisperExe, string modelFile, string media, string destination, string language, bool speechFilter,
-        IProgress<string>? progress, CancellationToken token)
+        IProgress<string>? progress, CancellationToken token, string? vadModel = null)
     {
         whisperExe = ValidateExecutable(whisperExe); modelFile = ValidateModel(modelFile); media = FfmpegJob.Source(media);
+        if (!string.IsNullOrWhiteSpace(vadModel)) vadModel = ValidateModel(vadModel); else vadModel = null;
         destination = Path.GetFullPath(destination);
         if (!Path.GetExtension(destination).Equals(".srt", StringComparison.OrdinalIgnoreCase)) throw new ArgumentException("Choose an .srt output file.");
         if (File.Exists(destination)) throw new IOException("The destination already exists. Choose another name.");
@@ -64,7 +65,7 @@ public static class WhisperSubtitles
             if (!File.Exists(wav) || new FileInfo(wav).Length < 1000) throw new InvalidDataException("The file has no audio to transcribe.");
             progress?.Report("Transcribing with Whisper. This can take a long time on a CPU…");
             var start = new ProcessStartInfo(whisperExe) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardError = true, RedirectStandardOutput = true, WorkingDirectory = folder };
-            foreach (string argument in WhisperArguments(modelFile, wav, outputBase, language, Environment.ProcessorCount / 2)) start.ArgumentList.Add(argument);
+            foreach (string argument in WhisperArguments(modelFile, wav, outputBase, language, Environment.ProcessorCount / 2, vadModel)) start.ArgumentList.Add(argument);
             using var process = Process.Start(start) ?? throw new IOException("Whisper could not start.");
             var output = Task.Run(() => process.StandardOutput.ReadToEndAsync(token), token); var errors = Task.Run(() => process.StandardError.ReadToEndAsync(token), token);
             try { await process.WaitForExitAsync(token).ConfigureAwait(false); }

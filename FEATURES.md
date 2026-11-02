@@ -1,13 +1,13 @@
 # Feature checklist
 
-**754 implemented · 420 implemented but untested · 6 pending · 1180 tracked capabilities.**
+**765 implemented · 430 implemented but untested · 6 pending · 1201 tracked capabilities.**
 
 Each capability appears exactly once. Completing it moves the same stable ID from Pending to Implemented. A setting or catalog entry alone does not complete a feature. Source references describe the implementation; validation limits are documented in [Testing](docs/TESTING.md).
 New code that has not been built or tested belongs to Implemented — untested, with unchecked boxes representing pending verification. It is excluded from the verified implementation count. Each regression report applies only to its documented source checkpoint.
 
 Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Sync-PublicFeatures.ps1`; CI rejects an outdated checklist.
 
-## Implemented (754)
+## Implemented (765)
 
 ### Workspaces and interface
 
@@ -35,6 +35,9 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [x] **F0288** Saved custom Fluent selection/accent colors. — FluxPlayer.Tests/PersonalExperienceAcceptanceChecks.cs; individual functional results in docs/local-completion-test-results.json, with actual controls/native runtime, real isolated servers or live public metadata as scoped in docs/LOCAL_SESSION_ACCEPTANCE.md.
 - [x] **F0289** Saved local background artwork for the idle video canvas. — FluxPlayer.Tests/PersonalExperienceAcceptanceChecks.cs; individual functional results in docs/local-completion-test-results.json, with actual controls/native runtime, real isolated servers or live public metadata as scoped in docs/LOCAL_SESSION_ACCEPTANCE.md.
 - [x] **F0290** Opt-in equalizer-window docking beside the player. — FluxPlayer.Tests/PersonalExperienceAcceptanceChecks.cs; individual functional results in docs/local-completion-test-results.json, with actual controls/native runtime, real isolated servers or live public metadata as scoped in docs/LOCAL_SESSION_ACCEPTANCE.md.
+- [x] **F1194** Search across all Settings pages and sorting and filtering of keyboard shortcuts. — SettingsPanel.Search; real-app run of the search (finds and jumps to the option). Shortcut sorting and filtering were not exercised.
+- [x] **F1195** Customizable right-click menu; entries that open Settings cannot be hidden. — MenuCustomization, MainWindow.MenuCustomization; ParityChecks; real-app run: two entries hidden and the menu stayed tidy.
+- [x] **F1201** Spanish interface for the right-click menu, Settings, on-screen messages and the advanced tool windows. — Localizer.Spanish*; PlayerMenuChecks (every menu entry), ParityChecks; real-app run in Spanish. Long error messages of the advanced services are still in English.
 
 ### Playback and formats
 
@@ -54,6 +57,8 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [x] **F0103** External OGM/Matroska XML navigation chapters, an editable/searchable timeline, session application and separate copy export. — ChapterDocument / ChapterEditorWindow / MainViewModel.Chapters; encoding and timing round trips, safe XML limits, overwrite refusal, native seek/reset/duration checks, MKV chapter offsets and manual edit/export/menu navigation.
 - [x] **F0104** Nested, ordered and linked-segment chapter playback, alternate editions/displays and editing chapters inside media containers. — MatroskaInspector reads bounded EBML Info/Chapters/SeekHead, discovers up to 500 same-folder candidates and rejects duplicate IDs/stale sources. LinkedChapters supports recursive whole ordered editions and nonordered source-chronology editions with disabled ranges, default/alternate UIDs/language displays, cycle/bounds checks and explicit mappings/XML overrides. Metadata fixtures include an unknown-size Cluster with SeekHead; actual FFmpeg Matroska extraction passes. Main-player bounded/EOF sequencing and XML/new-copy MKV editing retained. Chapter scripts/track-specific actions are rejected. docs/REALTIME_AUDIO.md.
 - [x] **F0111** Optional per-file volume, audio-track and subtitle recall, including Disabled/external subtitles and bounded history clearing. — FilePlaybackPreference / MainViewModel.FilePreferences / Settings > Playback. Native two-audio-track fixture verifies selection, disabled/external subtitle recall, isolated volume, mute preservation, restart, opt-out, clear persistence and changed-source rejection. History is bounded to 1,000 local file stamps; batch rename relocates records.
+- [x] **F1181** Hold the left mouse button on the video to play at a chosen speed until release. — FluxPlayer.Tests ParityChecks (rules); real-app run: 3x while held, back to 1x on release without pausing.
+- [x] **F1182** A-B section repeat with repeat count, pause between repeats, previous/next section and quick repeat of the last seconds. — SectionRepeat, MainViewModel; ParityChecks (arithmetic); real-app run: two repeats with a 500 ms pause, then playback continued past B. Previous/next section and quick repeat verified only by tests.
 
 ### Audio
 
@@ -343,6 +348,8 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [x] **F1178** Offline Temporal median denoising. — Palette acceptance: tmedian actual default export and independent decode passed with installed FFmpeg 9.0.2. Input bytes preserved; duration/output validity checked. Parameter extremes, special-source HDCD markers, all combinations and subjective quality are not certified. docs/PROCESSING_ACCEPTANCE.md.
 - [x] **F1179** Offline Video-component waveform scope. — Palette acceptance: waveform actual default export and independent decode passed with installed FFmpeg 9.0.2. Input bytes preserved; duration/output validity checked. Parameter extremes, special-source HDCD markers, all combinations and subjective quality are not certified. docs/PROCESSING_ACCEPTANCE.md.
 - [x] **F1180** Offline Unsharp-mask picture sharpening. — Palette acceptance: unsharp actual default export and independent decode passed with installed FFmpeg 9.0.2. Input bytes preserved; duration/output validity checked. Parameter extremes, special-source HDCD markers, all combinations and subjective quality are not certified. docs/PROCESSING_ACCEPTANCE.md.
+- [x] **F1183** Ignore subtitles inside the video and use only the preferred subtitle languages. — MediaService.Audio, ExternalSources; ParityChecks; real-app run on an MKV with an embedded subtitle: shown when allowed, absent when ignored.
+- [x] **F1196** Remove hearing-impaired text and limit the longest subtitle in external subtitle files, using a cleaned copy. — SubtitleCleanup; ParityChecks; real-app run: bracketed sound text removed. The maximum duration was verified only by tests.
 
 ### Network and distribution
 
@@ -451,6 +458,9 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [x] **F0425** Persistent account-bound listening outbox with uncertain-send handling. — ListenOutbox: profile-local metadata, bounded drafts, deduplication by provider/owner/track/start and Pending/Uncertain/Submitted states. Acceptance covers validation refusals, state transitions, removal, reopening the profile and history selection including the Last.fm fourteen-day window. Submitting to a real account is a separate provider capability. docs/TESTING.md.
 - [x] **F0474** Session-activated monitor recall for audio and video modes. — DesktopMediaSession.Changed: selected audio/video monitor targets on mode changes, off by default and stopped when the panel closes. Acceptance drives real mode changes and checks the recalled target each time. The physical move belongs to F0473. docs/TESTING.md.
 - [x] **F0475** Named window-placement presets for desktop and HTPC layouts. — WindowPlacementStore: up to sixteen uniquely named finite geometry/topmost presets. Acceptance covers case-insensitive replacement, refusal of undersized, non-finite and unnamed placements, the seventeenth entry and reopening the profile. Does not replace full placement restoration. docs/TESTING.md.
+- [x] **F1184** Separate double-click actions for the left and right thirds of the video. — PointerGestureRules; ParityChecks; real-app run: left-third double-click seeks back.
+- [x] **F1185** Sideways (tilt) mouse wheel action. — MainWindow.PointerGestures; real-app run with a WM_MOUSEHWHEEL message: seeked +10 s.
+- [x] **F1188** --subtitle and --audio command-line options, also handed over to an already running instance. — AppProfile, SingleInstance; ParityChecks and PlayerMenuChecks (hand-over); real-app run of --subtitle.
 
 ### Playlists and library
 
@@ -556,6 +566,7 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [x] **F0628** Jellyfin — Set a server item like or dislike. — FluxPlayer.Tests/JellyfinAcceptanceChecks.cs; individual functional results in docs/local-completion-test-results.json, with actual controls/native runtime, real isolated servers or live public metadata as scoped in docs/LOCAL_SESSION_ACCEPTANCE.md.
 - [x] **F0629** Jellyfin — Clear a server personal rating. — FluxPlayer.Tests/JellyfinAcceptanceChecks.cs; individual functional results in docs/local-completion-test-results.json, with actual controls/native runtime, real isolated servers or live public metadata as scoped in docs/LOCAL_SESSION_ACCEPTANCE.md.
 - [x] **F0630** Jellyfin — Create a user-owned server playlist. — FluxPlayer.Tests/JellyfinAcceptanceChecks.cs; individual functional results in docs/local-completion-test-results.json, with actual controls/native runtime, real isolated servers or live public metadata as scoped in docs/LOCAL_SESSION_ACCEPTANCE.md.
+- [x] **F1190** Playlist thumbnail view with pictures made from photos and, through FFmpeg, from videos, cached on disk. — PlaylistThumbnails; ParityChecks; real-app run: thumbnails appeared for two videos.
 
 ### Metadata and files
 
@@ -835,7 +846,7 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [x] **F0351** Selected-release back-cover copies from Cover Art Archive. — FluxPlayer.Tests/PublicMetadataAcceptanceChecks.cs; individual functional results in docs/local-completion-test-results.json, with actual controls/native runtime, real isolated servers or live public metadata as scoped in docs/LOCAL_SESSION_ACCEPTANCE.md.
 - [x] **F0352** Reviewed MusicBrainz-to-local tag application. — FluxPlayer.Tests/PublicMetadataAcceptanceChecks.cs; individual functional results in docs/local-completion-test-results.json, with actual controls/native runtime, real isolated servers or live public metadata as scoped in docs/LOCAL_SESSION_ACCEPTANCE.md.
 
-## Implemented — untested (420)
+## Implemented — untested (430)
 
 ### Workspaces and interface
 
@@ -860,6 +871,10 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 
 - [ ] **F0275** Explicit DirectShow webcam preview in an owned player window. — BUILT WITH CURRENT SOURCE — ACCEPTANCE NOT VERIFIED. CameraPreviewWindow: selected camera through a separate muted LibVLC instance and VlcWpfRenderer, with stop/disposal on close. Driver support remains unverified. Verification deferred at user request. docs/UNTESTED_EXTERNAL_MEDIA_THIRTY.md.
 - [ ] **F0287** Conditional local HEIF/HEIC photo decoding through Windows codecs. — BUILT WITH CURRENT SOURCE — ACCEPTANCE NOT VERIFIED. PhotoLibrary.Extensions / Decode and the photo picker: HEIF/HEIC paths accepted by the existing WIC decoder path. Appropriate Windows codec required; no codec installation or universal support claim. Verification deferred at user request. docs/UNTESTED_EXTERNAL_MEDIA_THIRTY.md.
+- [ ] **F1187** Extra subtitle and audio-track folders searched by video name. — ExternalSources, MediaService.ExternalSources; ParityChecks (discovery). Not run in the real app.
+- [ ] **F1193** Colour behind the video and EXIF orientation for photos. — MonitorPlan, PhotoLibrary; ParityChecks (a JPEG written with the tag is read back). Not opened in the photo viewer.
+- [ ] **F1197** 360° and 180° equirectangular viewing with drag-to-look and wheel zoom, as a WPF pixel shader. — Shaders/projection.hlsl, ProjectionEffect, ViewProjection; ParityChecks (maths and shader files); real-app run with a flat test video showed the projection responding to the drag. Not tried with a real 360° video.
+- [ ] **F1198** Built-in pixel shaders (grayscale, sepia, sharpen, invert) and a user-chosen compiled .ps shader. — VideoEffects, Shaders; ParityChecks (file validation). Shader effects were not looked at in the real app.
 
 ### Streaming and sources
 
@@ -1233,6 +1248,8 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [ ] **F0478** Explicit Windows hibernation requests. — Compiled source; individual functional/backend acceptance remains pending. DesktopMediaSession.Suspend(true) / DesktopMediaWindow: confirmed user action and system-managed hibernation availability. Does not change power configuration. docs/UNTESTED_EXPANSION_HUNDRED.md. Testing deferred for this new batch.
 - [ ] **F0479** Cancelable shutdown-after-current-item policy. — Compiled source; individual functional/backend acceptance remains pending. DesktopMediaSession.ArmShutdown/ShutdownTick: explicit arm, natural main-player end, software 60-second countdown and shutdown /s /t 0 without /f. Panel close cancels before command launch. docs/UNTESTED_EXPANSION_HUNDRED.md. Testing deferred for this new batch.
 - [ ] **F0480** Opt-in removable-media arrival queueing. — Compiled source; individual functional/backend acceptance remains pending. DesktopMediaSession.Hook/ScanArrival: arrival/removal signals, ready removable/CD-ROM drive snapshots, bounded top-level media selection and queue-only behavior. No pointer payload reads, recursive scans, autorun or disc-menu playback. docs/UNTESTED_EXPANSION_HUNDRED.md. Testing deferred for this new batch.
+- [ ] **F1186** Ctrl/Alt/Shift + drag on the video to zoom, move the picture or move the subtitles. — PointerGestureRules; ParityChecks (arithmetic); real-app run: Ctrl+drag zoomed 1.41x and Alt+drag changed the picture. Subtitle height by drag was not run.
+- [ ] **F1192** Fullscreen on a chosen monitor, black-out of the other monitors, keeping the window reachable and a largest window size. — MonitorPlan, MonitorBlackout; ParityChecks (geometry). Not run on a multi-monitor setup.
 
 ### Playlists and library
 
@@ -1280,6 +1297,16 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [ ] **F0668** Plex playlist occurrence removal. — Compiled source; individual functional/backend acceptance remains pending. ServerActionCatalog Plex/playlist-remove; PersonalMediaServers.Actions.cs / ExecutePlexAction; ServerActionsWindow under categorized Settings. Remove one playlistItemID occurrence; the media rating key is not an occurrence ID. Explicit request, bounded results, session credentials; no automatic synchronization/retry. docs/UNTESTED_NETWORK_HUNDRED.md.
 - [ ] **F0669** Plex playlist occurrence reordering. — Compiled source; individual functional/backend acceptance remains pending. ServerActionCatalog Plex/playlist-move; PersonalMediaServers.Actions.cs / ExecutePlexAction; ServerActionsWindow under categorized Settings. Move one playlistItemID after another; zero means first position. Explicit request, bounded results, session credentials; no automatic synchronization/retry. docs/UNTESTED_NETWORK_HUNDRED.md.
 - [ ] **F0670** Plex playlist creation from media. — Compiled source; individual functional/backend acceptance remains pending. ServerActionCatalog Plex/playlist-create; PersonalMediaServers.Actions.cs / ExecutePlexAction; ServerActionsWindow under categorized Settings. Build one playlist from a selected local Plex metadata key and server identity. Explicit request, bounded results, session credentials; no automatic synchronization/retry. docs/UNTESTED_NETWORK_HUNDRED.md.
+- [ ] **F1189** Playlist sorting (natural name, date, extension, duration, folder, reverse), moving entries, copying names and paths, and a filter box. — PlaylistOrdering; ParityChecks (order and filter); menu and filter box seen in the real app, sorting and filtering not exercised there.
+
+### Playback and formats
+
+- [ ] **F1191** Time format when copying the elapsed or total time, and a bookmark manager (filter, move, remove, save to and load from a text file). — BookmarkTools, BookmarksWindow; ParityChecks; the window was opened in the real app, its buttons were not exercised.
+
+### Metadata and lyrics
+
+- [ ] **F1199** Subtitle translation with Microsoft Azure Translator and Yandex Translate in addition to LibreTranslate, DeepL and Google. — SubtitleTranslator; TranslationChecks on loopback servers. Not run against the real services.
+- [ ] **F1200** Optional voice-activity detection model for Whisper transcription. — WhisperSubtitles; TranslationChecks (arguments). whisper.cpp was not available to run.
 
 ## Pending (6)
 

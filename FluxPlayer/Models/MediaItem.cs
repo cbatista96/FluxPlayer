@@ -15,6 +15,11 @@ public partial class MediaItem : ObservableObject
     [ObservableProperty] private long _durationMs;
     [ObservableProperty] private int _queuePosition = 0;
 
+    // Thumbnail view: the picture and the column it occupies (0 hides it in the plain list view).
+    [ObservableProperty] private System.Windows.Media.ImageSource? _thumbnail;
+    [ObservableProperty, NotifyPropertyChangedFor(nameof(ThumbHeight))] private double _thumbWidth;
+    public double ThumbHeight => ThumbWidth * 9 / 16;
+
     public bool IsNetwork => MediaFormats.IsNetwork(FilePath);
 
     public bool IsAudio => MediaFormats.IsAudio(FilePath);

@@ -94,7 +94,7 @@
                         <TextBox Grid.Row="1" x:Name="SettingsSearchBox" Margin="10,0,10,8" Height="36" MaxLength="80" VerticalContentAlignment="Center" ToolTip="Search the settings" TextChanged="SettingsSearchBox_TextChanged" PreviewKeyDown="SettingsSearchBox_PreviewKeyDown" />
                         <Popup x:Name="SettingsSearchPopup" PlacementTarget="{Binding ElementName=SettingsSearchBox}" Placement="Bottom" StaysOpen="False" AllowsTransparency="True" Focusable="False">
                             <Border Background="{DynamicResource SolidBackgroundFillColorBaseBrush}" BorderBrush="{DynamicResource FxDividerBrush}" BorderThickness="1" CornerRadius="6" Padding="4" MaxHeight="360" Margin="0,4,0,0">
-                                <ListBox x:Name="SettingsSearchResults" BorderThickness="0" Background="Transparent" Width="360" PreviewMouseLeftButtonUp="SettingsSearchResults_Click" />
+                                <ListBox x:Name="SettingsSearchResults" BorderThickness="0" Background="Transparent" Width="430" PreviewMouseLeftButtonUp="SettingsSearchResults_Click" />
                             </Border>
                         </Popup>
 
@@ -896,6 +896,51 @@
                                     </StackPanel>
                                     <TextBox x:Name="VideoBackgroundBox" Grid.Column="1" Width="100" Height="32" VerticalContentAlignment="Center" MaxLength="7" Text="#000000" />
                                 </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="360° / 180° video" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="For equirectangular videos: drag to look around and use the wheel to zoom. Pixel shaders are not combined with this view" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="VideoProjectionCombo" Grid.Column="1" Width="220" VerticalContentAlignment="Center">
+                                        <ComboBoxItem Content="Flat video" Tag="None" />
+                                        <ComboBoxItem Content="360° video" Tag="Equirect360" />
+                                        <ComboBoxItem Content="180° video" Tag="Equirect180" />
+                                    </ComboBox>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Pixel shader" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="An effect applied to the picture on screen; snapshots and saved clips are not affected" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="VideoShaderCombo" Grid.Column="1" Width="220" VerticalContentAlignment="Center">
+                                        <ComboBoxItem Content="None" Tag="None" />
+                                        <ComboBoxItem Content="Grayscale" Tag="Grayscale" />
+                                        <ComboBoxItem Content="Sepia" Tag="Sepia" />
+                                        <ComboBoxItem Content="Sharpen" Tag="Sharpen" />
+                                        <ComboBoxItem Content="Invert colours" Tag="Invert" />
+                                        <ComboBoxItem Content="My shader file" Tag="Custom" />
+                                    </ComboBox>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <StackPanel>
+                                    <TextBlock Text="My shader file" Style="{StaticResource OptTitle}" />
+                                    <TextBlock Text="A compiled pixel shader (.ps, ps_2_0 to ps_3_0, up to 64 KB). The picture arrives as s0, the size of one pixel as c0" Style="{StaticResource OptSub}" />
+                                    <Grid Margin="0,8,0,0">
+                                        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                        <TextBox x:Name="CustomShaderBox" Height="32" VerticalContentAlignment="Center" MaxLength="1024" />
+                                        <Button Grid.Column="1" Content="Choose..." Style="{StaticResource ActionBtn}" Margin="8,0,0,0" Click="ChooseShader_Click" />
+                                    </Grid>
+                                </StackPanel>
                             </Border>
 
                             <TextBlock Text="Picture settings" Style="{StaticResource SubsectionHdr}" />

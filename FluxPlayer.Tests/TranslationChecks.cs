@@ -14,7 +14,7 @@ internal static class TranslationChecks
     private sealed class Fake : IDisposable
     {
         private readonly HttpListener _listener = new(); private readonly CancellationTokenSource _stop = new();
-        public int Requests, MaxBatch; public string? LastAuth, LastPath; public int StatusCode = 200; public bool WrongCount;
+        public int Requests, MaxBatch; public string? LastAuth, LastPath, LastRegion; public int StatusCode = 200; public bool WrongCount;
         public string Address { get; }
         public Fake(TranslationEngine engine)
         {
@@ -27,16 +27,19 @@ internal static class TranslationChecks
                     HttpListenerContext context;
                     try { context = await _listener.GetContextAsync(); } catch { break; }
                     using var reader = new StreamReader(context.Request.InputStream, Encoding.UTF8); string body = await reader.ReadToEndAsync();
-                    Requests++; LastPath = context.Request.Url!.AbsolutePath; LastAuth = context.Request.Headers["Authorization"] ?? context.Request.Headers["X-goog-api-key"];
+                    Requests++; LastPath = context.Request.Url!.AbsolutePath; LastAuth = context.Request.Headers["Authorization"] ?? context.Request.Headers["X-goog-api-key"] ?? context.Request.Headers["Ocp-Apim-Subscription-Key"]; LastRegion = context.Request.Headers["Ocp-Apim-Subscription-Region"];
                     string[] inputs; string payload;
                     if (engine == TranslationEngine.DeepL) inputs = HttpUtility.ParseQueryString(body).GetValues("text") ?? [];
+                    else if (engine == TranslationEngine.AzureTranslator) inputs = JsonDocument.Parse(body).RootElement.EnumerateArray().Select(e => e.GetProperty("Text").GetString()!).ToArray();
+                    else if (engine == TranslationEngine.Yandex) inputs = JsonDocument.Parse(body).RootElement.GetProperty("texts").EnumerateArray().Select(e => e.GetString()!).ToArray();
                     else inputs = JsonDocument.Parse(body).RootElement.GetProperty("q").EnumerateArray().Select(e => e.GetString()!).ToArray();
                     MaxBatch = Math.Max(MaxBatch, inputs.Length);
                     var output = inputs.Select(text => "ES:" + text).Take(WrongCount ? Math.Max(0, inputs.Length - 1) : inputs.Length).ToArray();
                     payload = engine switch
                     {
                         TranslationEngine.LibreTranslate => JsonSerializer.Serialize(new { translatedText = output }),
-                        TranslationEngine.DeepL => JsonSerializer.Serialize(new { translations = output.Select(t => new { text = t }) }),
+                        TranslationEngine.DeepL or TranslationEngine.Yandex => JsonSerializer.Serialize(new { translations = output.Select(t => new { text = t }) }),
+                        TranslationEngine.AzureTranslator => JsonSerializer.Serialize(output.Select(t => new { translations = new[] { new { text = t, to = "es" } } })),
                         _ => JsonSerializer.Serialize(new { data = new { translations = output.Select(t => new { translatedText = t }) } })
                     };
                     context.Response.StatusCode = StatusCode; byte[] bytes = Encoding.UTF8.GetBytes(StatusCode == 200 ? payload : "{}");
@@ -50,15 +53,15 @@ internal static class TranslationChecks
     public static async Task Run(string root)
     {
         var cues = Enumerable.Range(0, 100).Select(i => new SubtitleCue(i * 2000L, i * 2000L + 1500, $"Línea {i} ñ\nsegunda")).ToArray();
-        foreach (var engine in new[] { TranslationEngine.LibreTranslate, TranslationEngine.DeepL, TranslationEngine.GoogleCloud })
+        foreach (var engine in new[] { TranslationEngine.LibreTranslate, TranslationEngine.DeepL, TranslationEngine.GoogleCloud, TranslationEngine.AzureTranslator, TranslationEngine.Yandex })
         {
             using var fake = new Fake(engine);
-            using var translator = new SubtitleTranslator(engine, fake.Address, "secret-key");
+            using var translator = new SubtitleTranslator(engine, fake.Address, "secret-key", null, "westeurope");
             int last = 0;
             var result = await translator.Translate(cues, "auto", "es", new Progress<int>(p => last = p), CancellationToken.None);
             Check(result.Length == 100 && result.All(r => r.Text.StartsWith("ES:Línea")) && result[7].StartMs == 14_000 && result[7].EndMs == 15_500, $"{engine}: text translated and timing preserved");
             Check(fake.Requests == 3 && fake.MaxBatch == SubtitleTranslator.BatchCues, $"{engine}: bounded batches ({fake.Requests} requests, max {fake.MaxBatch})");
-            Check(engine switch { TranslationEngine.DeepL => fake.LastAuth == "DeepL-Auth-Key secret-key" && fake.LastPath == "/v2/translate", TranslationEngine.GoogleCloud => fake.LastAuth == "secret-key" && fake.LastPath == "/language/translate/v2", _ => fake.LastPath == "/translate" }, $"{engine}: endpoint and key placement");
+            Check(engine switch { TranslationEngine.DeepL => fake.LastAuth == "DeepL-Auth-Key secret-key" && fake.LastPath == "/v2/translate", TranslationEngine.GoogleCloud => fake.LastAuth == "secret-key" && fake.LastPath == "/language/translate/v2", TranslationEngine.AzureTranslator => fake.LastAuth == "secret-key" && fake.LastRegion == "westeurope" && fake.LastPath == "/translate", TranslationEngine.Yandex => fake.LastAuth == "Api-Key secret-key" && fake.LastPath == "/translate/v2/translate", _ => fake.LastPath == "/translate" }, $"{engine}: endpoint and key placement");
 
             fake.StatusCode = 403; bool rejected = false;
             try { await translator.TranslateBatch(["a"], "en", "es", CancellationToken.None); } catch (IOException e) { rejected = e.Message.Contains("API key"); }
@@ -106,6 +109,9 @@ internal static class TranslationChecks
         Check(extract.Contains("-af") && extract.Contains(WhisperSubtitles.SpeechFilter) && extract[^1] == "out.wav" && extract.Contains("a b.mkv") && !WhisperSubtitles.ExtractionArguments("a.mkv", "o.wav", false).Contains("-af"), "FFmpeg extraction arguments");
         var run = WhisperSubtitles.WhisperArguments("m.bin", "a.wav", "result", "es", 8);
         Check(run.SequenceEqual(new[] { "-m", "m.bin", "-f", "a.wav", "-l", "es", "-t", "8", "-osrt", "-of", "result" }), "whisper.cpp arguments");
+        Check(WhisperSubtitles.WhisperArguments("m.bin", "a.wav", "result", "es", 8, "vad.bin").TakeLast(3).SequenceEqual(new[] { "--vad", "--vad-model", "vad.bin" }) && !WhisperSubtitles.WhisperArguments("m.bin", "a.wav", "result", "es", 8, "").Contains("--vad"), "Voice detection is added only when a model is given");
+        bool badRegion = false; try { new SubtitleTranslator(TranslationEngine.AzureTranslator, "", "key", null, "west europe;x").Dispose(); } catch (ArgumentException) { badRegion = true; }
+        Check(badRegion && SubtitleTranslator.DefaultEndpoint(TranslationEngine.AzureTranslator, "k").Contains("microsofttranslator") && SubtitleTranslator.DefaultEndpoint(TranslationEngine.Yandex, "k").Contains("yandex"), "Azure region and default endpoints are validated");
         bool noExe = false; try { WhisperSubtitles.ValidateExecutable(Path.Combine(folder, "missing.exe")); } catch (ArgumentException) { noExe = true; }
         bool noModel = false; try { WhisperSubtitles.ValidateModel(media); } catch (ArgumentException) { noModel = true; }
         Check(noExe && noModel, "A missing program or a non-model file is refused");

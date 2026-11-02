@@ -20,6 +20,8 @@ public class AppSettings
 
     public AppTheme Theme { get; set; } = AppTheme.DarkMica;
     public bool ShowPlaylist { get; set; } = true;
+    // List or Thumbnails: whether playlist entries show a small preview picture.
+    public string PlaylistView { get; set; } = "List";
     public bool RememberWindowPosition { get; set; } = true;
     public int MaxRecentFiles { get; set; } = 10;
     public string Language { get; set; } = "English";
@@ -89,6 +91,10 @@ public class AppSettings
     public string ActivePicturePreset { get; set; } = "";
     // Right-click menu entries the user hid, as English header paths ("Video > Deinterlace mode").
     public List<string> HiddenMenuItems { get; set; } = new();
+    // None / Equirect360 / Equirect180: look around inside a 360° or 180° picture. VideoShader: None, a built-in name, or Custom (CustomShaderFile).
+    public string VideoProjection { get; set; } = "None";
+    public string VideoShader { get; set; } = "None";
+    public string CustomShaderFile { get; set; } = "";
     public bool RestrictFullscreenCursor { get; set; } = false;
     // Current / Primary / Other: which monitor fullscreen opens on. The black-out covers the monitors the video is not on.
     public string FullscreenMonitor { get; set; } = "Current";
@@ -144,6 +150,7 @@ public class AppSettings
     public string WhisperExecutable { get; set; } = "";
     public string WhisperModel { get; set; } = "";
     public string WhisperLanguage { get; set; } = "auto";
+    public string WhisperVadModel { get; set; } = "";
     public int SubtitleDelayStepMs { get; set; } = 100;
     public bool ApplyShadowToSubtitle { get; set; } = true;
     public Dictionary<string, SubtitleStyle> SubtitleStyleProfiles { get; set; } = new(StringComparer.OrdinalIgnoreCase);

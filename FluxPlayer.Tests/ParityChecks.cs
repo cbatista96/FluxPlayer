@@ -151,6 +151,43 @@ internal static class ParityChecks
             && !MenuCustomization.IsHidden("Audio", hiddenSet) && !MenuCustomization.IsHidden("Preferences...", hiddenSet) && !MenuCustomization.IsHidden("Video > Configure video...", hiddenSet), "A hidden entry hides its children, but never a protected entry");
         Check(MenuCustomization.Sanitize(["Video", "Video", "Preferences...", "", "a\nb", new string('x', 400), "Audio > Configure audio..."]).SequenceEqual(new[] { "Video" }), "Stored menu keys are sanitized");
 
+        // 360° view, pixel shaders and thumbnails.
+        Check(ViewProjection.NormalizeMode("equirect360") == "Equirect360" && ViewProjection.NormalizeMode("cube") == "None" && ViewProjection.NormalizeShader("SEPIA") == "Sepia" && ViewProjection.NormalizeShader("x") == "None", "Projection and shader names are validated");
+        var (yaw, pitch) = ViewProjection.Clamp(4 * Math.PI, 5);
+        Check(Math.Abs(yaw) < 1e-9 && Math.Abs(pitch - ViewProjection.MaxPitch) < 1e-9 && ViewProjection.Clamp(double.NaN, double.PositiveInfinity) == (0, 0) && ViewProjection.Clamp(Math.PI + 0.5, 0).Yaw < 0, "Yaw wraps and pitch stops short of the poles");
+        var turned = ViewProjection.Drag(0, 0, 100, 0, 1000, 500, ViewProjection.DefaultFov);
+        Check(turned.Yaw < 0 && turned.Pitch == 0 && ViewProjection.Drag(0, 0, 0, 50, 1000, 500, ViewProjection.DefaultFov).Pitch > 0 && ViewProjection.Drag(1, 1, 50, 50, 0, 0, 1) == ViewProjection.Clamp(1, 1), "Dragging right turns the view left; a degenerate view is safe");
+        Check(ViewProjection.Zoom(ViewProjection.DefaultFov, 1) < ViewProjection.DefaultFov && ViewProjection.Zoom(ViewProjection.DefaultFov, -1) > ViewProjection.DefaultFov && ViewProjection.Zoom(1, 100) == ViewProjection.MinFov && ViewProjection.Zoom(1, -100) == ViewProjection.MaxFov && ViewProjection.Zoom(double.NaN, 0) == ViewProjection.DefaultFov, "Zoom narrows the field of view inside 30°–120°");
+        byte[] compiled = File.ReadAllBytes(Path.Combine(Directory.GetParent(root)!.Parent!.FullName, "FluxPlayer", "Shaders", "projection.ps"));
+        Check(ViewProjection.IsPixelShaderBytecode(compiled) && ViewProjection.IsPixelShaderBytecode(File.ReadAllBytes(Path.Combine(Directory.GetParent(root)!.Parent!.FullName, "FluxPlayer", "Shaders", "sharpen.ps"))), "The shipped shaders are compiled pixel shaders");
+        Check(!ViewProjection.IsPixelShaderBytecode("float4 main() : COLOR { return 0; } //padding..."u8) && !ViewProjection.IsPixelShaderBytecode(new byte[8]) && !ViewProjection.IsPixelShaderBytecode(new byte[ViewProjection.MaxShaderBytes + 1]), "Source text, empty and oversized files are not accepted as shaders");
+        Check(PlaylistThumbnails.FrameSecond(600_000) == 60 && PlaylistThumbnails.FrameSecond(0) == 5 && PlaylistThumbnails.FrameSecond(99_999_999) == 600, "The thumbnail frame is a tenth of the way in");
+        var thumbArgs = PlaylistThumbnails.FfmpegArguments("in.mkv", "out.jpg", 12.5);
+        Check(thumbArgs[1] == "12.5" && thumbArgs[3] == "in.mkv" && thumbArgs[^1] == "out.jpg" && thumbArgs.Contains("scale=192:-2"), "FFmpeg thumbnail arguments");
+        Check(PlaylistThumbnails.CacheName("C:\\A\\b.mkv", 10, 5) == PlaylistThumbnails.CacheName("c:\\a\\B.MKV", 10, 5) && PlaylistThumbnails.CacheName("C:\\a\\b.mkv", 10, 5) != PlaylistThumbnails.CacheName("C:\\a\\b.mkv", 11, 5) && PlaylistThumbnails.IsPhoto("x.JPG") && !PlaylistThumbnails.IsPhoto("x.mkv"), "Thumbnail cache names follow the file, its size and its date");
+
+        // EXIF orientation read from a real JPEG written with the tag.
+        string photoFolder = Path.Combine(folder, "photos"); Directory.CreateDirectory(photoFolder);
+        foreach (int orientation in new[] { 6, 3, 8, 1 })
+        {
+            string jpeg = Path.Combine(photoFolder, $"o{orientation}.jpg");
+            var source = System.Windows.Media.Imaging.BitmapSource.Create(4, 2, 96, 96, System.Windows.Media.PixelFormats.Bgr24, null, new byte[4 * 2 * 3], 12);
+            var metadata = new System.Windows.Media.Imaging.BitmapMetadata("jpg"); metadata.SetQuery("/app1/ifd/{ushort=274}", (ushort)orientation);
+            var encoder = new System.Windows.Media.Imaging.JpegBitmapEncoder(); encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(source, null, metadata, null));
+            using (var output = File.Create(jpeg)) encoder.Save(output);
+            Check(PhotoLibrary.Orientation(jpeg, CancellationToken.None).GetAwaiter().GetResult() == orientation, $"EXIF orientation {orientation} is read from the photo");
+        }
+        Check(PhotoLibrary.Orientation(Path.Combine(photoFolder, "missing.jpg"), CancellationToken.None).GetAwaiter().GetResult() == 1, "A missing photo has the neutral orientation");
+
+        // Messages with values are translated word by word and keep their numbers.
+        Localizer.Use("Spanish");
+        try
+        {
+            Check(Localizer.Rich("Speed 2x") == "Velocidad 2x" && Localizer.Rich("Bookmark at 00:12:00") == "Marcador en 00:12:00" && Localizer.Rich("Channel routing: Stereo") == "Enrutamiento de canales: " + Localizer.Rich("Stereo") && Localizer.Rich("Audio delay +50 ms") == "Retardo del audio +50 ms", "Messages with values are translated");
+            Check(Localizer.Rich("Muted") == "Silenciado" && Localizer.Rich("Something never translated 5") == "Something never translated 5" && Localizer.Rich("") == "", "Unknown messages are left alone");
+        }
+        finally { Localizer.Use("English"); }
+
         // Command line.
         var profile = AppProfile.Parse(["--subtitle", "a.srt", "movie.mkv", "--audio", "b.mka", "--subtitle", "c.srt"], folder);
         Check(profile.Sources.SequenceEqual(new[] { "movie.mkv" }) && profile.Subtitles!.Length == 2 && profile.Audio!.Length == 1 && Path.IsPathFullyQualified(profile.Subtitles[0]), "--subtitle and --audio are collected beside the media");

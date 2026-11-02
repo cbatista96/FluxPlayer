@@ -13,6 +13,7 @@ namespace FluxPlayer.Services;
 public sealed class SingleInstance : IDisposable
 {
     private const int MaximumMessageBytes = 256 * 1024, MaximumSources = 500;
+    private const string SubtitlePrefix = "--subtitle=", AudioPrefix = "--audio=";
     private readonly Mutex _mutex;
     private readonly string _pipe;
     private readonly CancellationTokenSource _stop = new();
@@ -27,7 +28,7 @@ public sealed class SingleInstance : IDisposable
     }
 
     /// <summary>Returns the owning instance, or null when another instance already runs and received <paramref name="sources"/>.</summary>
-    public static SingleInstance? TryOwn(string dataDirectory, IReadOnlyList<string> sources)
+    public static SingleInstance? TryOwn(string dataDirectory, IReadOnlyList<string> sources, IReadOnlyList<string>? subtitles = null, IReadOnlyList<string>? audio = null)
     {
         string key = Key(dataDirectory), pipe = "FluxPlayer-" + key;
         var mutex = new Mutex(true, "Local\\FluxPlayer-" + key, out bool created);
@@ -37,7 +38,10 @@ public sealed class SingleInstance : IDisposable
         {
             using var client = new NamedPipeClientStream(".", pipe, PipeDirection.Out);
             client.Connect(2000);
-            byte[] payload = Encoding.UTF8.GetBytes(string.Join('\n', sources.Take(MaximumSources).Select(Absolute)));
+            var lines = sources.Take(MaximumSources).Select(Absolute)
+                .Concat((subtitles ?? []).Take(AppProfile.MaximumExternalFiles).Select(file => SubtitlePrefix + Absolute(file)))
+                .Concat((audio ?? []).Take(AppProfile.MaximumExternalFiles).Select(file => AudioPrefix + Absolute(file)));
+            byte[] payload = Encoding.UTF8.GetBytes(string.Join('\n', lines));
             if (payload.Length <= MaximumMessageBytes) client.Write(payload);
             client.Flush();
             return null;
@@ -55,7 +59,12 @@ public sealed class SingleInstance : IDisposable
         catch (Exception e) when (e is ArgumentException or NotSupportedException or PathTooLongException) { return source; }
     }
 
-    public void Listen(Action<string[]> received)
+    /// <summary>What another launch asked this instance to open: media sources plus the files given with --subtitle / --audio.</summary>
+    public sealed record LaunchRequest(string[] Sources, string[] Subtitles, string[] Audio);
+
+    public void Listen(Action<string[]> received) => ListenForLaunches(launch => received(launch.Sources));
+
+    public void ListenForLaunches(Action<LaunchRequest> received)
     {
         _listener = Task.Run(async () =>
         {
@@ -69,7 +78,7 @@ public sealed class SingleInstance : IDisposable
                     var chunk = new byte[8192]; int read;
                     while ((read = await server.ReadAsync(chunk, _stop.Token).ConfigureAwait(false)) > 0 && buffer.Length <= MaximumMessageBytes) buffer.Write(chunk, 0, read);
                     if (buffer.Length > MaximumMessageBytes) continue;
-                    received(Parse(Encoding.UTF8.GetString(buffer.ToArray())));
+                    received(ParseLaunch(Encoding.UTF8.GetString(buffer.ToArray())));
                 }
                 catch (OperationCanceledException) { break; }
                 catch (Exception e) when (e is IOException or ObjectDisposedException or UnauthorizedAccessException) { await Task.Delay(250).ConfigureAwait(false); }
@@ -77,8 +86,17 @@ public sealed class SingleInstance : IDisposable
         });
     }
 
-    internal static string[] Parse(string message) => message.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-        .Where(line => line.Length is > 0 and < 32768 && !line.Any(char.IsControl)).Take(MaximumSources).ToArray();
+    internal static string[] Parse(string message) => ParseLaunch(message).Sources;
+
+    internal static LaunchRequest ParseLaunch(string message)
+    {
+        var lines = message.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(line => line.Length is > 0 and < 32768 && !line.Any(char.IsControl)).ToList();
+        string[] Prefixed(string prefix) => lines.Where(line => line.StartsWith(prefix, StringComparison.Ordinal)).Select(line => line[prefix.Length..])
+            .Where(line => line.Length > 0).Take(AppProfile.MaximumExternalFiles).ToArray();
+        return new(lines.Where(line => !line.StartsWith(SubtitlePrefix, StringComparison.Ordinal) && !line.StartsWith(AudioPrefix, StringComparison.Ordinal)).Take(MaximumSources).ToArray(),
+            Prefixed(SubtitlePrefix), Prefixed(AudioPrefix));
+    }
 
     public void Dispose()
     {

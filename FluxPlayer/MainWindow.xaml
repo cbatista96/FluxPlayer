@@ -199,6 +199,21 @@
                 </MenuItem>
                 <MenuItem Header="Hardware decoding" IsCheckable="True" Tag="set:HardwareDecoding" Click="CtxSetting_Click" />
                 <MenuItem Header="Vertical sync" IsCheckable="True" Tag="set:VSync" Click="CtxSetting_Click" />
+                <MenuItem Header="360° / 180° view">
+                    <MenuItem Header="Flat video" IsCheckable="True" Tag="set:VideoProjection=None" Click="CtxSetting_Click" />
+                    <MenuItem Header="360° video" IsCheckable="True" Tag="set:VideoProjection=Equirect360" Click="CtxSetting_Click" />
+                    <MenuItem Header="180° video" IsCheckable="True" Tag="set:VideoProjection=Equirect180" Click="CtxSetting_Click" />
+                    <Separator />
+                    <MenuItem Header="Reset the view direction" Tag="act:ResetLook" Click="CtxAction_Click" />
+                </MenuItem>
+                <MenuItem Header="Pixel shader">
+                    <MenuItem Header="None" IsCheckable="True" Tag="set:VideoShader=None" Click="CtxSetting_Click" />
+                    <MenuItem Header="Grayscale" IsCheckable="True" Tag="set:VideoShader=Grayscale" Click="CtxSetting_Click" />
+                    <MenuItem Header="Sepia" IsCheckable="True" Tag="set:VideoShader=Sepia" Click="CtxSetting_Click" />
+                    <MenuItem Header="Sharpen" IsCheckable="True" Tag="set:VideoShader=Sharpen" Click="CtxSetting_Click" />
+                    <MenuItem Header="Invert colours" IsCheckable="True" Tag="set:VideoShader=Invert" Click="CtxSetting_Click" />
+                    <MenuItem Header="My shader file" IsCheckable="True" Tag="set:VideoShader=Custom" Click="CtxSetting_Click" />
+                </MenuItem>
                 <Separator x:Name="CtxVideoActionSeparator" />
                 <MenuItem x:Name="CtxVideoConfigItem" Header="Configure video..." Tag="Video" Click="CtxConfigure_Click" />
             </MenuItem>
@@ -968,6 +983,10 @@
                                     <MenuItem Header="Down" Tag="2" Click="PlCtxMove_Click" />
                                     <MenuItem Header="To the bottom" Tag="3" Click="PlCtxMove_Click" />
                                 </MenuItem>
+                                <MenuItem x:Name="PlCtxView" Header="View">
+                                    <MenuItem Header="List" IsCheckable="True" Tag="set:PlaylistView=List" Click="CtxSetting_Click" />
+                                    <MenuItem Header="Thumbnails" IsCheckable="True" Tag="set:PlaylistView=Thumbnails" Click="CtxSetting_Click" />
+                                </MenuItem>
                                 <MenuItem Header="Sort the playlist">
                                     <MenuItem Header="By name" Tag="Name|A" Click="PlCtxSort_Click" />
                                     <MenuItem Header="By date modified (oldest first)" Tag="Date|A" Click="PlCtxSort_Click" />
@@ -988,6 +1007,7 @@
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="22" />
+                                        <ColumnDefinition Width="{Binding ThumbWidth}" />
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="24" />
                                     </Grid.ColumnDefinitions>
@@ -1008,7 +1028,8 @@
                                         </StackPanel>
                                     </Grid>
 
-                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="6,0,4,0">
+                                    <Border Grid.Column="1" Width="{Binding ThumbWidth}" Height="{Binding ThumbHeight}" Margin="2,2,0,2" CornerRadius="4" Background="#FF101216" ClipToBounds="True" VerticalAlignment="Center"><Image Source="{Binding Thumbnail}" Stretch="UniformToFill" Loaded="PlaylistThumb_Loaded" /></Border>
+                                    <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="6,0,4,0">
                                         <TextBlock x:Name="TitleText" Text="{Binding Title}" FontSize="12.5" Foreground="{DynamicResource PlayerPrimaryForegroundBrush}" TextTrimming="CharacterEllipsis" ToolTip="{Binding FilePath}" />
                                         <StackPanel Orientation="Horizontal" Margin="0,1,0,0">
                                             <TextBlock Text="{Binding Duration}" FontSize="11" VerticalAlignment="Center" Foreground="{DynamicResource PlayerSecondaryForegroundBrush}" />
@@ -1023,7 +1044,7 @@
                                         </StackPanel>
                                     </StackPanel>
 
-                                    <Button Grid.Column="2" x:Name="RemoveBtn" Style="{StaticResource TransportButton}" Width="24" Height="24" FontSize="10" Opacity="0" ToolTip="Remove from playlist" Command="{Binding DataContext.RemoveFromPlaylistCommand,                                                       RelativeSource={RelativeSource AncestorType=ListBox}}" CommandParameter="{Binding}">
+                                    <Button Grid.Column="3" x:Name="RemoveBtn" Style="{StaticResource TransportButton}" Width="24" Height="24" FontSize="10" Opacity="0" ToolTip="Remove from playlist" Command="{Binding DataContext.RemoveFromPlaylistCommand,                                                       RelativeSource={RelativeSource AncestorType=ListBox}}" CommandParameter="{Binding}">
                                         <TextBlock Text="" FontFamily="Segoe Fluent Icons" />
                                     </Button>
                                 </Grid>

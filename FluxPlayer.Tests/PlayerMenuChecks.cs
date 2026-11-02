@@ -129,18 +129,25 @@ internal static class PlayerMenuChecks
         string data = Path.Combine(root, "single-" + Guid.NewGuid().ToString("N")); Directory.CreateDirectory(data);
         using var first = SingleInstance.TryOwn(data, Array.Empty<string>());
         Check(first != null, "The first launch owns the profile");
-        var received = new TaskCompletionSource<string[]>(TaskCreationOptions.RunContinuationsAsynchronously);
-        first!.Listen(paths => received.TrySetResult(paths));
+        var launches = new System.Collections.Concurrent.ConcurrentQueue<SingleInstance.LaunchRequest>(); var arrived = new SemaphoreSlim(0);
+        first!.ListenForLaunches(launch => { launches.Enqueue(launch); arrived.Release(); });
         await Task.Delay(200);
         string file = Path.Combine(data, "ñ clip.mkv");
         using (var second = SingleInstance.TryOwn(data, new[] { file, "https://example.com/a.mp4" })) Check(second == null, "The second launch hands over and exits");
-        var got = await received.Task.WaitAsync(TimeSpan.FromSeconds(5));
+        SingleInstance.LaunchRequest? firstLaunch = null; bool firstIn = await arrived.WaitAsync(TimeSpan.FromSeconds(5)); firstIn = firstIn && launches.TryDequeue(out firstLaunch); Check(firstIn, "The first hand-over arrives"); var got = firstLaunch!.Sources;
         Check(got.SequenceEqual(new[] { file, "https://example.com/a.mp4" }), "Files, including Unicode names and addresses, reach the first instance");
+        await Task.Delay(200);
+        string sub = Path.Combine(data, "s.srt"), dub = Path.Combine(data, "d.mka");
+        using (var third = SingleInstance.TryOwn(data, new[] { file }, new[] { sub }, new[] { dub })) Check(third == null, "A launch with --subtitle/--audio also hands over");
+        SingleInstance.LaunchRequest? request = null; bool secondIn = await arrived.WaitAsync(TimeSpan.FromSeconds(5)); secondIn = secondIn && launches.TryDequeue(out request); Check(secondIn, "The second hand-over arrives");
+        Check(request!.Sources.SequenceEqual(new[] { file }) && request.Subtitles.SequenceEqual(new[] { sub }) && request.Audio.SequenceEqual(new[] { dub }), "Subtitle and audio files reach the first instance beside the media");
+        var parsed = SingleInstance.ParseLaunch("a.mkv\n--subtitle=x.srt\n--audio=\n--audio=y.mka\n");
+        Check(parsed.Sources.SequenceEqual(new[] { "a.mkv" }) && parsed.Subtitles.SequenceEqual(new[] { "x.srt" }) && parsed.Audio.SequenceEqual(new[] { "y.mka" }), "The hand-over message separates sources, subtitles and audio");
         using var otherProfile = SingleInstance.TryOwn(Path.Combine(root, "single-" + Guid.NewGuid().ToString("N")), Array.Empty<string>());
         Check(otherProfile != null, "A different profile is independent");
     }
 
     // Percentages, aspect ratios and speeds read the same in every language.
-    private static readonly HashSet<string> SameInSpanish = new(StringComparer.Ordinal) { "Audio", "Auto", "Mono", "Original", "ReplayGain", "Yadif", "Yadif2x", "Bob", "Blend", "Linear", "Mean", "X", "Phosphor", "Ivtc" };
+    private static readonly HashSet<string> SameInSpanish = new(StringComparer.Ordinal) { "Audio", "Auto", "Mono", "Original", "ReplayGain", "Yadif", "Yadif2x", "Sepia", "Bob", "Blend", "Linear", "Mean", "X", "Phosphor", "Ivtc" };
     private static bool IsInvariant(string header) => SameInSpanish.Contains(header) || header.Any(char.IsDigit) && header.Replace(" ", "").All(c => char.IsDigit(c) || ":%x.".Contains(c));
 }

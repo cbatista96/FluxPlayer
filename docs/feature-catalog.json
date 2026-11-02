@@ -8258,5 +8258,152 @@
     "Description": "Offline Unsharp-mask picture sharpening.",
     "Status": "implemented",
     "Evidence": "Palette acceptance: unsharp actual default export and independent decode passed with installed FFmpeg 9.0.2. Input bytes preserved; duration/output validity checked. Parameter extremes, special-source HDCD markers, all combinations and subjective quality are not certified. docs/PROCESSING_ACCEPTANCE.md."
+  },
+  {
+    "Id": "F1181",
+    "Area": "Playback and formats",
+    "Description": "Hold the left mouse button on the video to play at a chosen speed until release.",
+    "Status": "implemented",
+    "Evidence": "FluxPlayer.Tests ParityChecks (rules); real-app run: 3x while held, back to 1x on release without pausing."
+  },
+  {
+    "Id": "F1182",
+    "Area": "Playback and formats",
+    "Description": "A-B section repeat with repeat count, pause between repeats, previous/next section and quick repeat of the last seconds.",
+    "Status": "implemented",
+    "Evidence": "SectionRepeat, MainViewModel; ParityChecks (arithmetic); real-app run: two repeats with a 500 ms pause, then playback continued past B. Previous/next section and quick repeat verified only by tests."
+  },
+  {
+    "Id": "F1183",
+    "Area": "Video and subtitles",
+    "Description": "Ignore subtitles inside the video and use only the preferred subtitle languages.",
+    "Status": "implemented",
+    "Evidence": "MediaService.Audio, ExternalSources; ParityChecks; real-app run on an MKV with an embedded subtitle: shown when allowed, absent when ignored."
+  },
+  {
+    "Id": "F1184",
+    "Area": "Windows integration",
+    "Description": "Separate double-click actions for the left and right thirds of the video.",
+    "Status": "implemented",
+    "Evidence": "PointerGestureRules; ParityChecks; real-app run: left-third double-click seeks back."
+  },
+  {
+    "Id": "F1185",
+    "Area": "Windows integration",
+    "Description": "Sideways (tilt) mouse wheel action.",
+    "Status": "implemented",
+    "Evidence": "MainWindow.PointerGestures; real-app run with a WM_MOUSEHWHEEL message: seeked +10 s."
+  },
+  {
+    "Id": "F1186",
+    "Area": "Windows integration",
+    "Description": "Ctrl/Alt/Shift + drag on the video to zoom, move the picture or move the subtitles.",
+    "Status": "implemented_unverified",
+    "Evidence": "PointerGestureRules; ParityChecks (arithmetic); real-app run: Ctrl+drag zoomed 1.41x and Alt+drag changed the picture. Subtitle height by drag was not run."
+  },
+  {
+    "Id": "F1187",
+    "Area": "Video and subtitles",
+    "Description": "Extra subtitle and audio-track folders searched by video name.",
+    "Status": "implemented_unverified",
+    "Evidence": "ExternalSources, MediaService.ExternalSources; ParityChecks (discovery). Not run in the real app."
+  },
+  {
+    "Id": "F1188",
+    "Area": "Windows integration",
+    "Description": "--subtitle and --audio command-line options, also handed over to an already running instance.",
+    "Status": "implemented",
+    "Evidence": "AppProfile, SingleInstance; ParityChecks and PlayerMenuChecks (hand-over); real-app run of --subtitle."
+  },
+  {
+    "Id": "F1189",
+    "Area": "Playlists and library",
+    "Description": "Playlist sorting (natural name, date, extension, duration, folder, reverse), moving entries, copying names and paths, and a filter box.",
+    "Status": "implemented_unverified",
+    "Evidence": "PlaylistOrdering; ParityChecks (order and filter); menu and filter box seen in the real app, sorting and filtering not exercised there."
+  },
+  {
+    "Id": "F1190",
+    "Area": "Playlists and library",
+    "Description": "Playlist thumbnail view with pictures made from photos and, through FFmpeg, from videos, cached on disk.",
+    "Status": "implemented",
+    "Evidence": "PlaylistThumbnails; ParityChecks; real-app run: thumbnails appeared for two videos."
+  },
+  {
+    "Id": "F1191",
+    "Area": "Playback and formats",
+    "Description": "Time format when copying the elapsed or total time, and a bookmark manager (filter, move, remove, save to and load from a text file).",
+    "Status": "implemented_unverified",
+    "Evidence": "BookmarkTools, BookmarksWindow; ParityChecks; the window was opened in the real app, its buttons were not exercised."
+  },
+  {
+    "Id": "F1192",
+    "Area": "Windows integration",
+    "Description": "Fullscreen on a chosen monitor, black-out of the other monitors, keeping the window reachable and a largest window size.",
+    "Status": "implemented_unverified",
+    "Evidence": "MonitorPlan, MonitorBlackout; ParityChecks (geometry). Not run on a multi-monitor setup."
+  },
+  {
+    "Id": "F1193",
+    "Area": "Video and subtitles",
+    "Description": "Colour behind the video and EXIF orientation for photos.",
+    "Status": "implemented_unverified",
+    "Evidence": "MonitorPlan, PhotoLibrary; ParityChecks (a JPEG written with the tag is read back). Not opened in the photo viewer."
+  },
+  {
+    "Id": "F1194",
+    "Area": "Workspaces and interface",
+    "Description": "Search across all Settings pages and sorting and filtering of keyboard shortcuts.",
+    "Status": "implemented",
+    "Evidence": "SettingsPanel.Search; real-app run of the search (finds and jumps to the option). Shortcut sorting and filtering were not exercised."
+  },
+  {
+    "Id": "F1195",
+    "Area": "Workspaces and interface",
+    "Description": "Customizable right-click menu; entries that open Settings cannot be hidden.",
+    "Status": "implemented",
+    "Evidence": "MenuCustomization, MainWindow.MenuCustomization; ParityChecks; real-app run: two entries hidden and the menu stayed tidy."
+  },
+  {
+    "Id": "F1196",
+    "Area": "Video and subtitles",
+    "Description": "Remove hearing-impaired text and limit the longest subtitle in external subtitle files, using a cleaned copy.",
+    "Status": "implemented",
+    "Evidence": "SubtitleCleanup; ParityChecks; real-app run: bracketed sound text removed. The maximum duration was verified only by tests."
+  },
+  {
+    "Id": "F1197",
+    "Area": "Video and subtitles",
+    "Description": "360° and 180° equirectangular viewing with drag-to-look and wheel zoom, as a WPF pixel shader.",
+    "Status": "implemented_unverified",
+    "Evidence": "Shaders/projection.hlsl, ProjectionEffect, ViewProjection; ParityChecks (maths and shader files); real-app run with a flat test video showed the projection responding to the drag. Not tried with a real 360° video."
+  },
+  {
+    "Id": "F1198",
+    "Area": "Video and subtitles",
+    "Description": "Built-in pixel shaders (grayscale, sepia, sharpen, invert) and a user-chosen compiled .ps shader.",
+    "Status": "implemented_unverified",
+    "Evidence": "VideoEffects, Shaders; ParityChecks (file validation). Shader effects were not looked at in the real app."
+  },
+  {
+    "Id": "F1199",
+    "Area": "Metadata and lyrics",
+    "Description": "Subtitle translation with Microsoft Azure Translator and Yandex Translate in addition to LibreTranslate, DeepL and Google.",
+    "Status": "implemented_unverified",
+    "Evidence": "SubtitleTranslator; TranslationChecks on loopback servers. Not run against the real services."
+  },
+  {
+    "Id": "F1200",
+    "Area": "Metadata and lyrics",
+    "Description": "Optional voice-activity detection model for Whisper transcription.",
+    "Status": "implemented_unverified",
+    "Evidence": "WhisperSubtitles; TranslationChecks (arguments). whisper.cpp was not available to run."
+  },
+  {
+    "Id": "F1201",
+    "Area": "Workspaces and interface",
+    "Description": "Spanish interface for the right-click menu, Settings, on-screen messages and the advanced tool windows.",
+    "Status": "implemented",
+    "Evidence": "Localizer.Spanish*; PlayerMenuChecks (every menu entry), ParityChecks; real-app run in Spanish. Long error messages of the advanced services are still in English."
   }
 ]

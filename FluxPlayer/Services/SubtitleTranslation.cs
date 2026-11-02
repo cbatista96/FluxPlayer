@@ -7,7 +7,7 @@ using System.Text.Json;
 
 namespace FluxPlayer.Services;
 
-public enum TranslationEngine { LibreTranslate, DeepL, GoogleCloud }
+public enum TranslationEngine { LibreTranslate, DeepL, GoogleCloud, AzureTranslator, Yandex }
 public enum TranslationLayout { TranslationOnly, OriginalAbove, OriginalBelow }
 
 /// <summary>Finds the subtitle file that belongs to a media file.</summary>
@@ -44,10 +44,14 @@ public sealed class SubtitleTranslator : IDisposable
     {
         TranslationEngine.LibreTranslate => "https://libretranslate.com",
         TranslationEngine.DeepL => key.EndsWith(":fx", StringComparison.Ordinal) ? "https://api-free.deepl.com" : "https://api.deepl.com",
+        TranslationEngine.AzureTranslator => "https://api.cognitive.microsofttranslator.com",
+        TranslationEngine.Yandex => "https://translate.api.cloud.yandex.net",
         _ => "https://translation.googleapis.com"
     };
 
-    public SubtitleTranslator(TranslationEngine engine, string endpoint, string apiKey, HttpMessageHandler? handler = null)
+    private readonly string _region;
+
+    public SubtitleTranslator(TranslationEngine engine, string endpoint, string apiKey, HttpMessageHandler? handler = null, string? region = null)
     {
         apiKey = apiKey.Trim();
         if (apiKey.Length > 512 || apiKey.Any(char.IsControl)) throw new ArgumentException("The API key is not valid.");
@@ -55,7 +59,9 @@ public sealed class SubtitleTranslator : IDisposable
         if (!Uri.TryCreate(string.IsNullOrWhiteSpace(endpoint) ? DefaultEndpoint(engine, apiKey) : endpoint.Trim(), UriKind.Absolute, out var uri)
             || !(uri.Scheme == Uri.UriSchemeHttps || (uri.Scheme == Uri.UriSchemeHttp && uri.IsLoopback)) || !string.IsNullOrEmpty(uri.UserInfo))
             throw new ArgumentException("Use an https address (http only for a server on this computer).");
-        _engine = engine; _endpoint = uri; _key = apiKey;
+        region = (region ?? "").Trim();
+        if (region.Length > 64 || !region.All(c => char.IsAsciiLetterOrDigit(c) || c == '-')) throw new ArgumentException("The service region is not valid.");
+        _engine = engine; _endpoint = uri; _key = apiKey; _region = region;
         _http = handler == null ? new HttpClient { Timeout = TimeSpan.FromSeconds(60) } : new HttpClient(handler, true) { Timeout = TimeSpan.FromSeconds(60) };
         _http.DefaultRequestHeaders.UserAgent.ParseAdd("FluxPlayer");
     }
@@ -112,6 +118,22 @@ public sealed class SubtitleTranslator : IDisposable
                 request.Headers.TryAddWithoutValidation("Authorization", "DeepL-Auth-Key " + _key);
                 return request;
             }
+            case TranslationEngine.AzureTranslator:
+            {
+                string query = "/translate?api-version=3.0&to=" + Uri.EscapeDataString(target) + (source != "auto" ? "&from=" + Uri.EscapeDataString(source) : "") + "&textType=plain";
+                var request = new HttpRequestMessage(HttpMethod.Post, Url(query)) { Content = JsonContent.Create(texts.Select(text => new Dictionary<string, string> { ["Text"] = text }).ToArray()) };
+                request.Headers.TryAddWithoutValidation("Ocp-Apim-Subscription-Key", _key);
+                if (_region.Length > 0) request.Headers.TryAddWithoutValidation("Ocp-Apim-Subscription-Region", _region);
+                return request;
+            }
+            case TranslationEngine.Yandex:
+            {
+                var body = new Dictionary<string, object?> { ["texts"] = texts, ["targetLanguageCode"] = target, ["format"] = "PLAIN_TEXT" };
+                if (source != "auto") body["sourceLanguageCode"] = source;
+                var request = new HttpRequestMessage(HttpMethod.Post, Url("/translate/v2/translate")) { Content = JsonContent.Create(body) };
+                request.Headers.TryAddWithoutValidation("Authorization", "Api-Key " + _key);
+                return request;
+            }
             default:
             {
                 var body = new Dictionary<string, object?> { ["q"] = texts, ["target"] = target, ["format"] = "text" };
@@ -134,7 +156,8 @@ public sealed class SubtitleTranslator : IDisposable
                     var value = root.GetProperty("translatedText");
                     return value.ValueKind == JsonValueKind.Array ? value.EnumerateArray().Select(item => item.GetString() ?? "").ToArray() : [value.GetString() ?? ""];
                 }
-                case TranslationEngine.DeepL: return root.GetProperty("translations").EnumerateArray().Select(item => item.GetProperty("text").GetString() ?? "").ToArray();
+                case TranslationEngine.DeepL or TranslationEngine.Yandex: return root.GetProperty("translations").EnumerateArray().Select(item => item.GetProperty("text").GetString() ?? "").ToArray();
+                case TranslationEngine.AzureTranslator: return root.EnumerateArray().Select(item => item.GetProperty("translations")[0].GetProperty("text").GetString() ?? "").ToArray();
                 default: return root.GetProperty("data").GetProperty("translations").EnumerateArray().Select(item => item.GetProperty("translatedText").GetString() ?? "").ToArray();
             }
         }

@@ -12,7 +12,7 @@ public class FeatureWorkbench : Wpf.Ui.Controls.FluentWindow
 {
     protected readonly StackPanel Form = new();
     protected readonly WrapPanel Actions = new();
-    protected readonly TextBlock Status = new() { TextWrapping = TextWrapping.Wrap, Margin = new(0, 12, 0, 0) };
+    protected readonly TextBlock Status = new LocalizedStatusText { TextWrapping = TextWrapping.Wrap, Margin = new(0, 12, 0, 0) };
     protected readonly ContentControl View = new();
     protected readonly CancellationTokenSource Lifetime = new();
     private CancellationTokenSource? _job;

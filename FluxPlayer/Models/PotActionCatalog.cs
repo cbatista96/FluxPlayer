@@ -19,6 +19,7 @@ public static class PotActionCatalog
         ("CopyFrame", "Copy the current frame to the clipboard"), ("CycleAspect", "Next aspect ratio"), ("ToggleAlwaysOnTop", "Always on top"),
         ("DeleteToRecycleBin", "Move the current file to the Recycle Bin"), ("CopyFilePath", "Copy the file path"),
         ("SectionRepeatPrevious", "Previous repeat section"), ("SectionRepeatNext", "Next repeat section"), ("RepeatLastSeconds", "Repeat the last few seconds"),
+        ("ResetLook", "Reset the 360° view direction"),
     ];
 
     public static readonly string[] AspectCycle = ["Auto", "16:9", "16:10", "4:3", "5:4", "21:9", "1:1", "Stretch"];

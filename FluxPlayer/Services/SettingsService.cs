@@ -113,6 +113,10 @@ public class SettingsService
         settings.SubtitleFolders = ExternalSources.NormalizeFolderList(settings.SubtitleFolders);
         settings.AudioFolders = ExternalSources.NormalizeFolderList(settings.AudioFolders);
         settings.MaxSubtitleSeconds = SubtitleCleanup.NormalizeMaxSeconds(settings.MaxSubtitleSeconds);
+        settings.PlaylistView = string.Equals(settings.PlaylistView, "Thumbnails", StringComparison.OrdinalIgnoreCase) ? "Thumbnails" : "List";
+        settings.VideoProjection = Models.ViewProjection.NormalizeMode(settings.VideoProjection);
+        settings.VideoShader = Models.ViewProjection.NormalizeShader(settings.VideoShader);
+        settings.CustomShaderFile = (settings.CustomShaderFile ?? "").Length > 1024 || (settings.CustomShaderFile ?? "").Any(char.IsControl) ? "" : settings.CustomShaderFile ?? "";
         settings.HiddenMenuItems = MenuCustomization.Sanitize(settings.HiddenMenuItems);
         settings.FullscreenMonitor = MonitorPlan.NormalizeFullscreenMode(settings.FullscreenMonitor);
         settings.VideoBackgroundColor = MonitorPlan.NormalizeColor(settings.VideoBackgroundColor);
@@ -130,7 +134,8 @@ public class SettingsService
         settings.AltDragAction = PointerGestureRules.Normalize(settings.AltDragAction, PointerGestureRules.DragActions, "None");
         settings.ShiftDragAction = PointerGestureRules.Normalize(settings.ShiftDragAction, PointerGestureRules.DragActions, "None");
         settings.WhisperExecutable = (settings.WhisperExecutable ?? "").Length > 1024 ? "" : settings.WhisperExecutable ?? "";
-        settings.WhisperModel = (settings.WhisperModel ?? "").Length > 1024 ? "" : settings.WhisperModel ?? "";
+        settings.WhisperVadModel = (settings.WhisperVadModel ?? "").Length > 1024 ? "" : settings.WhisperVadModel ?? "";
+        settings.WhisperModel =(settings.WhisperModel ?? "").Length > 1024 ? "" : settings.WhisperModel ?? "";
         settings.WhisperLanguage = WhisperSubtitles.Languages.Contains(settings.WhisperLanguage ?? "") ? settings.WhisperLanguage! : "auto";
         settings.PlaybackHistoryLimit = Math.Clamp(settings.PlaybackHistoryLimit, 1, PlaybackHistoryService.MaximumEntries);
         settings.PlaybackHistoryDays = Math.Clamp(settings.PlaybackHistoryDays, 1, 3650);

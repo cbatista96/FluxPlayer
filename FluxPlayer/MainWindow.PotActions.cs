@@ -57,6 +57,7 @@ public partial class MainWindow
                 return true;
             case "DeleteToRecycleBin": _ = DeleteCurrentToRecycleBinAsync(); return true;
             case "CopyFilePath": CopyInfo("path"); return true;
+            case "ResetLook": ResetLook(); ShowActionOsd("", Localizer.T("View direction reset")); return true;
             case "SectionRepeatPrevious": ShiftRepeatSection(-1); return true;
             case "SectionRepeatNext": ShiftRepeatSection(+1); return true;
             case "RepeatLastSeconds":

@@ -203,6 +203,9 @@ public partial class SettingsPanel : UserControl
         RestrictCursorToggle.IsChecked = _settings.RestrictFullscreenCursor;
         SelectComboByTag(FullscreenMonitorCombo, _settings.FullscreenMonitor);
         BlackOutMonitorsToggle.IsChecked = _settings.BlackOutOtherMonitors;
+        SelectComboByTag(VideoProjectionCombo, _settings.VideoProjection);
+        SelectComboByTag(VideoShaderCombo, _settings.VideoShader);
+        CustomShaderBox.Text = _settings.CustomShaderFile;
         VideoBackgroundBox.Text = _settings.VideoBackgroundColor;
         WindowLimitBox.Text = _settings.WindowSizeLimitPercent.ToString();
         KeepOnScreenToggle.IsChecked = _settings.KeepWindowOnScreen;
@@ -356,6 +359,9 @@ public partial class SettingsPanel : UserControl
         _settings.RestrictFullscreenCursor = RestrictCursorToggle.IsChecked == true;
         _settings.FullscreenMonitor = GetComboTag(FullscreenMonitorCombo) ?? _settings.FullscreenMonitor;
         _settings.BlackOutOtherMonitors = BlackOutMonitorsToggle.IsChecked == true;
+        _settings.VideoProjection = GetComboTag(VideoProjectionCombo) ?? _settings.VideoProjection;
+        _settings.VideoShader = GetComboTag(VideoShaderCombo) ?? _settings.VideoShader;
+        _settings.CustomShaderFile = CustomShaderBox.Text.Trim();
         _settings.VideoBackgroundColor = MonitorPlan.NormalizeColor(VideoBackgroundBox.Text, _settings.VideoBackgroundColor);
         if (int.TryParse(WindowLimitBox.Text, out int wlp)) _settings.WindowSizeLimitPercent = MonitorPlan.NormalizeLimitPercent(wlp);
         _settings.KeepWindowOnScreen = KeepOnScreenToggle.IsChecked == true;

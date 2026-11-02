@@ -1113,6 +1113,8 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         int notches = _wheelAccumulator / Mouse.MouseWheelDeltaForOneLine;
         if (notches == 0) return;
         _wheelAccumulator -= notches * Mouse.MouseWheelDeltaForOneLine;
+        // Inside a 360° picture the plain wheel zooms (narrows the field of view); Ctrl/Shift keep their own actions.
+        if (ProjectionActive && (mods & (ModifierKeys.Control | ModifierKeys.Shift)) == 0) { LookZoom(notches); return; }
         RunWheelAction(action, notches);
     }
 
@@ -1167,9 +1169,9 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
             ? "\uE74F"
             : _vm.Volume < 33 ? "\uE993"
             : _vm.Volume < 66 ? "\uE994" : "\uE995";
-        VolumeOsdText.Text = muted ? "Muted"
+        VolumeOsdText.Text = Localizer.Rich(muted ? "Muted"
             : volumePercent > 100 ? $"Volume {volumePercent}% (boost)"
-            : $"Volume {volumePercent}%";
+            : $"Volume {volumePercent}%");
 
         if (!VolumeOsdPopup.IsOpen)
             VolumeOsdPopup.IsOpen = true;
@@ -1229,7 +1231,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         if (!IsThisAppForeground()) return;
 
         PlaybackOsdIcon.Text = iconGlyph;
-        PlaybackOsdText.Text = text;
+        PlaybackOsdText.Text = Localizer.Rich(text);
 
         if (!PlaybackOsdPopup.IsOpen)
             PlaybackOsdPopup.IsOpen = true;
@@ -1401,6 +1403,8 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         foreach (var entry in PlaylistItemMenu.Items.OfType<MenuItem>().Where(entry => entry != PlCtxCopyAll && entry.Header as string != "Sort the playlist"))
             entry.IsEnabled = hasItem;
         PlCtxCopyAll.IsEnabled = _vm.Playlist.Count > 0;
+        PlCtxView.IsEnabled = true;
+        RefreshSettingChecks(PlaylistItemMenu);
         if (_playlistCtxItem == null) return;
         bool isCurrent = ReferenceEquals(_playlistCtxItem, _vm.CurrentItem);
         bool isLocal = !_playlistCtxItem.IsNetwork;
@@ -2362,6 +2366,8 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
     {
         FluxPlayer.Controls.ButtonFx.ReduceMotion = _runtimeSettings.ReduceMotion;
         ApplyVideoBackground();
+        ApplyPlaylistView();
+        ApplyVideoEffects();
 
         bool fullOsdEnabled = IsFeatureEnabled(FeatureCatalog.FullOsd);
         if (!fullOsdEnabled)
@@ -2406,7 +2412,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
 
     private void OnErrorOccurred(object? sender, string message)
     {
-        ErrorText.Text = message;
+        ErrorText.Text = Localizer.Rich(message);
         var fadeIn = new DoubleAnimation(1.0, TimeSpan.FromMilliseconds(200));
         ErrorBanner.BeginAnimation(OpacityProperty, fadeIn);
         _errorTimer.Stop();

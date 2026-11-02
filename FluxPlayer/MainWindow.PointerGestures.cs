@@ -44,7 +44,8 @@ public partial class MainWindow
     {
         var mods = Keyboard.Modifiers;
         string action = PointerGestureRules.DragActionFor(_runtimeSettings, (mods & ModifierKeys.Control) != 0, (mods & ModifierKeys.Alt) != 0, (mods & ModifierKeys.Shift) != 0);
-        if (action == "None" || !_vm.HasMedia || _controlsLocked) return false;
+        if (action == "None") return BeginLook(e);
+        if (!_vm.HasMedia || _controlsLocked) return false;
         _dragGesture = action;
         _dragGestureLast = e.GetPosition(VideoMouseOverlay);
         _dragGestureMargin = _runtimeSettings.SubtitleVerticalMargin;
@@ -57,6 +58,7 @@ public partial class MainWindow
     private void ApplyPointerGesture(MouseEventArgs e)
     {
         var point = e.GetPosition(VideoMouseOverlay);
+        if (_dragGesture == "Look") { LookDrag(point); _dragGestureLast = point; return; }
         double dx = point.X - _dragGestureLast.X, dy = point.Y - _dragGestureLast.Y;
         _dragGestureLast = point;
         try

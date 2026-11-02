@@ -17,7 +17,7 @@ public static partial class Localizer
 
     private static readonly Dictionary<string, IReadOnlyDictionary<string, string>> Catalogs = new(StringComparer.Ordinal)
     {
-        ["Spanish"] = Variants(SpanishCatalog)
+        ["Spanish"] = Variants(Merge(SpanishCatalog, SpanishTools1, SpanishTools2, SpanishTools3))
     };
 
     private static readonly DependencyProperty SourceProperty = DependencyProperty.RegisterAttached("Source", typeof(string), typeof(Localizer));
@@ -41,6 +41,36 @@ public static partial class Localizer
 
     /// <summary>The English text an element was built with, even while it shows a translation (<paramref name="shown"/> when it was never translated).</summary>
     public static string SourceOf(DependencyObject element, string shown) => (string?)element.GetValue(SourceProperty) ?? shown;
+
+    private static readonly System.Text.RegularExpressions.Regex ValueTail = new(@"^(?<head>\D*?[^\d\s+\-−:])(?<sep>:?\s+)(?<tail>[+\-−]?\d.*)$", System.Text.RegularExpressions.RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
+
+    /// <summary>
+    /// Translates a message that carries values, such as "Speed 2x", "Bookmark at 00:12:00" or "Channel routing: Stereo": the words are translated and the values kept.
+    /// Text that is already translated, or has no known words, comes back unchanged.
+    /// </summary>
+    public static string Rich(string text)
+    {
+        if (Current == "English" || string.IsNullOrEmpty(text)) return text;
+        string direct = T(text);
+        if (direct != text) return direct;
+        int colon = text.IndexOf(": ", StringComparison.Ordinal);
+        if (colon > 0)
+        {
+            string head = T(text[..colon]);
+            if (head != text[..colon]) return head + ": " + Rich(text[(colon + 2)..]);
+        }
+        try
+        {
+            var match = ValueTail.Match(text);
+            if (match.Success)
+            {
+                string head = T(match.Groups["head"].Value);
+                if (head != match.Groups["head"].Value) return head + match.Groups["sep"].Value + match.Groups["tail"].Value;
+            }
+        }
+        catch (System.Text.RegularExpressions.RegexMatchTimeoutException) { }
+        return text;
+    }
 
     /// <summary>Translates a literal, keeping a dynamic tail such as " (+5 s)" or " — 4:12" intact.</summary>
     public static string T(string text)
@@ -100,6 +130,13 @@ public static partial class Localizer
         element.SetValue(sourceKey, source);
         element.SetValue(renderedKey, rendered);
         if (rendered != current) assign(rendered);
+    }
+
+    private static IReadOnlyDictionary<string, string> Merge(params IReadOnlyDictionary<string, string>[] parts)
+    {
+        var all = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var part in parts) foreach (var (key, value) in part) all[key] = value;
+        return all;
     }
 
     // The same phrase is written with "..." in menus and "…" in dialogs.

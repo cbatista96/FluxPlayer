@@ -255,3 +255,19 @@ Notas:
 - La suite gestionada pasa (576 pruebas). Esta entrega suma una prueba que cubre todos los modelos nuevos.
 - La orientación EXIF se aplica siempre; no tiene ajuste porque es un metadato que el resto de visores también respeta.
 - Se corrigió un error de codificación que dejaba «sesiÃ³n» en lugar de «sesión» en la cadena en español de «Iniciar con Windows».
+
+## 15. Entrega 4: lo que quedaba y se podía hacer sin cambiar de motor
+
+| Función | Estado |
+|---|---|
+| Vista de miniaturas de la lista | Hecha. Fotos directas y vídeos mediante FFmpeg (si no está instalado, sin imagen), con caché en disco. Probada en la app: aparecieron miniaturas de dos vídeos |
+| `--subtitle` y `--audio` entre instancias | Hecho. Probado con tests de la canalización con nombre |
+| Vídeo de 360° y 180° | Hecho **sin cambiar de motor**: LibVLC no sirve (el reproductor dibuja con su propio renderizador), pero un sombreador de píxeles de WPF (`Shaders/projection.hlsl`, compilado con `fxc`) reproyecta la imagen equirrectangular. Arrastrar mira alrededor y la rueda amplía. Probado en la app con un vídeo plano (la vista responde al arrastre); **no probado con un vídeo de 360° real** |
+| Sombreadores de píxeles | Hecho en parte: cuatro integrados (escala de grises, sepia, enfocar, invertir) y un archivo `.ps` compilado elegido por el usuario (ps_2_0 a ps_3_0, hasta 64 KB). Se aplican a lo que se ve en pantalla, no a capturas ni a clips. No se combinan con la vista de 360°. No se probó su aspecto en la app |
+| Whisper: detección de voz (VAD) | Hecho (parámetros `--vad --vad-model`). Sin whisper.cpp instalado no se pudo ejecutar |
+| Más motores de traducción | Microsoft Azure Translator y Yandex, que suman 5 de los 7 de PotPlayer. Probados con servidores locales; no con los servicios reales |
+| Español completo | Los textos de las ventanas de herramientas avanzadas (885 etiquetas y descripciones), los mensajes sobre el vídeo y los mensajes de estado de las funciones principales. Los mensajes de error largos de los servicios avanzados (unos 1 400) siguen en inglés |
+| Comprobaciones en la app | Ignorar subtítulos incrustados (con y sin), rueda lateral (+10 s), Ctrl+arrastrar (ampliación 1,41x) y Alt+arrastrar (la imagen cambia) |
+
+Sigue sin hacerse con LibVLC: tono HDR, super resolución por GPU, 3D en vivo, DVD/Blu-ray con menús, captura de juegos o de pantalla, S/PDIF y teletexto DVB.
+Faster-Whisper no se implementó: no había un programa con el que comprobar sus argumentos.

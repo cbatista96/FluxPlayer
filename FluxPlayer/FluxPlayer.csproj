@@ -57,6 +57,8 @@
     <EmbeddedResource Include="Data/Interop/*.json" />
     <EmbeddedResource Include="Assets/mobile-remote.html" />
     <Resource Include="Assets\logo.png" />
+    <Resource Include="Shaders\*.ps" />
+    <None Include="Shaders\*.hlsl" />
     <Content Include="..\Native\FluxDsp\bin\x64\$(Configuration)\libfluxdsp_plugin.dll" Link="libvlc\win-x64\plugins\audio_filter\libfluxdsp_plugin.dll" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" Condition="'$(SkipNativeDsp)' != 'true'" />
     <Content Include="..\Native\FluxSubtitles\bin\x64\$(Configuration)\libfluxsub_plugin.dll" Link="libvlc\win-x64\plugins\spu\libfluxsub_plugin.dll" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" Condition="'$(SkipNativeDsp)' != 'true'" />
   </ItemGroup>

@@ -54,7 +54,7 @@ public partial class App : Application
         var startupSettings = settingsService.Load();
         if (!startupSettings.AllowMultipleInstances)
         {
-            _singleInstance = SingleInstance.TryOwn(AppProfile.Current.DataDirectory, AppProfile.Current.Sources);
+            _singleInstance = SingleInstance.TryOwn(AppProfile.Current.DataDirectory, AppProfile.Current.Sources, AppProfile.Current.Subtitles, AppProfile.Current.Audio);
             if (_singleInstance == null) { Shutdown(0); return; }
         }
         ThemeService.ApplyDialogPalette(startupSettings.Theme == AppTheme.LightMica);
@@ -95,7 +95,7 @@ public partial class App : Application
         Localizer.Changed += (_, _) => Dispatcher.BeginInvoke(() => { foreach (Window window in Windows) Localizer.Apply(window); });
         var mainWindow = Services.GetRequiredService<MainWindow>();
         mainWindow.Show();
-        _singleInstance?.Listen(paths => Dispatcher.BeginInvoke(() => OpenFromOtherInstance(mainWindow, paths)));
+        _singleInstance?.ListenForLaunches(launch => Dispatcher.BeginInvoke(() => OpenFromOtherInstance(mainWindow, launch)));
 
         if (AppProfile.Current.Sources.Length > 0)
         {
@@ -114,10 +114,15 @@ public partial class App : Application
 
     private SingleInstance? _singleInstance;
 
-    private static void OpenFromOtherInstance(Window window, string[] paths)
+    private static void OpenFromOtherInstance(Window window, SingleInstance.LaunchRequest launch)
     {
-        var files = paths.Where(path => System.IO.File.Exists(path) || System.IO.Directory.Exists(path) || MediaFormats.IsNetwork(path)).ToArray();
-        if (files.Length > 0) Services.GetRequiredService<MainViewModel>().AddFilesToPlaylist(files, playFirst: true);
+        var files = launch.Sources.Where(path => System.IO.File.Exists(path) || System.IO.Directory.Exists(path) || MediaFormats.IsNetwork(path)).ToArray();
+        if (files.Length > 0)
+        {
+            var vm = Services.GetRequiredService<MainViewModel>();
+            vm.Engine.QueueExternalSources(launch.Subtitles, launch.Audio);
+            vm.AddFilesToPlaylist(files, playFirst: true);
+        }
         if (window.WindowState == WindowState.Minimized) window.WindowState = WindowState.Normal;
         window.Show(); window.Activate();
     }
