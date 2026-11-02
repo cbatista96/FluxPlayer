@@ -109,6 +109,7 @@ public class SettingsService
         }
         settings.LibraryColumnViews = libraryViews;
         settings.Language = Localizer.Normalize(settings.Language);
+        settings.DeinterlaceMode = MediaService.NormalizeDeinterlaceMode(settings.DeinterlaceMode);
         settings.WhisperExecutable = (settings.WhisperExecutable ?? "").Length > 1024 ? "" : settings.WhisperExecutable ?? "";
         settings.WhisperModel = (settings.WhisperModel ?? "").Length > 1024 ? "" : settings.WhisperModel ?? "";
         settings.WhisperLanguage = WhisperSubtitles.Languages.Contains(settings.WhisperLanguage ?? "") ? settings.WhisperLanguage! : "auto";

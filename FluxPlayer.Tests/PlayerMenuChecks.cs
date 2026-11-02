@@ -67,6 +67,8 @@ internal static class PlayerMenuChecks
         Check(saved.Save(new AppSettings { Language = "Spanish" }) && saved.Load().Language == "Spanish", "Spanish survives a save and load");
         Check(saved.Save(new AppSettings { Language = "Unknown" }) && saved.Load().Language == "English", "An unknown language is repaired to English");
 
+        Check(MediaService.NormalizeDeinterlaceMode("BOB") == "Bob" && MediaService.NormalizeDeinterlaceMode("nonsense") == "Auto" && MediaService.NormalizeDeinterlaceMode(null) == "Auto", "Deinterlace modes normalize");
+        Check(MediaService.DeinterlaceFilter("Auto") == "yadif" && MediaService.DeinterlaceFilter("yadif2x") == "yadif2x" && MediaService.DeinterlaceFilter("zzz") == "yadif" && MediaService.DeinterlaceModes.Select(m => m.Id).Distinct().Count() == MediaService.DeinterlaceModes.Length, "Deinterlace mode to LibVLC filter mapping");
         foreach ((string text, long expected) in new[] { ("90", 90_000L), ("1:30", 90_000L), ("1:02:03", 3_723_000L), ("0:00:00.5", 500L), ("12.25", 12_250L) })
             Check(GoToTimeWindow.TryParse(text, out long ms) && ms == expected, $"Go to time parses {text}");
         foreach (string bad in new[] { "", "abc", "-5", "1:2:3:4", "1.5:30", "99999999" })
@@ -108,6 +110,21 @@ internal static class PlayerMenuChecks
         }
         finally { hkcu.DeleteSubKeyTree(sandboxRoot, false); }
 
+        string runSandbox = @"Software\FluxPlayerTests\" + Guid.NewGuid().ToString("N") + @"\";
+        try
+        {
+            string runExe = Path.Combine(root, "run-" + Guid.NewGuid().ToString("N") + ".exe"); File.WriteAllText(runExe, "x");
+            Check(!StartupRegistration.IsEnabled(hkcu, runSandbox), "Startup is off by default");
+            StartupRegistration.Set(hkcu, true, runExe, runSandbox);
+            Check(StartupRegistration.IsEnabled(hkcu, runSandbox), "Startup can be enabled");
+            using (var run = hkcu.OpenSubKey(runSandbox + @"Software\Microsoft\Windows\CurrentVersion\Run")) Check((string?)run?.GetValue("FluxPlayer") == "\"" + runExe + "\"", "Startup runs the quoted executable");
+            StartupRegistration.Set(hkcu, false, runExe, runSandbox);
+            Check(!StartupRegistration.IsEnabled(hkcu, runSandbox), "Startup can be disabled");
+            bool noExe = false; try { StartupRegistration.Set(hkcu, true, Path.Combine(root, "gone.exe"), runSandbox); } catch (ArgumentException) { noExe = true; }
+            Check(noExe, "Startup refuses a missing executable");
+        }
+        finally { hkcu.DeleteSubKeyTree(runSandbox.Substring(0, runSandbox.TrimEnd((char)92).LastIndexOf((char)92)), false); }
+
         // Single instance: the second launch forwards its files to the first and does not own the profile.
         string data = Path.Combine(root, "single-" + Guid.NewGuid().ToString("N")); Directory.CreateDirectory(data);
         using var first = SingleInstance.TryOwn(data, Array.Empty<string>());
@@ -124,6 +141,6 @@ internal static class PlayerMenuChecks
     }
 
     // Percentages, aspect ratios and speeds read the same in every language.
-    private static readonly HashSet<string> SameInSpanish = new(StringComparer.Ordinal) { "Audio", "Auto", "Mono", "Original", "ReplayGain" };
+    private static readonly HashSet<string> SameInSpanish = new(StringComparer.Ordinal) { "Audio", "Auto", "Mono", "Original", "ReplayGain", "Yadif", "Yadif2x", "Bob", "Blend", "Linear", "Mean", "X", "Phosphor", "Ivtc" };
     private static bool IsInvariant(string header) => SameInSpanish.Contains(header) || header.Any(char.IsDigit) && header.Replace(" ", "").All(c => char.IsDigit(c) || ":%x.".Contains(c));
 }

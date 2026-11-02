@@ -97,6 +97,17 @@ public partial class MediaService
         });
     }
 
+    /// <summary>Deinterlace modes LibVLC 3 offers, as (setting value, filter name). "Auto" picks yadif.</summary>
+    public static readonly (string Id, string Filter)[] DeinterlaceModes =
+    [
+        ("Auto", "yadif"), ("Yadif", "yadif"), ("Yadif2x", "yadif2x"), ("Bob", "bob"), ("Blend", "blend"), ("Discard", "discard"),
+        ("Linear", "linear"), ("Mean", "mean"), ("X", "x"), ("Phosphor", "phosphor"), ("Ivtc", "ivtc")
+    ];
+
+    public static string NormalizeDeinterlaceMode(string? mode) => DeinterlaceModes.FirstOrDefault(m => string.Equals(m.Id, mode, StringComparison.OrdinalIgnoreCase)).Id ?? "Auto";
+
+    public static string DeinterlaceFilter(string? mode) => DeinterlaceModes.First(m => m.Id == NormalizeDeinterlaceMode(mode)).Filter;
+
     public void ApplyPlaybackSettings()
     {
         var s = PlaybackSettings;
@@ -105,14 +116,7 @@ public partial class MediaService
         MediaPlayer.SetSpuDelay(s.SubtitleDelay * 1000L);
         if (s.AudioOutputDevice != "Default") SelectAudioDevice(s.AudioOutputDevice);
         ApplyAudioChannelRouting();
-        MediaPlayer.SetDeinterlace(s.DeinterlaceEnabled ? s.DeinterlaceMode.ToLowerInvariant() switch
-        {
-            "auto" => "yadif",
-            "bob" => "bob",
-            "blend" => "blend",
-            "yadif2x" => "yadif2x",
-            _ => "yadif"
-        } : null!);
+        MediaPlayer.SetDeinterlace(s.DeinterlaceEnabled ? DeinterlaceFilter(s.DeinterlaceMode) : null!);
     }
 
     public MediaMetadata? ReadCurrentMetadata()

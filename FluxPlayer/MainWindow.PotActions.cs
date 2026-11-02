@@ -220,5 +220,16 @@ public partial class MainWindow
 
     private void WhisperSubtitles_Click(object sender, RoutedEventArgs e) => new Windows.WhisperSubtitlesWindow(this, _vm).Show();
 
+    private void ApplyStartWithWindows(bool enabled)
+    {
+        try
+        {
+            if (StartupRegistration.IsEnabled(Microsoft.Win32.Registry.CurrentUser) == enabled) return;
+            StartupRegistration.Set(Microsoft.Win32.Registry.CurrentUser, enabled, Environment.ProcessPath ?? "");
+        }
+        catch (Exception ex) when (ex is ArgumentException or UnauthorizedAccessException or System.Security.SecurityException or IOException)
+        { ShowActionOsd("E8B7", ex.Message); }
+    }
+
     private void DefaultApps_Click(object sender, RoutedEventArgs e) => FileAssociations.OpenDefaultApps();
 }

@@ -383,6 +383,17 @@
                                 <Grid>
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                                     <StackPanel>
+                                        <TextBlock Text="Start with Windows" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Open FluxPlayer when you sign in to Windows" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <CheckBox x:Name="StartWithWindowsToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
                                         <TextBlock Text="Check for updates" Style="{StaticResource OptTitle}" />
                                         <TextBlock Text="Update check frequency" Style="{StaticResource OptSub}" />
                                     </StackPanel>
@@ -723,6 +734,29 @@
                                         <TextBlock Text="Enable deinterlacing for interlaced video" Style="{StaticResource OptSub}" />
                                     </StackPanel>
                                     <CheckBox x:Name="DeinterlaceToggle" Grid.Column="1" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource OptionCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Deinterlacing mode" Style="{StaticResource OptTitle}" />
+                                        <TextBlock Text="Filter used when deinterlacing is on" Style="{StaticResource OptSub}" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="DeinterlaceModeCombo" Grid.Column="1" Width="160" VerticalContentAlignment="Center">
+                                        <ComboBoxItem Content="Auto" Tag="Auto" />
+                                        <ComboBoxItem Content="Yadif" Tag="Yadif" />
+                                        <ComboBoxItem Content="Yadif2x" Tag="Yadif2x" />
+                                        <ComboBoxItem Content="Bob" Tag="Bob" />
+                                        <ComboBoxItem Content="Blend" Tag="Blend" />
+                                        <ComboBoxItem Content="Discard" Tag="Discard" />
+                                        <ComboBoxItem Content="Linear" Tag="Linear" />
+                                        <ComboBoxItem Content="Mean" Tag="Mean" />
+                                        <ComboBoxItem Content="X" Tag="X" />
+                                        <ComboBoxItem Content="Phosphor" Tag="Phosphor" />
+                                        <ComboBoxItem Content="Ivtc" Tag="Ivtc" />
+                                    </ComboBox>
                                 </Grid>
                             </Border>
 

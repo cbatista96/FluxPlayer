@@ -180,6 +180,19 @@
                 </MenuItem>
                 <MenuItem Header="Crop picture..." Click="VideoCrop_Click" />
                 <MenuItem Header="Deinterlace" IsCheckable="True" Tag="set:DeinterlaceEnabled" Click="CtxSetting_Click" />
+                <MenuItem Header="Deinterlace mode">
+                    <MenuItem Header="Auto" IsCheckable="True" Tag="set:DeinterlaceMode=Auto" Click="CtxSetting_Click" />
+                    <MenuItem Header="Yadif" IsCheckable="True" Tag="set:DeinterlaceMode=Yadif" Click="CtxSetting_Click" />
+                    <MenuItem Header="Yadif2x" IsCheckable="True" Tag="set:DeinterlaceMode=Yadif2x" Click="CtxSetting_Click" />
+                    <MenuItem Header="Bob" IsCheckable="True" Tag="set:DeinterlaceMode=Bob" Click="CtxSetting_Click" />
+                    <MenuItem Header="Blend" IsCheckable="True" Tag="set:DeinterlaceMode=Blend" Click="CtxSetting_Click" />
+                    <MenuItem Header="Discard" IsCheckable="True" Tag="set:DeinterlaceMode=Discard" Click="CtxSetting_Click" />
+                    <MenuItem Header="Linear" IsCheckable="True" Tag="set:DeinterlaceMode=Linear" Click="CtxSetting_Click" />
+                    <MenuItem Header="Mean" IsCheckable="True" Tag="set:DeinterlaceMode=Mean" Click="CtxSetting_Click" />
+                    <MenuItem Header="X" IsCheckable="True" Tag="set:DeinterlaceMode=X" Click="CtxSetting_Click" />
+                    <MenuItem Header="Phosphor" IsCheckable="True" Tag="set:DeinterlaceMode=Phosphor" Click="CtxSetting_Click" />
+                    <MenuItem Header="Ivtc" IsCheckable="True" Tag="set:DeinterlaceMode=Ivtc" Click="CtxSetting_Click" />
+                </MenuItem>
                 <MenuItem Header="Hardware decoding" IsCheckable="True" Tag="set:HardwareDecoding" Click="CtxSetting_Click" />
                 <MenuItem Header="Vertical sync" IsCheckable="True" Tag="set:VSync" Click="CtxSetting_Click" />
                 <Separator x:Name="CtxVideoActionSeparator" />
@@ -260,6 +273,7 @@
                 <MenuItem Header="Pause when the screen is locked" IsCheckable="True" Tag="set:PauseWhenScreenLocked" Click="CtxSetting_Click" />
                 <MenuItem Header="Minimize to the tray" IsCheckable="True" Tag="set:MinimizeToTray" Click="CtxSetting_Click" />
                 <MenuItem Header="Show the tray icon" IsCheckable="True" Tag="set:ShowSystemTrayIcon" Click="CtxSetting_Click" />
+                <MenuItem Header="Start with Windows" IsCheckable="True" Tag="set:StartWithWindows" Click="CtxSetting_Click" />
                 <MenuItem Header="Allow several instances" IsCheckable="True" Tag="set:AllowMultipleInstances" Click="CtxSetting_Click" />
                 <MenuItem Header="Snap to window edges" IsCheckable="True" Tag="set:SnapToWindowEdges" Click="CtxSetting_Click" />
                 <MenuItem Header="Show tooltips" IsCheckable="True" Tag="set:ShowTooltips" Click="CtxSetting_Click" />

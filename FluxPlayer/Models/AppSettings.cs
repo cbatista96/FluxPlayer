@@ -27,6 +27,7 @@ public class AppSettings
     public string FileOpenBehavior { get; set; } = "OpenSimilarTogether";
     public bool ShowSystemTrayIcon { get; set; } = true;
     public bool AllowMultipleInstances { get; set; } = true;
+    public bool StartWithWindows { get; set; }
     public string UpdateCheckMode { get; set; } = "Always";
     public bool DownloadUpdatesIfAvailable { get; set; } = true;
     public bool PauseOnMinimize { get; set; } = false;

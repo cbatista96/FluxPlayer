@@ -225,6 +225,8 @@ public static partial class Localizer
         ["Model file (ggml-*.bin)"] = "Archivo de modelo (ggml-*.bin)", ["Choose the model…"] = "Elegir el modelo…", ["Spoken language"] = "Idioma hablado", ["Apply the speech-emphasis filter before transcribing"] = "Aplicar el filtro de énfasis de voz antes de transcribir",
         ["Attach the new subtitles to the current video"] = "Adjuntar los subtítulos nuevos al vídeo actual", ["Create subtitles…"] = "Crear subtítulos…", ["Extracting the audio"] = "Extrayendo el audio", ["Transcribing with Whisper. This can take a long time on a CPU"] = "Transcribiendo con Whisper. En una CPU puede tardar mucho",
         ["Saved the generated subtitles:"] = "Se guardaron los subtítulos generados:",
+        ["Deinterlace mode"] = "Modo de desentrelazado", ["Deinterlacing mode"] = "Modo de desentrelazado", ["Filter used when deinterlacing is on"] = "Filtro usado cuando el desentrelazado está activado", ["Discard"] = "Descartar",
+        ["Start with Windows"] = "Iniciar con Windows", ["Open FluxPlayer when you sign in to Windows"] = "Abrir FluxPlayer al iniciar sesiÃ³n en Windows",
         ["Playlist (.m3u)"] = "Lista de reproducción (.m3u)", ["Next track"] = "Pista siguiente", ["Previous track"] = "Pista anterior", ["None"] = "Ninguno", ["Left"] = "Izquierda", ["Right"] = "Derecha", ["Action"] = "Acción"
     };
 }

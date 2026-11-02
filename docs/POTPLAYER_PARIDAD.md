@@ -203,3 +203,30 @@ Cada fase debe actualizar `docs/feature-catalog.json` y regenerar `FEATURES.md` 
 - **Cuadro/fotograma clave anterior:** LibVLC no retrocede cuadros.
 - **Los skins `.dsf` y el diseño de menú de PotPlayer:** otro marco de interfaz, no aplicable.
 - **Traducción de las ventanas de herramientas:** los textos que construye cada ventana en código aún tienen muchas cadenas sin catálogo; se traducen las palabras comunes y los títulos, no todas.
+
+## 13. Cruce con el registro de cambios de PotPlayer (`History\English.txt`, hasta la versión 261021)
+
+El archivo tiene 191 versiones y 691 líneas «Added». Las leí todas. **El estado se obtuvo buscando palabras clave en el código, no ejecutando cada función**: un «tenemos» significa que hay código relacionado, y un «falta» significa que no encontré nada; ambos pueden equivocarse y conviene confirmarlos al implementar.
+
+**No aplicables (≈ 40 % del registro):** traducciones de la interfaz a ~25 idiomas (nosotros: inglés y español, ampliable); servicios de emisión propios de PotPlayer (Daum tvPot, Kakao TV, Vingo, chat, donaciones, logos, efectos de emisión); skins y su sistema de comandos; codificadores propios (NVENC, AMF, QuickSync, OpenH264); decodificadores y renderizadores DirectShow/madVR/MPC; códecs raros (Indeo, RealMedia, VP7, NOTCHLC, APV, Dirac).
+
+**Ya lo tenemos (según el código):** ReplayGain; OSD configurable (con fuente); sincronía de subtítulos y audio; reanudar por archivo; recordar pista de audio y subtítulos; mover a la Papelera; apagar/suspender a una hora; TTS; control multimedia del sistema (SMTC); recordar tamaño de ventana; texto a voz; letras sincronizadas; pausa al buscar; velocidad sin cambio de tono; bloqueo de controles; capturas por intervalo; reproducción de HLS/DASH; recuperar error y pasar al siguiente; abrir desde el portapapeles; copiar el subtítulo; Whisper (sin VAD ni «Faster-Whisper»); traducción (3 motores de los 7 de PotPlayer); mapa de teclas editable.
+
+**Falta y se puede hacer sin cambiar el motor** (candidatos de la próxima entrega):
+1. Mantener pulsado el ratón para cambiar la velocidad (241015).
+2. Repetición de sección: retardo, número de repeticiones, ir a la sección anterior/siguiente, repetición rápida (200512, 200616, 211118, 210929, 240618).
+3. Ignorar subtítulos incrustados; no elegir idiomas no preferidos (200204, 191211).
+4. Acción distinta al hacer doble clic en el lado izquierdo y derecho (260819).
+5. Rueda del ratón lateral (izquierda/derecha) y arrastrar con Ctrl/Alt/Mayús para zoom, desplazamiento y posición de subtítulos (varias).
+6. Carpetas de subtítulos y de audio externo configurables; cargar subtítulos y audio desde la línea de comandos (200512, 241211).
+7. Lista de reproducción: ordenar por fecha de publicación o extensión, vista de miniaturas, mover entradas, copiar rutas, filtrar en vez de buscar (260819, 200317).
+8. Formato de tiempo al copiar al portapapeles; guardar marcadores en un archivo; filtrar y editar marcadores en lote (210729, 201021, 200730).
+9. Rellenar de negro los demás monitores en pantalla completa; pantalla completa en otro monitor; evitar arrastrar la ventana fuera de pantalla (211118, 191211).
+10. Girar imágenes JPEG según EXIF; fondo de color del área de vídeo; limitar el tamaño de ventana respecto al escritorio (191211).
+11. Buscador en Ajustes y ordenar los atajos (200204, 210428).
+12. Menú contextual personalizable (201209).
+13. Duración máxima de un subtítulo; marcar subtítulos de oído (varias).
+
+**Falta y necesita otro motor o hardware:** reproducción de 180° y 360° (261021, 191211), tono HDR y RTX Video HDR (250625, 240305), super resolución por GPU (230405), sombreadores de píxel (201209), 3D en vivo, doblar la tasa de cuadros con mejor calidad (261021), DXVA específico, libass propio (260401, 250226), ARIB y teletexto DVB, DVD/Blu-ray, captura de juegos/pantalla, BDA.
+
+**Hecho en esta entrega:** modos de desentrelazado (11 modos de LibVLC en menú y Ajustes) e inicio con Windows (clave Run del usuario; probada en una clave de pruebas).

@@ -160,6 +160,7 @@ public partial class SettingsPanel : UserControl
         TaskbarFeaturesToggle.IsChecked = _settings.EnhancedTaskbarFeatures;
         SystemMediaControlsToggle.IsChecked = _settings.UseSystemMediaControls;
         MultiInstanceToggle.IsChecked = _settings.AllowMultipleInstances;
+        StartWithWindowsToggle.IsChecked = _settings.StartWithWindows;
 
         VolumeSliderSetting.Value = _settings.Volume;
         VolumeLabel.Text = $"{(int)_settings.Volume}%";
@@ -193,6 +194,7 @@ public partial class SettingsPanel : UserControl
         SelectComboByTag(AspectComboSetting, _settings.AspectRatio);
         VSyncToggle.IsChecked = _settings.VSync;
         DeinterlaceToggle.IsChecked = _settings.DeinterlaceEnabled;
+        SelectComboByTag(DeinterlaceModeCombo, _settings.DeinterlaceMode);
         RestrictCursorToggle.IsChecked = _settings.RestrictFullscreenCursor;
         BrightnessSlider.Value = _settings.Brightness; UpdateImageLabel(BrightnessLabel, _settings.Brightness);
         ContrastSlider.Value = _settings.Contrast; UpdateImageLabel(ContrastLabel, _settings.Contrast);
@@ -294,6 +296,7 @@ public partial class SettingsPanel : UserControl
         _settings.EnhancedTaskbarFeatures = TaskbarFeaturesToggle.IsChecked == true;
         _settings.UseSystemMediaControls = SystemMediaControlsToggle.IsChecked == true;
         _settings.AllowMultipleInstances = MultiInstanceToggle.IsChecked == true;
+        _settings.StartWithWindows = StartWithWindowsToggle.IsChecked == true;
 
         _settings.Volume = VolumeSliderSetting.Value;
         if (int.TryParse(VolumeStepBox.Text, out int vs)) _settings.VolumeStep = Math.Clamp(vs, 1, 50);
@@ -321,6 +324,7 @@ public partial class SettingsPanel : UserControl
         _settings.AspectRatio = GetComboTag(AspectComboSetting) ?? "Auto";
         _settings.VSync = VSyncToggle.IsChecked == true;
         _settings.DeinterlaceEnabled = DeinterlaceToggle.IsChecked == true;
+        _settings.DeinterlaceMode = GetComboTag(DeinterlaceModeCombo) ?? _settings.DeinterlaceMode;
         _settings.RestrictFullscreenCursor = RestrictCursorToggle.IsChecked == true;
         _settings.Brightness = (int)BrightnessSlider.Value;
         _settings.Contrast = (int)ContrastSlider.Value;

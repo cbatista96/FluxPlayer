@@ -1601,6 +1601,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         _vm.ReloadSettingsFromDisk();
         _runtimeSettings = settings;
         Localizer.Use(settings.Language);
+        ApplyStartWithWindows(settings.StartWithWindows);
 
         if (_vm.CurrentTheme != settings.Theme)
         {
