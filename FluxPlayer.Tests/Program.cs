@@ -909,6 +909,7 @@ internal static class Program
         await ServerActionInputGuardChecks.Run(Test);
         await ServerActionLoopbackChecks.Run(Root, Test);
         if (managedOnly) return;
+        await WindowSmokeChecks.Run(Root, Test);
         await LocalControlAcceptanceChecks.Run(Root, Test);
         await AudioZoneAcceptanceChecks.Run(Root, Test);
         if (skipMpv) Console.WriteLine("SKIP mpv native IPC acceptance: explicitly disabled; requires mpv.exe and MKVToolNix.");
