@@ -1,13 +1,13 @@
 # Feature checklist
 
-**765 implemented · 430 implemented but untested · 6 pending · 1201 tracked capabilities.**
+**769 implemented · 427 implemented but untested · 6 pending · 1202 tracked capabilities.**
 
 Each capability appears exactly once. Completing it moves the same stable ID from Pending to Implemented. A setting or catalog entry alone does not complete a feature. Source references describe the implementation; validation limits are documented in [Testing](docs/TESTING.md).
 New code that has not been built or tested belongs to Implemented — untested, with unchecked boxes representing pending verification. It is excluded from the verified implementation count. Each regression report applies only to its documented source checkpoint.
 
 Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Sync-PublicFeatures.ps1`; CI rejects an outdated checklist.
 
-## Implemented (765)
+## Implemented (769)
 
 ### Workspaces and interface
 
@@ -35,9 +35,9 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [x] **F0288** Saved custom Fluent selection/accent colors. — FluxPlayer.Tests/PersonalExperienceAcceptanceChecks.cs; individual functional results in docs/local-completion-test-results.json, with actual controls/native runtime, real isolated servers or live public metadata as scoped in docs/LOCAL_SESSION_ACCEPTANCE.md.
 - [x] **F0289** Saved local background artwork for the idle video canvas. — FluxPlayer.Tests/PersonalExperienceAcceptanceChecks.cs; individual functional results in docs/local-completion-test-results.json, with actual controls/native runtime, real isolated servers or live public metadata as scoped in docs/LOCAL_SESSION_ACCEPTANCE.md.
 - [x] **F0290** Opt-in equalizer-window docking beside the player. — FluxPlayer.Tests/PersonalExperienceAcceptanceChecks.cs; individual functional results in docs/local-completion-test-results.json, with actual controls/native runtime, real isolated servers or live public metadata as scoped in docs/LOCAL_SESSION_ACCEPTANCE.md.
-- [x] **F1194** Search across all Settings pages and sorting and filtering of keyboard shortcuts. — SettingsPanel.Search; real-app run of the search (finds and jumps to the option). Shortcut sorting and filtering were not exercised.
+- [x] **F1194** Search across all Settings pages and sorting and filtering of keyboard shortcuts. — SettingsPanel.Search; real-app run: the search finds options and jumps to them in English and Spanish; shortcut filter and Sort by action name worked.
 - [x] **F1195** Customizable right-click menu; entries that open Settings cannot be hidden. — MenuCustomization, MainWindow.MenuCustomization; ParityChecks; real-app run: two entries hidden and the menu stayed tidy.
-- [x] **F1201** Spanish interface for the right-click menu, Settings, on-screen messages and the advanced tool windows. — Localizer.Spanish*; PlayerMenuChecks (every menu entry), ParityChecks; real-app run in Spanish. Long error messages of the advanced services are still in English.
+- [x] **F1201** Spanish interface for the right-click menu, Settings, on-screen messages and the advanced tool windows. — Localizer.Spanish*; PlayerMenuChecks (every menu entry), ParityChecks (messages and a scan that 99.5% of the status and error messages in the source have a translation); real-app run in Spanish. A few messages that continue with a free-form value remain in English.
 
 ### Playback and formats
 
@@ -59,6 +59,7 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [x] **F0111** Optional per-file volume, audio-track and subtitle recall, including Disabled/external subtitles and bounded history clearing. — FilePlaybackPreference / MainViewModel.FilePreferences / Settings > Playback. Native two-audio-track fixture verifies selection, disabled/external subtitle recall, isolated volume, mute preservation, restart, opt-out, clear persistence and changed-source rejection. History is bounded to 1,000 local file stamps; batch rename relocates records.
 - [x] **F1181** Hold the left mouse button on the video to play at a chosen speed until release. — FluxPlayer.Tests ParityChecks (rules); real-app run: 3x while held, back to 1x on release without pausing.
 - [x] **F1182** A-B section repeat with repeat count, pause between repeats, previous/next section and quick repeat of the last seconds. — SectionRepeat, MainViewModel; ParityChecks (arithmetic); real-app run: two repeats with a 500 ms pause, then playback continued past B. Previous/next section and quick repeat verified only by tests.
+- [x] **F1191** Time format when copying the elapsed or total time, and a bookmark manager (filter, move, remove, save to and load from a text file). — BookmarkTools, BookmarksWindow; ParityChecks; real-app run: Move all and Remove selected changed the list. Saving to and loading from a text file are covered by tests only (the file dialogs were not driven).
 
 ### Audio
 
@@ -350,6 +351,7 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [x] **F1180** Offline Unsharp-mask picture sharpening. — Palette acceptance: unsharp actual default export and independent decode passed with installed FFmpeg 9.0.2. Input bytes preserved; duration/output validity checked. Parameter extremes, special-source HDCD markers, all combinations and subjective quality are not certified. docs/PROCESSING_ACCEPTANCE.md.
 - [x] **F1183** Ignore subtitles inside the video and use only the preferred subtitle languages. — MediaService.Audio, ExternalSources; ParityChecks; real-app run on an MKV with an embedded subtitle: shown when allowed, absent when ignored.
 - [x] **F1196** Remove hearing-impaired text and limit the longest subtitle in external subtitle files, using a cleaned copy. — SubtitleCleanup; ParityChecks; real-app run: bracketed sound text removed. The maximum duration was verified only by tests.
+- [x] **F1198** Built-in pixel shaders (grayscale, sepia, sharpen, invert) and a user-chosen compiled .ps shader. — VideoEffects, Shaders; ParityChecks (file validation); real-app run: Grayscale, Invert and Sepia changed the picture colours as expected, Sharpen left flat areas unchanged. A user-supplied .ps file was not tried.
 
 ### Network and distribution
 
@@ -461,6 +463,7 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [x] **F1184** Separate double-click actions for the left and right thirds of the video. — PointerGestureRules; ParityChecks; real-app run: left-third double-click seeks back.
 - [x] **F1185** Sideways (tilt) mouse wheel action. — MainWindow.PointerGestures; real-app run with a WM_MOUSEHWHEEL message: seeked +10 s.
 - [x] **F1188** --subtitle and --audio command-line options, also handed over to an already running instance. — AppProfile, SingleInstance; ParityChecks and PlayerMenuChecks (hand-over); real-app run of --subtitle.
+- [x] **F1192** Fullscreen on a chosen monitor, black-out of the other monitors, keeping the window reachable and a largest window size. — MonitorPlan, MonitorBlackout, MainWindow.Monitors; ParityChecks (geometry); real-app run on a two-monitor machine: fullscreen opened on the other monitor, the main monitor was blacked out (average brightness 0) and came back after leaving fullscreen, and a window pushed to x=9000 returned onto the screen. This found and fixed a crash in the black-out window.
 
 ### Playlists and library
 
@@ -566,6 +569,7 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [x] **F0628** Jellyfin — Set a server item like or dislike. — FluxPlayer.Tests/JellyfinAcceptanceChecks.cs; individual functional results in docs/local-completion-test-results.json, with actual controls/native runtime, real isolated servers or live public metadata as scoped in docs/LOCAL_SESSION_ACCEPTANCE.md.
 - [x] **F0629** Jellyfin — Clear a server personal rating. — FluxPlayer.Tests/JellyfinAcceptanceChecks.cs; individual functional results in docs/local-completion-test-results.json, with actual controls/native runtime, real isolated servers or live public metadata as scoped in docs/LOCAL_SESSION_ACCEPTANCE.md.
 - [x] **F0630** Jellyfin — Create a user-owned server playlist. — FluxPlayer.Tests/JellyfinAcceptanceChecks.cs; individual functional results in docs/local-completion-test-results.json, with actual controls/native runtime, real isolated servers or live public metadata as scoped in docs/LOCAL_SESSION_ACCEPTANCE.md.
+- [x] **F1189** Playlist sorting (natural name, date, extension, duration, folder, reverse), moving entries, copying names and paths, and a filter box. — PlaylistOrdering, MainViewModel.SortPlaylist; ParityChecks (order and filter); real-app run: the filter box narrowed the list and Sort by duration reordered it while the playing item kept playing (this found and fixed durations not being recorded in milliseconds). Moving entries and copying paths were not exercised.
 - [x] **F1190** Playlist thumbnail view with pictures made from photos and, through FFmpeg, from videos, cached on disk. — PlaylistThumbnails; ParityChecks; real-app run: thumbnails appeared for two videos.
 
 ### Metadata and files
@@ -846,7 +850,7 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [x] **F0351** Selected-release back-cover copies from Cover Art Archive. — FluxPlayer.Tests/PublicMetadataAcceptanceChecks.cs; individual functional results in docs/local-completion-test-results.json, with actual controls/native runtime, real isolated servers or live public metadata as scoped in docs/LOCAL_SESSION_ACCEPTANCE.md.
 - [x] **F0352** Reviewed MusicBrainz-to-local tag application. — FluxPlayer.Tests/PublicMetadataAcceptanceChecks.cs; individual functional results in docs/local-completion-test-results.json, with actual controls/native runtime, real isolated servers or live public metadata as scoped in docs/LOCAL_SESSION_ACCEPTANCE.md.
 
-## Implemented — untested (430)
+## Implemented — untested (427)
 
 ### Workspaces and interface
 
@@ -873,8 +877,7 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [ ] **F0287** Conditional local HEIF/HEIC photo decoding through Windows codecs. — BUILT WITH CURRENT SOURCE — ACCEPTANCE NOT VERIFIED. PhotoLibrary.Extensions / Decode and the photo picker: HEIF/HEIC paths accepted by the existing WIC decoder path. Appropriate Windows codec required; no codec installation or universal support claim. Verification deferred at user request. docs/UNTESTED_EXTERNAL_MEDIA_THIRTY.md.
 - [ ] **F1187** Extra subtitle and audio-track folders searched by video name. — ExternalSources, MediaService.ExternalSources; ParityChecks (discovery). Not run in the real app.
 - [ ] **F1193** Colour behind the video and EXIF orientation for photos. — MonitorPlan, PhotoLibrary; ParityChecks (a JPEG written with the tag is read back). Not opened in the photo viewer.
-- [ ] **F1197** 360° and 180° equirectangular viewing with drag-to-look and wheel zoom, as a WPF pixel shader. — Shaders/projection.hlsl, ProjectionEffect, ViewProjection; ParityChecks (maths and shader files); real-app run with a flat test video showed the projection responding to the drag. Not tried with a real 360° video.
-- [ ] **F1198** Built-in pixel shaders (grayscale, sepia, sharpen, invert) and a user-chosen compiled .ps shader. — VideoEffects, Shaders; ParityChecks (file validation). Shader effects were not looked at in the real app.
+- [ ] **F1197** 360° and 180° equirectangular viewing with drag-to-look and wheel zoom, as a WPF pixel shader. — Shaders/projection.hlsl, ProjectionEffect, ViewProjection; ParityChecks (maths and shader files); real-app run with a synthetic equirectangular test pattern: the view is a rectilinear cut of the picture and turns when dragged. Not tried with real 360 footage.
 
 ### Streaming and sources
 
@@ -1249,7 +1252,6 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [ ] **F0479** Cancelable shutdown-after-current-item policy. — Compiled source; individual functional/backend acceptance remains pending. DesktopMediaSession.ArmShutdown/ShutdownTick: explicit arm, natural main-player end, software 60-second countdown and shutdown /s /t 0 without /f. Panel close cancels before command launch. docs/UNTESTED_EXPANSION_HUNDRED.md. Testing deferred for this new batch.
 - [ ] **F0480** Opt-in removable-media arrival queueing. — Compiled source; individual functional/backend acceptance remains pending. DesktopMediaSession.Hook/ScanArrival: arrival/removal signals, ready removable/CD-ROM drive snapshots, bounded top-level media selection and queue-only behavior. No pointer payload reads, recursive scans, autorun or disc-menu playback. docs/UNTESTED_EXPANSION_HUNDRED.md. Testing deferred for this new batch.
 - [ ] **F1186** Ctrl/Alt/Shift + drag on the video to zoom, move the picture or move the subtitles. — PointerGestureRules; ParityChecks (arithmetic); real-app run: Ctrl+drag zoomed 1.41x and Alt+drag changed the picture. Subtitle height by drag was not run.
-- [ ] **F1192** Fullscreen on a chosen monitor, black-out of the other monitors, keeping the window reachable and a largest window size. — MonitorPlan, MonitorBlackout; ParityChecks (geometry). Not run on a multi-monitor setup.
 
 ### Playlists and library
 
@@ -1297,16 +1299,12 @@ Maintained in `docs/feature-catalog.json`. Regenerate with `pwsh -File tools/Syn
 - [ ] **F0668** Plex playlist occurrence removal. — Compiled source; individual functional/backend acceptance remains pending. ServerActionCatalog Plex/playlist-remove; PersonalMediaServers.Actions.cs / ExecutePlexAction; ServerActionsWindow under categorized Settings. Remove one playlistItemID occurrence; the media rating key is not an occurrence ID. Explicit request, bounded results, session credentials; no automatic synchronization/retry. docs/UNTESTED_NETWORK_HUNDRED.md.
 - [ ] **F0669** Plex playlist occurrence reordering. — Compiled source; individual functional/backend acceptance remains pending. ServerActionCatalog Plex/playlist-move; PersonalMediaServers.Actions.cs / ExecutePlexAction; ServerActionsWindow under categorized Settings. Move one playlistItemID after another; zero means first position. Explicit request, bounded results, session credentials; no automatic synchronization/retry. docs/UNTESTED_NETWORK_HUNDRED.md.
 - [ ] **F0670** Plex playlist creation from media. — Compiled source; individual functional/backend acceptance remains pending. ServerActionCatalog Plex/playlist-create; PersonalMediaServers.Actions.cs / ExecutePlexAction; ServerActionsWindow under categorized Settings. Build one playlist from a selected local Plex metadata key and server identity. Explicit request, bounded results, session credentials; no automatic synchronization/retry. docs/UNTESTED_NETWORK_HUNDRED.md.
-- [ ] **F1189** Playlist sorting (natural name, date, extension, duration, folder, reverse), moving entries, copying names and paths, and a filter box. — PlaylistOrdering; ParityChecks (order and filter); menu and filter box seen in the real app, sorting and filtering not exercised there.
-
-### Playback and formats
-
-- [ ] **F1191** Time format when copying the elapsed or total time, and a bookmark manager (filter, move, remove, save to and load from a text file). — BookmarkTools, BookmarksWindow; ParityChecks; the window was opened in the real app, its buttons were not exercised.
 
 ### Metadata and lyrics
 
-- [ ] **F1199** Subtitle translation with Microsoft Azure Translator and Yandex Translate in addition to LibreTranslate, DeepL and Google. — SubtitleTranslator; TranslationChecks on loopback servers. Not run against the real services.
+- [ ] **F1199** Subtitle translation with LibreTranslate, DeepL, Google, Microsoft Azure Translator, Yandex Translate, any OpenAI-compatible chat service (ChatGPT, Ollama, LM Studio) and Papago. — SubtitleTranslator; TranslationChecks on loopback servers speaking each protocol (batches, key placement, bad counts). Not run against the real services.
 - [ ] **F1200** Optional voice-activity detection model for Whisper transcription. — WhisperSubtitles; TranslationChecks (arguments). whisper.cpp was not available to run.
+- [ ] **F1202** Faster-Whisper (standalone faster-whisper-xxl) as an alternative to whisper.cpp for creating subtitles from audio. — WhisperSubtitles, SubtitleAiWindows; TranslationChecks (command line). The program was not available to run, so its arguments follow its documentation and are unconfirmed.
 
 ## Pending (6)
 

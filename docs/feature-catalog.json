@@ -8319,8 +8319,8 @@
     "Id": "F1189",
     "Area": "Playlists and library",
     "Description": "Playlist sorting (natural name, date, extension, duration, folder, reverse), moving entries, copying names and paths, and a filter box.",
-    "Status": "implemented_unverified",
-    "Evidence": "PlaylistOrdering; ParityChecks (order and filter); menu and filter box seen in the real app, sorting and filtering not exercised there."
+    "Status": "implemented",
+    "Evidence": "PlaylistOrdering, MainViewModel.SortPlaylist; ParityChecks (order and filter); real-app run: the filter box narrowed the list and Sort by duration reordered it while the playing item kept playing (this found and fixed durations not being recorded in milliseconds). Moving entries and copying paths were not exercised."
   },
   {
     "Id": "F1190",
@@ -8333,15 +8333,15 @@
     "Id": "F1191",
     "Area": "Playback and formats",
     "Description": "Time format when copying the elapsed or total time, and a bookmark manager (filter, move, remove, save to and load from a text file).",
-    "Status": "implemented_unverified",
-    "Evidence": "BookmarkTools, BookmarksWindow; ParityChecks; the window was opened in the real app, its buttons were not exercised."
+    "Status": "implemented",
+    "Evidence": "BookmarkTools, BookmarksWindow; ParityChecks; real-app run: Move all and Remove selected changed the list. Saving to and loading from a text file are covered by tests only (the file dialogs were not driven)."
   },
   {
     "Id": "F1192",
     "Area": "Windows integration",
     "Description": "Fullscreen on a chosen monitor, black-out of the other monitors, keeping the window reachable and a largest window size.",
-    "Status": "implemented_unverified",
-    "Evidence": "MonitorPlan, MonitorBlackout; ParityChecks (geometry). Not run on a multi-monitor setup."
+    "Status": "implemented",
+    "Evidence": "MonitorPlan, MonitorBlackout, MainWindow.Monitors; ParityChecks (geometry); real-app run on a two-monitor machine: fullscreen opened on the other monitor, the main monitor was blacked out (average brightness 0) and came back after leaving fullscreen, and a window pushed to x=9000 returned onto the screen. This found and fixed a crash in the black-out window."
   },
   {
     "Id": "F1193",
@@ -8355,7 +8355,7 @@
     "Area": "Workspaces and interface",
     "Description": "Search across all Settings pages and sorting and filtering of keyboard shortcuts.",
     "Status": "implemented",
-    "Evidence": "SettingsPanel.Search; real-app run of the search (finds and jumps to the option). Shortcut sorting and filtering were not exercised."
+    "Evidence": "SettingsPanel.Search; real-app run: the search finds options and jumps to them in English and Spanish; shortcut filter and Sort by action name worked."
   },
   {
     "Id": "F1195",
@@ -8376,21 +8376,21 @@
     "Area": "Video and subtitles",
     "Description": "360° and 180° equirectangular viewing with drag-to-look and wheel zoom, as a WPF pixel shader.",
     "Status": "implemented_unverified",
-    "Evidence": "Shaders/projection.hlsl, ProjectionEffect, ViewProjection; ParityChecks (maths and shader files); real-app run with a flat test video showed the projection responding to the drag. Not tried with a real 360° video."
+    "Evidence": "Shaders/projection.hlsl, ProjectionEffect, ViewProjection; ParityChecks (maths and shader files); real-app run with a synthetic equirectangular test pattern: the view is a rectilinear cut of the picture and turns when dragged. Not tried with real 360 footage."
   },
   {
     "Id": "F1198",
     "Area": "Video and subtitles",
     "Description": "Built-in pixel shaders (grayscale, sepia, sharpen, invert) and a user-chosen compiled .ps shader.",
-    "Status": "implemented_unverified",
-    "Evidence": "VideoEffects, Shaders; ParityChecks (file validation). Shader effects were not looked at in the real app."
+    "Status": "implemented",
+    "Evidence": "VideoEffects, Shaders; ParityChecks (file validation); real-app run: Grayscale, Invert and Sepia changed the picture colours as expected, Sharpen left flat areas unchanged. A user-supplied .ps file was not tried."
   },
   {
     "Id": "F1199",
     "Area": "Metadata and lyrics",
-    "Description": "Subtitle translation with Microsoft Azure Translator and Yandex Translate in addition to LibreTranslate, DeepL and Google.",
+    "Description": "Subtitle translation with LibreTranslate, DeepL, Google, Microsoft Azure Translator, Yandex Translate, any OpenAI-compatible chat service (ChatGPT, Ollama, LM Studio) and Papago.",
     "Status": "implemented_unverified",
-    "Evidence": "SubtitleTranslator; TranslationChecks on loopback servers. Not run against the real services."
+    "Evidence": "SubtitleTranslator; TranslationChecks on loopback servers speaking each protocol (batches, key placement, bad counts). Not run against the real services."
   },
   {
     "Id": "F1200",
@@ -8404,6 +8404,13 @@
     "Area": "Workspaces and interface",
     "Description": "Spanish interface for the right-click menu, Settings, on-screen messages and the advanced tool windows.",
     "Status": "implemented",
-    "Evidence": "Localizer.Spanish*; PlayerMenuChecks (every menu entry), ParityChecks; real-app run in Spanish. Long error messages of the advanced services are still in English."
+    "Evidence": "Localizer.Spanish*; PlayerMenuChecks (every menu entry), ParityChecks (messages and a scan that 99.5% of the status and error messages in the source have a translation); real-app run in Spanish. A few messages that continue with a free-form value remain in English."
+  },
+  {
+    "Id": "F1202",
+    "Area": "Metadata and lyrics",
+    "Description": "Faster-Whisper (standalone faster-whisper-xxl) as an alternative to whisper.cpp for creating subtitles from audio.",
+    "Status": "implemented_unverified",
+    "Evidence": "WhisperSubtitles, SubtitleAiWindows; TranslationChecks (command line). The program was not available to run, so its arguments follow its documentation and are unconfirmed."
   }
 ]

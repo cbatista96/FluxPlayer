@@ -954,7 +954,7 @@
                                 </Button>
                             </StackPanel>
                         </Grid>
-                        <TextBox x:Name="PlaylistFilterBox" Margin="0,8,0,0" Height="28" FontSize="12" VerticalContentAlignment="Center" MaxLength="120" ToolTip="Filter the playlist by name or folder" TextChanged="PlaylistFilterBox_TextChanged" />
+                        <TextBox x:Name="PlaylistFilterBox" Margin="0,8,0,0" Height="34" FontSize="12" VerticalContentAlignment="Center" MaxLength="120" ToolTip="Filter the playlist by name or folder" TextChanged="PlaylistFilterBox_TextChanged" />
                       </StackPanel>
                     </Border>
 

@@ -17,7 +17,7 @@ public static partial class Localizer
 
     private static readonly Dictionary<string, IReadOnlyDictionary<string, string>> Catalogs = new(StringComparer.Ordinal)
     {
-        ["Spanish"] = Variants(Merge(SpanishCatalog, SpanishTools1, SpanishTools2, SpanishTools3))
+        ["Spanish"] = Variants(Merge(SpanishCatalog, SpanishTools1, SpanishTools2, SpanishTools3, SpanishMessages1, SpanishMessages2, SpanishMessages3, SpanishMessages4))
     };
 
     private static readonly DependencyProperty SourceProperty = DependencyProperty.RegisterAttached("Source", typeof(string), typeof(Localizer));
@@ -53,6 +53,9 @@ public static partial class Localizer
         if (Current == "English" || string.IsNullOrEmpty(text)) return text;
         string direct = T(text);
         if (direct != text) return direct;
+        // A message may carry trailing spaces or a final period of its own; translate what is inside and keep the rest.
+        string trimmed = text.TrimEnd();
+        if (trimmed.Length > 0 && trimmed != text) return Rich(trimmed) + text[trimmed.Length..];
         int colon = text.IndexOf(": ", StringComparison.Ordinal);
         if (colon > 0)
         {
@@ -69,6 +72,10 @@ public static partial class Localizer
             }
         }
         catch (System.Text.RegularExpressions.RegexMatchTimeoutException) { }
+        // Messages that start with fixed words followed by a value.
+        if (Current == "Spanish")
+            foreach (var (english, spanish) in SpanishPrefixes)
+                if (text.StartsWith(english, StringComparison.Ordinal)) return spanish + text[english.Length..];
         return text;
     }
 

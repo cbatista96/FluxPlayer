@@ -151,6 +151,8 @@ public class AppSettings
     public string WhisperModel { get; set; } = "";
     public string WhisperLanguage { get; set; } = "auto";
     public string WhisperVadModel { get; set; } = "";
+    public string WhisperFlavor { get; set; } = "WhisperCpp";
+    public bool WhisperFasterVad { get; set; } = true;
     public int SubtitleDelayStepMs { get; set; } = 100;
     public bool ApplyShadowToSubtitle { get; set; } = true;
     public Dictionary<string, SubtitleStyle> SubtitleStyleProfiles { get; set; } = new(StringComparer.OrdinalIgnoreCase);

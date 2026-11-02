@@ -11,16 +11,16 @@ namespace FluxPlayer.Windows;
 
 public sealed class SubtitleTranslationWindow : FeatureWorkbench
 {
-    private static readonly TranslationEngine[] Engines = [TranslationEngine.LibreTranslate, TranslationEngine.DeepL, TranslationEngine.GoogleCloud, TranslationEngine.AzureTranslator, TranslationEngine.Yandex];
+    private static readonly TranslationEngine[] Engines = [TranslationEngine.LibreTranslate, TranslationEngine.DeepL, TranslationEngine.GoogleCloud, TranslationEngine.AzureTranslator, TranslationEngine.Yandex, TranslationEngine.OpenAiCompatible, TranslationEngine.Papago];
 
     public SubtitleTranslationWindow(Window owner, MainViewModel vm, string? subtitleFile) : base(owner, vm, "Translate subtitles",
         "Translate the current subtitle file with an online service you choose. The subtitle text is sent to that service. The API key is used only while this window is open and is never saved.")
     {
         UseFormLayout(740);
-        var engine = Choice("Service", ["LibreTranslate", "DeepL", "Google Cloud Translation", "Microsoft Azure Translator", "Yandex Translate"]);
+        var engine = Choice("Service", ["LibreTranslate", "DeepL", "Google Cloud Translation", "Microsoft Azure Translator", "Yandex Translate", "OpenAI-compatible (ChatGPT, Ollama…)", "Papago (Naver Cloud)"]);
         var endpoint = Text("Server address (leave blank for the official service)", "", 512);
         var key = Field("API key", new PasswordBox { MaxLength = 512 });
-        var region = Text("Service region (Azure only, for example westeurope)", "", 64);
+        var region = Text("Azure region (for example westeurope) or OpenAI-compatible model name", "", 64);
         var source = Text("Source language (auto detects it)", "auto", 12);
         var target = Text("Target language code (es, en, pt-BR…)", Localizer.Current == "Spanish" ? "es" : "en", 12);
         var layout = Choice("Show", new[] { "Translation only", "Original above the translation", "Original below the translation" }.Select(Localizer.T));
@@ -57,9 +57,11 @@ public sealed class WhisperSubtitlesWindow : FeatureWorkbench
         UseFormLayout(700);
         var settings = App.Services.GetRequiredService<SettingsService>();
         var saved = settings.Load();
-        var program = Text("whisper.cpp program (.exe)", saved.WhisperExecutable, 1024);
+        var flavor = Choice("Program type", ["whisper.cpp", "Faster-Whisper (standalone, faster-whisper-xxl)"], saved.WhisperFlavor == "Faster" ? 1 : 0);
+        var program = Text("Whisper program (.exe)", saved.WhisperExecutable, 1024);
         Action("Choose the program…", () => { Browse(program, "whisper.cpp program|*.exe"); return Task.CompletedTask; });
-        var model = Text("Model file (ggml-*.bin)", saved.WhisperModel, 1024);
+        var model = Text("Model file (ggml-*.bin) or, for Faster-Whisper, a model name such as medium", saved.WhisperModel, 1024);
+        var fasterVad = Toggle("Faster-Whisper: skip non-speech with its voice filter", saved.WhisperFasterVad);
         Action("Choose the model…", () => { Browse(model, "ggml model|*.bin"); return Task.CompletedTask; });
         var vadModel = Text("Voice detection model (optional, ggml silero .bin)", saved.WhisperVadModel, 1024);
         Action("Choose the voice detection model…", () => { Browse(vadModel, "ggml model|*.bin"); return Task.CompletedTask; });
@@ -70,11 +72,11 @@ public sealed class WhisperSubtitlesWindow : FeatureWorkbench
         {
             var item = vm.CurrentItem;
             if (item == null || item.IsNetwork || !File.Exists(item.FilePath)) throw new ArgumentException("Open a local audio or video file first.");
-            string exe = WhisperSubtitles.ValidateExecutable(program.Text), bin = WhisperSubtitles.ValidateModel(model.Text), lang = WhisperSubtitles.NormalizeLanguage((string)language.SelectedItem);
+            bool faster = flavor.SelectedIndex == 1; string exe = WhisperSubtitles.ValidateExecutable(program.Text), bin = faster ? model.Text.Trim() : WhisperSubtitles.ValidateModel(model.Text), lang = WhisperSubtitles.NormalizeLanguage((string)language.SelectedItem);
             var save = new SaveFileDialog { Title = "Save the generated subtitles", FileName = Path.GetFileNameWithoutExtension(item.FilePath) + ".srt", InitialDirectory = Path.GetDirectoryName(item.FilePath), Filter = "SubRip|*.srt", AddExtension = true, DefaultExt = ".srt", OverwritePrompt = false };
             if (save.ShowDialog(this) != true) return;
-            var current = settings.Load(); current.WhisperExecutable = exe; current.WhisperModel = bin; current.WhisperLanguage = lang; current.WhisperVadModel = vadModel.Text.Trim(); settings.Save(current);
-            string path = await WhisperSubtitles.Generate(exe, bin, item.FilePath, save.FileName, lang, filter.IsChecked == true, new Progress<string>(text => Status.Text = Localizer.T(text.TrimEnd('…')) + "…"), OperationToken, vadModel.Text.Trim());
+            var current = settings.Load(); current.WhisperExecutable = exe; current.WhisperModel = bin; current.WhisperLanguage = lang; current.WhisperVadModel = vadModel.Text.Trim(); current.WhisperFlavor = faster ? "Faster" : "WhisperCpp"; current.WhisperFasterVad = fasterVad.IsChecked == true; settings.Save(current);
+            string path = await WhisperSubtitles.Generate(exe, bin, item.FilePath, save.FileName, lang, filter.IsChecked == true, new Progress<string>(text => Status.Text = Localizer.T(text.TrimEnd('…')) + "…"), OperationToken, faster ? (fasterVad.IsChecked == true ? "on" : null) : vadModel.Text.Trim(), faster);
             Status.Text = Localizer.T("Saved the generated subtitles:") + " " + path;
             if (attach.IsChecked == true && !IsClosed && ReferenceEquals(item, vm.CurrentItem) && vm.LoadExternalSubtitle(path)) Status.Text += "\n" + Localizer.T("Attached to the current video.");
         });

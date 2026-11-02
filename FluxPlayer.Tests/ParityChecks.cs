@@ -188,6 +188,24 @@ internal static class ParityChecks
         }
         finally { Localizer.Use("English"); }
 
+        // Spanish coverage of the messages the code can show.
+        Localizer.Use("Spanish");
+        try
+        {
+            Check(Localizer.Rich("Downloading file.mp3") == "Descargando file.mp3" && Localizer.Rich("A linked edition cycle was detected: X") == "Se detectó un ciclo de ediciones enlazadas: X" && Localizer.Rich("Invalid volume. ") == "Volumen no válido. ", "Messages with prefixes, values and trailing spaces are translated");
+            string sourceRoot = Path.Combine(Directory.GetParent(root)!.Parent!.FullName, "FluxPlayer");
+            var literals = new HashSet<string>(StringComparer.Ordinal);
+            foreach (string file in Directory.EnumerateFiles(sourceRoot, "*.cs", SearchOption.AllDirectories).Where(path => !path.Contains("\\obj\\") && !path.Contains("\\bin\\") && !Path.GetFileName(path).StartsWith("Localizer")))
+            {
+                string source = File.ReadAllText(file);
+                foreach (System.Text.RegularExpressions.Match m in System.Text.RegularExpressions.Regex.Matches(source, "Status\\.Text\\s*=\\s*\"((?:[^\"\\\\{]|\\\\.)*)\"")) literals.Add(m.Groups[1].Value);
+                foreach (System.Text.RegularExpressions.Match m in System.Text.RegularExpressions.Regex.Matches(source, "new (?:ArgumentException|InvalidDataException|IOException|InvalidOperationException|FileNotFoundException|UnauthorizedAccessException|NotSupportedException|FormatException)\\(\"((?:[^\"\\\\{]|\\\\.)*)\"")) literals.Add(m.Groups[1].Value);
+            }
+            var untranslated = literals.Where(text => text.Length > 3 && text.Any(char.IsLetter) && Localizer.Rich(text) == text && !text.EndsWith(' ') && !text.EndsWith("…")).ToList();
+            Check(literals.Count > 1000 && untranslated.Count <= 5, $"Status and error messages have a Spanish translation ({literals.Count} found, {untranslated.Count} without: {string.Join(" | ", untranslated.Take(5))})");
+        }
+        finally { Localizer.Use("English"); }
+
         // Command line.
         var profile = AppProfile.Parse(["--subtitle", "a.srt", "movie.mkv", "--audio", "b.mka", "--subtitle", "c.srt"], folder);
         Check(profile.Sources.SequenceEqual(new[] { "movie.mkv" }) && profile.Subtitles!.Length == 2 && profile.Audio!.Length == 1 && Path.IsPathFullyQualified(profile.Subtitles[0]), "--subtitle and --audio are collected beside the media");

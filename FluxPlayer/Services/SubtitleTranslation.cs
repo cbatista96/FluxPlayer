@@ -7,7 +7,7 @@ using System.Text.Json;
 
 namespace FluxPlayer.Services;
 
-public enum TranslationEngine { LibreTranslate, DeepL, GoogleCloud, AzureTranslator, Yandex }
+public enum TranslationEngine { LibreTranslate, DeepL, GoogleCloud, AzureTranslator, Yandex, OpenAiCompatible, Papago }
 public enum TranslationLayout { TranslationOnly, OriginalAbove, OriginalBelow }
 
 /// <summary>Finds the subtitle file that belongs to a media file.</summary>
@@ -46,23 +46,29 @@ public sealed class SubtitleTranslator : IDisposable
         TranslationEngine.DeepL => key.EndsWith(":fx", StringComparison.Ordinal) ? "https://api-free.deepl.com" : "https://api.deepl.com",
         TranslationEngine.AzureTranslator => "https://api.cognitive.microsofttranslator.com",
         TranslationEngine.Yandex => "https://translate.api.cloud.yandex.net",
+        TranslationEngine.OpenAiCompatible => "https://api.openai.com",
+        TranslationEngine.Papago => "https://naveropenapi.apigw.ntruss.com",
         _ => "https://translation.googleapis.com"
     };
 
-    private readonly string _region;
+    private readonly string _option;   // Azure: service region. OpenAI-compatible: model name.
 
     public SubtitleTranslator(TranslationEngine engine, string endpoint, string apiKey, HttpMessageHandler? handler = null, string? region = null)
     {
         apiKey = apiKey.Trim();
         if (apiKey.Length > 512 || apiKey.Any(char.IsControl)) throw new ArgumentException("The API key is not valid.");
-        if (engine != TranslationEngine.LibreTranslate && apiKey.Length == 0) throw new ArgumentException("This service needs an API key.");
         if (!Uri.TryCreate(string.IsNullOrWhiteSpace(endpoint) ? DefaultEndpoint(engine, apiKey) : endpoint.Trim(), UriKind.Absolute, out var uri)
             || !(uri.Scheme == Uri.UriSchemeHttps || (uri.Scheme == Uri.UriSchemeHttp && uri.IsLoopback)) || !string.IsNullOrEmpty(uri.UserInfo))
             throw new ArgumentException("Use an https address (http only for a server on this computer).");
+        // A server on this computer (LibreTranslate, Ollama, LM Studio…) may run without a key.
+        if (apiKey.Length == 0 && !(engine == TranslationEngine.LibreTranslate || (engine == TranslationEngine.OpenAiCompatible && uri.IsLoopback))) throw new ArgumentException("This service needs an API key.");
+        if (engine == TranslationEngine.Papago && !(apiKey.IndexOf(':') is > 0 and var at && at < apiKey.Length - 1)) throw new ArgumentException("For Papago enter the key as ID:secret.");
         region = (region ?? "").Trim();
-        if (region.Length > 64 || !region.All(c => char.IsAsciiLetterOrDigit(c) || c == '-')) throw new ArgumentException("The service region is not valid.");
-        _engine = engine; _endpoint = uri; _key = apiKey; _region = region;
-        _http = handler == null ? new HttpClient { Timeout = TimeSpan.FromSeconds(60) } : new HttpClient(handler, true) { Timeout = TimeSpan.FromSeconds(60) };
+        if (engine == TranslationEngine.OpenAiCompatible && region.Length == 0) region = "gpt-4o-mini";
+        if (region.Length > 80 || !region.All(c => char.IsAsciiLetterOrDigit(c) || c is '-' or '.' or '_' or ':' or '/') || (engine != TranslationEngine.OpenAiCompatible && region.Any(c => c is '.' or '_' or ':' or '/')))
+            throw new ArgumentException(engine == TranslationEngine.OpenAiCompatible ? "The model name is not valid." : "The service region is not valid.");
+        _engine = engine; _endpoint = uri; _key = apiKey; _option = region;
+        _http = handler == null ? new HttpClient { Timeout = TimeSpan.FromSeconds(engine == TranslationEngine.OpenAiCompatible ? 180 : 60) } : new HttpClient(handler, true) { Timeout = TimeSpan.FromSeconds(60) };
         _http.DefaultRequestHeaders.UserAgent.ParseAdd("FluxPlayer");
     }
 
@@ -78,7 +84,28 @@ public sealed class SubtitleTranslator : IDisposable
     {
         if (texts.Count == 0) return [];
         source = NormalizeLanguage(source, true); target = NormalizeLanguage(target, false);
+        // Papago translates one text per request; the other services take the whole batch.
+        if (_engine == TranslationEngine.Papago)
+        {
+            if (source == "auto") throw new ArgumentException("Papago needs the source language; choose it instead of auto.");
+            var each = new string[texts.Count];
+            for (int i = 0; i < texts.Count; i++)
+            {
+                using var single = Build([texts[i]], source, target);
+                using var one = await SendAsync(single, token).ConfigureAwait(false);
+                each[i] = Parse(one.RootElement) is { Length: 1 } parsed ? parsed[0] : throw new InvalidDataException("The translation service returned a different number of lines.");
+            }
+            return each;
+        }
         using var request = Build(texts, source, target);
+        using var document = await SendAsync(request, token).ConfigureAwait(false);
+        string[] result = Parse(document.RootElement);
+        if (result.Length != texts.Count) throw new InvalidDataException("The translation service returned a different number of lines.");
+        return result;
+    }
+
+    private async Task<JsonDocument> SendAsync(HttpRequestMessage request, CancellationToken token)
+    {
         using var response = await _http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode)
             throw new IOException(response.StatusCode switch
@@ -92,10 +119,7 @@ public sealed class SubtitleTranslator : IDisposable
         using var buffer = new MemoryStream(); var chunk = new byte[16384]; int read;
         while ((read = await stream.ReadAsync(chunk, token).ConfigureAwait(false)) > 0)
         { buffer.Write(chunk, 0, read); if (buffer.Length > MaximumResponseBytes) throw new InvalidDataException("The translation response is too large."); }
-        using var document = JsonDocument.Parse(buffer.ToArray());
-        string[] result = Parse(document.RootElement);
-        if (result.Length != texts.Count) throw new InvalidDataException("The translation service returned a different number of lines.");
-        return result;
+        return JsonDocument.Parse(buffer.ToArray());
     }
 
     private HttpRequestMessage Build(IReadOnlyList<string> texts, string source, string target)
@@ -123,7 +147,31 @@ public sealed class SubtitleTranslator : IDisposable
                 string query = "/translate?api-version=3.0&to=" + Uri.EscapeDataString(target) + (source != "auto" ? "&from=" + Uri.EscapeDataString(source) : "") + "&textType=plain";
                 var request = new HttpRequestMessage(HttpMethod.Post, Url(query)) { Content = JsonContent.Create(texts.Select(text => new Dictionary<string, string> { ["Text"] = text }).ToArray()) };
                 request.Headers.TryAddWithoutValidation("Ocp-Apim-Subscription-Key", _key);
-                if (_region.Length > 0) request.Headers.TryAddWithoutValidation("Ocp-Apim-Subscription-Region", _region);
+                if (_option.Length > 0) request.Headers.TryAddWithoutValidation("Ocp-Apim-Subscription-Region", _option);
+                return request;
+            }
+            case TranslationEngine.OpenAiCompatible:
+            {
+                var body = new Dictionary<string, object?>
+                {
+                    ["model"] = _option, ["temperature"] = 0,
+                    ["messages"] = new[]
+                    {
+                        new Dictionary<string, string> { ["role"] = "system", ["content"] = "You translate subtitle lines. Reply with only a JSON array of strings: the same number of items, in the same order, each the translation of the item at that position. Keep line breaks inside an item as \\n. Do not add notes, numbering or code fences." },
+                        new Dictionary<string, string> { ["role"] = "user", ["content"] = JsonSerializer.Serialize(new { source_language = source == "auto" ? "detect it" : source, target_language = target, lines = texts }) }
+                    }
+                };
+                var request = new HttpRequestMessage(HttpMethod.Post, Url("/v1/chat/completions")) { Content = JsonContent.Create(body) };
+                if (_key.Length > 0) request.Headers.TryAddWithoutValidation("Authorization", "Bearer " + _key);
+                return request;
+            }
+            case TranslationEngine.Papago:
+            {
+                int split = _key.IndexOf(':');
+                var form = new List<KeyValuePair<string, string>> { new("source", source), new("target", target), new("text", texts[0]) };
+                var request = new HttpRequestMessage(HttpMethod.Post, Url("/nmt/v1/translation")) { Content = new FormUrlEncodedContent(form) };
+                request.Headers.TryAddWithoutValidation("X-NCP-APIGW-API-KEY-ID", _key[..split]);
+                request.Headers.TryAddWithoutValidation("X-NCP-APIGW-API-KEY", _key[(split + 1)..]);
                 return request;
             }
             case TranslationEngine.Yandex:
@@ -157,6 +205,15 @@ public sealed class SubtitleTranslator : IDisposable
                     return value.ValueKind == JsonValueKind.Array ? value.EnumerateArray().Select(item => item.GetString() ?? "").ToArray() : [value.GetString() ?? ""];
                 }
                 case TranslationEngine.DeepL or TranslationEngine.Yandex: return root.GetProperty("translations").EnumerateArray().Select(item => item.GetProperty("text").GetString() ?? "").ToArray();
+                case TranslationEngine.Papago: return [root.GetProperty("message").GetProperty("result").GetProperty("translatedText").GetString() ?? ""];
+                case TranslationEngine.OpenAiCompatible:
+                {
+                    string content = root.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString() ?? "";
+                    int start = content.IndexOf('['), end = content.LastIndexOf(']');
+                    if (start < 0 || end <= start) throw new InvalidDataException("The translation response was not in the expected format.");
+                    using var lines = JsonDocument.Parse(content[start..(end + 1)]);
+                    return lines.RootElement.EnumerateArray().Select(item => item.ValueKind == JsonValueKind.String ? item.GetString() ?? "" : throw new InvalidOperationException()).ToArray();
+                }
                 case TranslationEngine.AzureTranslator: return root.EnumerateArray().Select(item => item.GetProperty("translations")[0].GetProperty("text").GetString() ?? "").ToArray();
                 default: return root.GetProperty("data").GetProperty("translations").EnumerateArray().Select(item => item.GetProperty("translatedText").GetString() ?? "").ToArray();
             }

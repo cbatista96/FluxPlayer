@@ -26,7 +26,7 @@ public sealed class MonitorBlackout : IDisposable
         {
             var window = new Window
             {
-                WindowStyle = WindowStyle.None, ResizeMode = ResizeMode.NoResize, ShowInTaskbar = false, ShowActivated = false, Topmost = true,
+                Style = null, AllowsTransparency = false, WindowStyle = WindowStyle.None, ResizeMode = ResizeMode.NoResize, ShowInTaskbar = false, ShowActivated = false, Topmost = true,
                 Background = Brushes.Black, WindowStartupLocation = WindowStartupLocation.Manual, Left = bounds.Left, Top = bounds.Top, Width = 1, Height = 1, Focusable = false
             };
             var helper = new WindowInteropHelper(window);

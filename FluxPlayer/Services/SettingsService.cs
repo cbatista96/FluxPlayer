@@ -134,6 +134,7 @@ public class SettingsService
         settings.AltDragAction = PointerGestureRules.Normalize(settings.AltDragAction, PointerGestureRules.DragActions, "None");
         settings.ShiftDragAction = PointerGestureRules.Normalize(settings.ShiftDragAction, PointerGestureRules.DragActions, "None");
         settings.WhisperExecutable = (settings.WhisperExecutable ?? "").Length > 1024 ? "" : settings.WhisperExecutable ?? "";
+        settings.WhisperFlavor = settings.WhisperFlavor == "Faster" ? "Faster" : "WhisperCpp";
         settings.WhisperVadModel = (settings.WhisperVadModel ?? "").Length > 1024 ? "" : settings.WhisperVadModel ?? "";
         settings.WhisperModel =(settings.WhisperModel ?? "").Length > 1024 ? "" : settings.WhisperModel ?? "";
         settings.WhisperLanguage = WhisperSubtitles.Languages.Contains(settings.WhisperLanguage ?? "") ? settings.WhisperLanguage! : "auto";

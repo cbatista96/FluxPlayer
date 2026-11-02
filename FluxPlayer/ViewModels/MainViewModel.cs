@@ -1399,7 +1399,7 @@ public partial class MainViewModel : ObservableObject
                 {
                     var ts = TimeSpan.FromMilliseconds(durationMs);
                     Application.Current?.Dispatcher.InvokeAsync(() =>
-                        item.Duration = FormatTime(ts));
+                        { item.Duration = FormatTime(ts); item.DurationMs = durationMs; });
                 }
             }
             catch { }

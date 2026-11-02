@@ -271,3 +271,17 @@ Notas:
 
 Sigue sin hacerse con LibVLC: tono HDR, super resolución por GPU, 3D en vivo, DVD/Blu-ray con menús, captura de juegos o de pantalla, S/PDIF y teletexto DVB.
 Faster-Whisper no se implementó: no había un programa con el que comprobar sus argumentos.
+
+## 16. Entrega 5: lo que se había dejado por probar o por hacer
+
+**Probado ahora en la app real** (en un equipo con dos monitores):
+- **Varios monitores:** la pantalla completa se abrió en el otro monitor, el monitor principal quedó en negro y volvió a la normalidad al salir; una ventana empujada fuera de la pantalla volvió sola. Esto destapó un fallo (la ventana negra provocaba un error por el estilo global de las ventanas), que quedó corregido.
+- **Sombreadores:** escala de grises, invertir y sepia cambian los colores como se espera; enfocar no cambia las zonas planas.
+- **Lista de reproducción:** el filtro y «Ordenar por duración» funcionan. La prueba destapó un error: las duraciones se guardaban solo como texto, así que ordenar por duración no funcionaba; ya se guardan también en milisegundos (lo usan además las miniaturas).
+- **Atajos:** el filtro y el orden por nombre de acción.
+- **Marcadores:** «Mover todos» y «Quitar los seleccionados». El botón «Mover todos» quedaba cortado; se corrigió con un panel que baja de línea.
+- **360°:** con un patrón equirrectangular de prueba la vista responde al arrastre. Sigue sin probarse con un vídeo de 360° real.
+
+**Hecho:** Faster-Whisper (`faster-whisper-xxl`) y los dos motores de traducción que faltaban (cualquier servicio compatible con OpenAI —ChatGPT, Ollama, LM Studio— y Papago), con lo que quedan los 7 de PotPlayer. Traducidos al español los 1 384 mensajes de estado y de error de los servicios; una prueba comprueba que casi todos tienen traducción.
+
+**Sigue sin probarse:** una foto con EXIF abierta en el visor (la orientación se lee y se calcula bien en pruebas), guardar y cargar marcadores con los cuadros de archivo, un archivo de sombreador propio, los servicios de traducción reales, Whisper y Faster-Whisper (los argumentos de este último siguen su documentación y no pudieron comprobarse sin el programa).
