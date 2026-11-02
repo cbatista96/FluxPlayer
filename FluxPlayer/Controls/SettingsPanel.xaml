@@ -219,7 +219,7 @@
                                         <TextBlock Text="When opening files" Style="{StaticResource OptTitle}" />
                                         <TextBlock Text="Behavior when opening media files" Style="{StaticResource OptSub}" />
                                     </StackPanel>
-                                    <ComboBox x:Name="FileOpenCombo" Grid.Column="1" Width="200" VerticalContentAlignment="Center">
+                                    <ComboBox x:Name="FileOpenCombo" Grid.Column="1" Width="220" VerticalContentAlignment="Center">
                                         <ComboBoxItem Content="Open similar files together" Tag="OpenSimilarTogether" />
                                         <ComboBoxItem Content="Selected file only" Tag="OpenOnlyOne" />
                                         <ComboBoxItem Content="Add to playlist" Tag="AddToPlaylist" />

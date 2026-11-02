@@ -80,6 +80,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
             if (_settingsWindow != null)
                 _settingsWindow.SyncTheme(theme);
             _equalizerWindow?.SyncTheme(theme);
+            SyncOpenToolWindowThemes(theme);
         };
         _vm.SnapshotTaken += OnSnapshotTaken;
         _vm.OpenUrlRequested += OnOpenUrlRequested;
@@ -1537,6 +1538,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
     {
         var mini = App.Services.GetRequiredService<MiniPlayerWindow>();
         mini.DataContext = _vm;
+        mini.SourceInitialized += (_, _) => ThemeService.Apply(_vm.CurrentTheme, mini);
         if (_vm.IsAudioMode) mini.Height = 240;
         mini.SetMediaPlayer(_vm.MediaPlayer!);
 
@@ -2205,6 +2207,18 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
     }
     private void CtxExit_Click(object sender, RoutedEventArgs e) => Close();
 
+    // Open editors keep their own title bar and backdrop until they are told about
+    // the new theme; their content already follows the shared dynamic resources.
+    private void SyncOpenToolWindowThemes(AppTheme theme)
+    {
+        foreach (var window in Application.Current?.Windows.OfType<Window>().ToArray() ?? Array.Empty<Window>())
+        {
+            if (ReferenceEquals(window, this) || ReferenceEquals(window, _settingsWindow) || ReferenceEquals(window, _equalizerWindow)) continue;
+            if (!window.IsLoaded) continue;
+            try { ThemeService.Apply(theme, window); } catch (InvalidOperationException) { }
+        }
+    }
+
     private void MainContextMenu_Opened(object sender, RoutedEventArgs e)
     {
         RefreshQuickSettings();
@@ -2280,6 +2294,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
     private void OnOpenUrlRequested(object? sender, EventArgs e)
     {
         var win = new UrlInputWindow { Owner = this };
+        win.SourceInitialized += (_, _) => ThemeService.Apply(_vm.CurrentTheme, win);
         if (win.ShowDialog() == true && !string.IsNullOrWhiteSpace(win.Url))
             _vm.AddNetworkUrl(win.Url);
     }

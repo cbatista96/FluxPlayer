@@ -23,6 +23,7 @@
             <conv:PathToFileNameConverter x:Key="PathToFileName" />
             <conv:NonZeroToActiveTagConverter x:Key="ActiveTag" />
             <conv:ZeroToVisibleConverter x:Key="ZeroToVisible" />
+            <conv:NullToVisibleConverter x:Key="NullToVisible" />
 
             <Thickness x:Key="ComboBoxPadding">10,6,10,6</Thickness>
 
@@ -126,10 +127,10 @@
             </Style>
 
             <Style TargetType="ContextMenu">
-                <Setter Property="Background" Value="#E61A1F2A" />
-                <Setter Property="BorderBrush" Value="#30FFFFFF" />
+                <Setter Property="Background" Value="{DynamicResource FxDialogSurfaceBrush}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource FxDialogBorderBrush}" />
                 <Setter Property="BorderThickness" Value="1" />
-                <Setter Property="Foreground" Value="#F2F2F2" />
+                <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
                 <Setter Property="Padding" Value="4" />
                 <Setter Property="HasDropShadow" Value="True" />
                 <Setter Property="Template">
@@ -149,7 +150,7 @@
             </Style>
 
             <Style TargetType="MenuItem">
-                <Setter Property="Foreground" Value="#F2F2F2" />
+                <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
                 <Setter Property="Background" Value="Transparent" />
                 <Setter Property="Padding" Value="10,7" />
                 <Setter Property="Cursor" Value="Hand" />
@@ -165,17 +166,17 @@
                                     </Grid.ColumnDefinitions>
 
                                     <ContentPresenter x:Name="icon" Grid.Column="0" ContentSource="Icon" VerticalAlignment="Center" HorizontalAlignment="Center" />
-                                    <TextBlock x:Name="check" Grid.Column="0" Text="" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="12" Foreground="#60CDFF" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="Collapsed" />
+                                    <TextBlock x:Name="check" Grid.Column="0" Text="" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="12" Foreground="{DynamicResource FxAccentTextBrush}" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="Collapsed" />
 
                                     <ContentPresenter Grid.Column="1" ContentSource="Header" VerticalAlignment="Center" Margin="8,0,16,0" RecognizesAccessKey="True" />
 
                                     <Grid Grid.Column="2" MinWidth="14">
                                         <TextBlock x:Name="gesture" Text="{TemplateBinding InputGestureText}" Opacity="0.55" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Right" />
-                                        <Path x:Name="arrow" Data="M 0,0 L 4,4 L 0,8 Z" Fill="#A0FFFFFF" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,2,0" Visibility="Collapsed" />
+                                        <Path x:Name="arrow" Data="M 0,0 L 4,4 L 0,8 Z" Fill="{DynamicResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,2,0" Visibility="Collapsed" />
                                     </Grid>
 
                                     <Popup x:Name="PART_Popup" Placement="Right" IsOpen="{TemplateBinding IsSubmenuOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="Fade">
-                                        <Border Background="#E61A1F2A" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="8" Padding="4">
+                                        <Border Background="{DynamicResource FxDialogSurfaceBrush}" BorderBrush="{DynamicResource FxDialogBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="4">
                                             <Border.Effect>
                                                 <DropShadowEffect Color="Black" BlurRadius="20" ShadowDepth="0" Opacity="0.6" />
                                             </Border.Effect>
@@ -186,14 +187,14 @@
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsHighlighted" Value="True">
-                                    <Setter TargetName="bd" Property="Background" Value="#28FFFFFF" />
+                                    <Setter TargetName="bd" Property="Background" Value="{DynamicResource FxHoverBrush}" />
                                 </Trigger>
                                 <Trigger Property="IsChecked" Value="True">
                                     <Setter TargetName="check" Property="Visibility" Value="Visible" />
                                     <Setter TargetName="icon" Property="Visibility" Value="Hidden" />
                                 </Trigger>
                                 <Trigger Property="IsEnabled" Value="False">
-                                    <Setter Property="Foreground" Value="#60FFFFFF" />
+                                    <Setter Property="Foreground" Value="{DynamicResource TextFillColorDisabledBrush}" />
                                 </Trigger>
                                 <Trigger Property="Role" Value="SubmenuHeader">
                                     <Setter TargetName="arrow" Property="Visibility" Value="Visible" />
@@ -213,7 +214,7 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Separator">
-                            <Rectangle Height="1" Margin="6,4" Fill="#22FFFFFF" />
+                            <Rectangle Height="1" Margin="6,4" Fill="{DynamicResource FxDividerBrush}" />
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>

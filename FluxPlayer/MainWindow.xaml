@@ -376,7 +376,7 @@
                             <MenuItem Header="Audio effect recipes…" Click="AudioPalette_Click" controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Offline effect recipes" />
                             <MenuItem Header="Audio analysis and visualizations…" Click="AudioDiagnostics_Click" controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Signal and measurements" controls:SettingsAction.QuickAccess="True" />
                             <MenuItem Header="Video filter recipes…" Click="VideoPalette_Click" controls:SettingsAction.Category="Video" controls:SettingsAction.Section="Offline filter recipes" />
-                            <MenuItem Header="Video quality diagnostics…" Click="VideoDiagnostics_Click" controls:SettingsAction.Category="Video" controls:SettingsAction.Section="Picture diagnostics" />
+                            <MenuItem Header="Video quality diagnostics…" Click="VideoDiagnostics_Click" controls:SettingsAction.Category="Video" controls:SettingsAction.Section="Diagnostics" />
                             <MenuItem Header="Subtitle quality and cleanup…" Click="SubtitleWorkshop_Click" controls:SettingsAction.Category="Subtitles" controls:SettingsAction.Section="Quality and cleanup" controls:SettingsAction.QuickAccess="True" />
                             <MenuItem Header="Subsonic discovery and library actions…" Click="SubsonicActions_Click" controls:SettingsAction.Category="Library" controls:SettingsAction.Section="Remote libraries" />
                             <MenuItem Header="Jellyfin library actions…" Click="JellyfinActions_Click" controls:SettingsAction.Category="Library" controls:SettingsAction.Section="Personal media servers" />
@@ -414,7 +414,7 @@
                             <MenuItem controls:SettingsAction.Category="Video" controls:SettingsAction.Section="Capture" Header="Thumbnail contact sheet…" Click="ContactSheet_Click" />
                             <MenuItem controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Conversion" Header="Create ringtone…" Click="Ringtone_Click" />
                             <MenuItem controls:SettingsAction.Category="Subtitles" controls:SettingsAction.Section="Bilingual display" controls:SettingsAction.QuickAccess="True" Header="Bilingual subtitles…" Click="Bilingual_Click" />
-                            <MenuItem controls:SettingsAction.Category="Video" controls:SettingsAction.Section="Picture and stereo" controls:SettingsAction.QuickAccess="True" Header="Custom aspect ratio…" Click="CustomAspect_Click" />
+                            <MenuItem controls:SettingsAction.Category="Video" controls:SettingsAction.Section="Picture" controls:SettingsAction.QuickAccess="True" Header="Custom aspect ratio…" Click="CustomAspect_Click" />
                             <MenuItem controls:SettingsAction.Category="Video" controls:SettingsAction.Section="Diagnostics" controls:SettingsAction.QuickAccess="True" Header="Playback and renderer statistics…" Click="Statistics_Click" />
                             <MenuItem controls:SettingsAction.Category="General" controls:SettingsAction.Section="Player presentation" Header="Playback OSD…" Tag="Playback OSD" Click="PlayerPreferences_Click" />
                             <MenuItem controls:SettingsAction.Category="General" controls:SettingsAction.Section="Player presentation" Header="Player toolbar…" Tag="Player toolbar" Click="PlayerPreferences_Click" />
@@ -426,9 +426,9 @@
                             <MenuItem controls:SettingsAction.Category="Library" controls:SettingsAction.Section="Synchronization" Header="Remote library synchronization…" Click="RemoteLibrarySync_Click" />
                             <MenuItem controls:SettingsAction.Category="Subtitles" controls:SettingsAction.Section="Online providers" Header="Download subtitles · OpenSubtitles…" Click="SubtitleDownloads_Click" />
                             <MenuItem controls:SettingsAction.Category="Playback" controls:SettingsAction.Section="External control" Header="Cast local media · Chromecast / DLNA…" Click="Casting_Click" />
-                            <MenuItem controls:SettingsAction.Category="Playback" controls:SettingsAction.Section="Chapters" Header="Ordered and linked chapter playback…" Click="LinkedChapters_Click" />
-                            <MenuItem controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Output and continuous playback" Header="Continuous PCM, DSP and exclusive output…" Click="RealtimeAudio_Click" />
-                            <MenuItem controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Output and continuous playback" Header="Native DSD · ASIO…" Click="NativeDsd_Click" />
+                            <MenuItem controls:SettingsAction.Category="Playback" controls:SettingsAction.Section="Chapters and navigation" Header="Ordered and linked chapter playback…" Click="LinkedChapters_Click" />
+                            <MenuItem controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Output and processing" Header="Continuous PCM, DSP and exclusive output…" Click="RealtimeAudio_Click" />
+                            <MenuItem controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Output and processing" Header="Native DSD · ASIO…" Click="NativeDsd_Click" />
                             <MenuItem controls:SettingsAction.Category="Playback" controls:SettingsAction.Section="Diagnostics" Header="Local playback compatibility matrix…" Click="PlaybackCompatibility_Click" />
                             <MenuItem controls:SettingsAction.Category="Video" controls:SettingsAction.Section="Renderer" Header="Native GPU video and HDR display state…" Click="NativeGpuVideo_Click" />
                             <MenuItem controls:SettingsAction.Category="Keyboard" controls:SettingsAction.Section="System-wide transport" Header="Global transport shortcuts…" Tag="Global transport shortcuts" Click="PlayerPreferences_Click" />
@@ -462,7 +462,7 @@
                             <MenuItem controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Production" Header="Extract audio from video…" Click="ExtractAudio_Click" />
                             <MenuItem controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Production" Header="Mix audio to a new file…" Click="MixAudio_Click" />
                             <MenuItem controls:SettingsAction.Category="Video" controls:SettingsAction.Section="Conversion" Header="Video converter and mobile profiles…" Click="VideoConverter_Click" />
-                            <MenuItem controls:SettingsAction.Category="Video" controls:SettingsAction.Section="Picture and stereo" Header="Zoom, pan and stereo view…" Click="VideoView_Click" controls:SettingsAction.QuickAccess="True" />
+                            <MenuItem controls:SettingsAction.Category="Video" controls:SettingsAction.Section="Picture" Header="Zoom, pan and stereo view…" Click="VideoView_Click" controls:SettingsAction.QuickAccess="True" />
                             <MenuItem controls:SettingsAction.Category="Playback" controls:SettingsAction.Section="Scheduling" Header="Playback schedule…" Click="PlaybackSchedule_Click" />
                             <MenuItem controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Level and dynamics" Header="Volume fade…" Click="VolumeFade_Click" controls:SettingsAction.QuickAccess="True" />
                             <MenuItem controls:SettingsAction.Category="Audio" controls:SettingsAction.Section="Lyrics" Header="Lyrics editor…" Click="LyricsEditor_Click" />
@@ -979,7 +979,10 @@
 
                         <StackPanel x:Name="LeftAudioGroup" Orientation="Horizontal" VerticalAlignment="Center">
                             <Rectangle Width="1" Height="20" Fill="{DynamicResource PlayerSeparatorBrush}" Margin="10,0,8,0" />
-                            <ComboBox x:Name="AudioCombo" Width="124" Height="32" FontSize="12" VerticalContentAlignment="Center" ItemsSource="{Binding AudioTracks}" SelectedItem="{Binding SelectedAudioTrack}" ItemTemplate="{StaticResource TrimmedTrackItem}" ToolTip="Audio track" IsEnabled="{Binding HasMedia}" />
+                            <Grid>
+                                <ComboBox x:Name="AudioCombo" Width="124" Height="32" FontSize="12" VerticalContentAlignment="Center" ItemsSource="{Binding AudioTracks}" SelectedItem="{Binding SelectedAudioTrack}" ItemTemplate="{StaticResource TrimmedTrackItem}" ToolTip="Audio track" IsEnabled="{Binding HasMedia}" />
+                                <TextBlock Text="Audio track" FontSize="12" IsHitTestVisible="False" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left" Foreground="{DynamicResource PlayerSecondaryForegroundBrush}" Visibility="{Binding SelectedItem, ElementName=AudioCombo, Converter={StaticResource NullToVisible}}" />
+                            </Grid>
                         </StackPanel>
 
                         <StackPanel x:Name="LeftSpeedGroup" Orientation="Horizontal" VerticalAlignment="Center">

@@ -27,7 +27,7 @@
             <TextBlock Text="Enter a stream or network file URL" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
             <TextBlock Text="HTTP(S), HLS (.m3u8), RTSP, RTMP, MMS, UDP/RTP, FTP or SMB" FontSize="12" Margin="0,4,0,12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
 
-            <ui:TextBox x:Name="UrlTextBox" PlaceholderText="https://... o rtsp://..." FontSize="13" TextChanged="UrlTextBox_TextChanged" />
+            <ui:TextBox x:Name="UrlTextBox" PlaceholderText="https://... or rtsp://..." FontSize="13" TextChanged="UrlTextBox_TextChanged" />
 
             <TextBlock x:Name="ValidationText" FontSize="11.5" Margin="2,6,0,0" Foreground="#FFFF9A8A" TextWrapping="Wrap" Visibility="Collapsed" />
 
