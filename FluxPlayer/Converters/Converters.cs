@@ -173,3 +173,18 @@ public class NullToVisibleConverter : IValueConverter
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         => throw new NotImplementedException();
 }
+
+/// <summary>Shows only the media title in the title bar centre: the application name is already shown at the left, so "FluxPlayer — Song" becomes "Song" and the idle "FluxPlayer" becomes empty.</summary>
+public class TitleWithoutAppNameConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        string text = value as string ?? "";
+        const string app = "FluxPlayer";
+        if (!text.StartsWith(app, StringComparison.Ordinal)) return text;
+        return text[app.Length..].TrimStart(' ', '—', '–', '-', '·').TrimEnd();
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        => throw new NotImplementedException();
+}

@@ -23,7 +23,7 @@ public partial class MainViewModel
     [ObservableProperty] private string _lyricLine = "";
     [ObservableProperty] private bool _isCurrentFavorite;
     public bool IsAudioMode => ActiveMode == PlayerMode.Audio;
-    public string ModeLabel => IsAudioMode ? "Audio" : "Video";
+    public string ModeLabel => Localizer.T(IsAudioMode ? "Audio" : "Video");
     public ObservableCollection<ChapterInfo> Chapters { get; } = new();
     public ObservableCollection<AudioDevice> OutputDevices { get; } = new();
     private LyricsDocument? _lyrics;

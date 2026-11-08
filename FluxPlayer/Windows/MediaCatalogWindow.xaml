@@ -19,7 +19,7 @@
   <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
   <StackPanel Margin="0,0,0,16"><TextBlock x:Name="Heading" FontSize="25" FontWeight="SemiBold"/><TextBlock x:Name="Description" TextWrapping="Wrap" Margin="0,6,0,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/></StackPanel>
   <Grid Grid.Row="1" Margin="0,0,0,14"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-   <StackPanel><TextBlock Text="Search" Margin="0,0,0,5"/><TextBox x:Name="Search" TextChanged="Search_Changed" Padding="10,7" AutomationProperties.Name="Search saved media"/></StackPanel>
+   <StackPanel><TextBlock Text="Search" Margin="0,0,0,5"/><ui:TextBox PlaceholderText="Search saved media" Icon="{ui:SymbolIcon Search24}" ClearButtonEnabled="True" x:Name="Search" TextChanged="Search_Changed" Padding="10,7" AutomationProperties.Name="Search saved media"/></StackPanel>
    <WrapPanel Grid.Column="1" VerticalAlignment="Bottom" Margin="12,0,0,0"><Button x:Name="NewButton" Content="New…" Click="New_Click" Padding="14,8" Margin="0,0,8,0"/><Button Content="Import playlist…" Click="Import_Click" Padding="14,8" Margin="0,0,8,0"/><Button Content="Refresh" Click="Refresh_Click" Padding="14,8"/></WrapPanel>
   </Grid>
   <Grid Grid.Row="2"><Grid.ColumnDefinitions><ColumnDefinition Width="260"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>

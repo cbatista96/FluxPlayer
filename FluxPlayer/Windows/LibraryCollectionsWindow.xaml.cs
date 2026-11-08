@@ -57,7 +57,7 @@ public partial class LibraryCollectionsWindow : FluentWindow
     private async void Remove_Click(object sender, RoutedEventArgs e)
     {
         if (_selected == null) { Status.Text = "Select a collection first."; return; }
-        if (System.Windows.MessageBox.Show(this, "Remove this collection and its child collections? Media files remain on disk and in the library. Smart playlists scoped to this tree must be removed first.", "Remove collection tree", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
+        if (MessageBox.Show(this, "Remove this collection and its child collections? Media files remain on disk and in the library. Smart playlists scoped to this tree must be removed first.", "Remove collection tree", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
         string selected = _selected;
         await Run(async () => { int count = await _vm.Library.RemoveCollectionAsync(selected); _selected = null; await RefreshAsync(); Status.Text = $"Removed {count:N0} collection(s). Media files were retained."; });
     }

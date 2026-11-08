@@ -17,13 +17,17 @@ public static partial class Localizer
 
     private static readonly Dictionary<string, IReadOnlyDictionary<string, string>> Catalogs = new(StringComparer.Ordinal)
     {
-        ["Spanish"] = Variants(Merge(SpanishCatalog, SpanishTools1, SpanishTools2, SpanishTools3, SpanishMessages1, SpanishMessages2, SpanishMessages3, SpanishMessages4))
+        ["Spanish"] = Variants(Merge(SpanishCatalog, SpanishWindows, SpanishWindows2, SpanishTools1, SpanishTools2, SpanishTools3, SpanishMessages1, SpanishMessages2, SpanishMessages3, SpanishMessages4))
     };
 
     private static readonly DependencyProperty SourceProperty = DependencyProperty.RegisterAttached("Source", typeof(string), typeof(Localizer));
     private static readonly DependencyProperty RenderedProperty = DependencyProperty.RegisterAttached("Rendered", typeof(string), typeof(Localizer));
     private static readonly DependencyProperty TipSourceProperty = DependencyProperty.RegisterAttached("TipSource", typeof(string), typeof(Localizer));
     private static readonly DependencyProperty TipRenderedProperty = DependencyProperty.RegisterAttached("TipRendered", typeof(string), typeof(Localizer));
+    private static readonly DependencyProperty BarSourceProperty = DependencyProperty.RegisterAttached("BarSource", typeof(string), typeof(Localizer));
+    private static readonly DependencyProperty BarRenderedProperty = DependencyProperty.RegisterAttached("BarRendered", typeof(string), typeof(Localizer));
+    private static readonly DependencyProperty HintSourceProperty = DependencyProperty.RegisterAttached("HintSource", typeof(string), typeof(Localizer));
+    private static readonly DependencyProperty HintRenderedProperty = DependencyProperty.RegisterAttached("HintRendered", typeof(string), typeof(Localizer));
 
     public static string Current { get; private set; } = "English";
     public static event EventHandler? Changed;
@@ -101,6 +105,20 @@ public static partial class Localizer
         Translate(root);
         foreach (object child in LogicalTreeHelper.GetChildren(root))
             if (child is DependencyObject node) Apply(node);
+        if (root is Window window) TranslateTitleBars(window);
+    }
+
+    // The Fluent title bar lives in the window template, so the logical walk above never reaches it.
+    private static void TranslateTitleBars(DependencyObject node)
+    {
+        int count = node is System.Windows.Media.Visual or System.Windows.Media.Media3D.Visual3D ? System.Windows.Media.VisualTreeHelper.GetChildrenCount(node) : 0;
+        for (int i = 0; i < count; i++)
+        {
+            var child = System.Windows.Media.VisualTreeHelper.GetChild(node, i);
+            if (child is Wpf.Ui.Controls.TitleBar { Title.Length: > 0 } bar && !BindingOperations.IsDataBound(bar, Wpf.Ui.Controls.TitleBar.TitleProperty))
+                Render(bar, bar.Title, text => bar.Title = text, BarSourceProperty, BarRenderedProperty);
+            TranslateTitleBars(child);
+        }
     }
 
     private static void Translate(DependencyObject node)
@@ -111,6 +129,14 @@ public static partial class Localizer
         {
             case Window window when window.Title.Length > 0 && !BindingOperations.IsDataBound(window, Window.TitleProperty):
                 Render(window, window.Title, text => window.Title = text);
+                break;
+            case Wpf.Ui.Controls.TextBox { PlaceholderText.Length: > 0 } box when !BindingOperations.IsDataBound(box, Wpf.Ui.Controls.TextBox.PlaceholderTextProperty):
+                Render(box, box.PlaceholderText, text => box.PlaceholderText = text, HintSourceProperty, HintRenderedProperty);
+                break;
+            case DataGrid grid:
+                foreach (var column in grid.Columns)
+                    if (column.Header is string columnHeader && columnHeader.Length > 0)
+                        Render(column, columnHeader, text => column.Header = text);
                 break;
             case MenuItem item when item.Header is string header:
                 Render(item, header, text => item.Header = text);

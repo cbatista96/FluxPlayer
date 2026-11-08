@@ -99,7 +99,7 @@ public sealed class DuplicateFilesWindow : FluentWindow
         AddAction("Automatically consolidate exact groups…", async (_, _) =>
         {
             if (_operation != null || _groups.Length == 0) return;
-            if (System.Windows.MessageBox.Show(this, $"Consolidate {_groups.Length} exact-file groups? The oldest indexed entry in each group is retained. Metadata and collections merge; unchanged copies stay excluded from future scans. Files remain intact. Completed groups are retained if canceled.", "Review automatic consolidation", MessageBoxButton.OKCancel) != MessageBoxResult.OK) return;
+            if (MessageBox.Show(this, $"Consolidate {_groups.Length} exact-file groups? The oldest indexed entry in each group is retained. Metadata and collections merge; unchanged copies stay excluded from future scans. Files remain intact. Completed groups are retained if canceled.", "Review automatic consolidation", MessageBoxButton.OKCancel) != MessageBoxResult.OK) return;
             using var cancel = new CancellationTokenSource(); _operation = cancel; _scan.IsEnabled = false; _cancel.IsEnabled = true;
             try { int count = await _vm.Library.AutoConsolidate(_groups, new Progress<string>(s => { if (!_closed) _status.Text = s; }), cancel.Token); _grid.ItemsSource = Array.Empty<Row>(); _groups = []; _status.Text = $"Consolidated {count} index entries. Original files remain intact."; }
             catch (Exception ex) when (ex is not OutOfMemoryException) { if (!_closed) _status.Text = ex is OperationCanceledException ? "Canceled. Completed group merges remain saved; rescan to continue." : ex.Message; }

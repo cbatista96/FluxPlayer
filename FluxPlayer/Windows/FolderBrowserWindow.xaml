@@ -8,10 +8,9 @@
     <Button Content="Choose folder…" Click="Choose_Click" Padding="12,7" Margin="0,0,8,8"/>
     <Button x:Name="ParentButton" Content="Up one folder" Click="Parent_Click" Padding="12,7" Margin="0,0,8,8"/>
     <Button Content="Refresh" Click="Refresh_Click" Padding="12,7" Margin="0,0,8,8"/>
-    <ComboBox x:Name="KindFilter" Width="130" SelectedIndex="0" SelectionChanged="Kind_Changed" Margin="0,0,8,8" AutomationProperties.Name="Folder media type"><ComboBoxItem Content="All media"/><ComboBoxItem Content="Audio"/><ComboBoxItem Content="Video"/></ComboBox>
+    <ComboBox x:Name="KindFilter" Width="130" SelectedIndex="0" SelectionChanged="Kind_Changed" Margin="0,0,8,8" AutomationProperties.Name="Folder media type"><ComboBoxItem Tag="i" Content="All media"/><ComboBoxItem Tag="i" Content="Audio"/><ComboBoxItem Tag="i" Content="Video"/></ComboBox>
     <Grid Width="200" Margin="0,0,0,8">
-     <TextBox x:Name="Search" Padding="10,7" TextChanged="Search_Changed" MaxLength="200" AutomationProperties.Name="Filter file names" ToolTip="Filter media filenames; folders remain visible"/>
-     <TextBlock Text="Filter filenames…" Margin="12,0" VerticalAlignment="Center" IsHitTestVisible="False" Foreground="{DynamicResource TextFillColorSecondaryBrush}"><TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding Text, ElementName=Search}" Value=""><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock>
+     <ui:TextBox PlaceholderText="Filter filenames…" Icon="{ui:SymbolIcon Search24}" ClearButtonEnabled="True" x:Name="Search" Padding="10,7" TextChanged="Search_Changed" MaxLength="200" AutomationProperties.Name="Filter file names" ToolTip="Filter media filenames; folders remain visible"/>
     </Grid>
    </WrapPanel>
   </StackPanel>

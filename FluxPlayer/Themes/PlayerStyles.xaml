@@ -33,14 +33,6 @@
     <SolidColorBrush x:Key="PopupSurfaceBrush" Color="#F2161A24" />
     <SolidColorBrush x:Key="PopupBorderBrush" Color="#2AFFFFFF" />
 
-    <LinearGradientBrush x:Key="AccentGradientBrush" StartPoint="0,0" EndPoint="1,1">
-        <GradientStop Color="#3FB4FF" Offset="0" />
-        <GradientStop Color="#8B6CFF" Offset="1" />
-    </LinearGradientBrush>
-    <LinearGradientBrush x:Key="AccentGradientHorizontalBrush" StartPoint="0,0" EndPoint="1,0">
-        <GradientStop Color="#60CDFF" Offset="0" />
-        <GradientStop Color="#8B6CFF" Offset="1" />
-    </LinearGradientBrush>
 
     <CubicEase x:Key="EaseOut" EasingMode="EaseOut" />
     <BackEase x:Key="EaseBack" EasingMode="EaseOut" Amplitude="0.45" />
@@ -108,8 +100,8 @@
                             <Setter TargetName="bg" Property="Background" Value="{DynamicResource PlayerPressedBrush}" />
                         </Trigger>
                         <Trigger Property="Tag" Value="Active">
-                            <Setter TargetName="bg" Property="Background" Value="{StaticResource AccentSoftBrush}" />
-                            <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                            <Setter TargetName="bg" Property="Background" Value="{DynamicResource FxAccentSoftBrush}" />
+                            <Setter Property="Foreground" Value="{DynamicResource FxAccentTextBrush}" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="root" Property="Opacity" Value="0.32" />
@@ -122,9 +114,9 @@
 
     <Style x:Key="PlayButton" TargetType="Button" BasedOn="{StaticResource TransportButton}">
         <Setter Property="FontSize" Value="20" />
-        <Setter Property="Width" Value="50" />
-        <Setter Property="Height" Value="50" />
-        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Width" Value="48" />
+        <Setter Property="Height" Value="48" />
+        <Setter Property="Foreground" Value="{DynamicResource TextOnAccentFillColorPrimaryBrush}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
@@ -132,14 +124,10 @@
                         <Grid.RenderTransform>
                             <ScaleTransform x:Name="scale" />
                         </Grid.RenderTransform>
-                        <Ellipse x:Name="glow" Fill="{StaticResource AccentGradientBrush}" Opacity="0.28" Margin="2">
-                            <Ellipse.Effect>
-                                <BlurEffect Radius="16" KernelType="Gaussian" />
-                            </Ellipse.Effect>
-                        </Ellipse>
-                        <Ellipse Fill="{StaticResource AccentGradientBrush}" />
-                        <Ellipse StrokeThickness="1" Stroke="#40FFFFFF" />
+                        <Ellipse Fill="{DynamicResource FxAccentFillBrush}" />
+                        <Ellipse StrokeThickness="1" Stroke="#24FFFFFF" />
                         <Ellipse x:Name="hover" Fill="White" Opacity="0" />
+                        <Ellipse x:Name="press" Fill="Black" Opacity="0" />
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Grid>
                     <ControlTemplate.Triggers>
@@ -147,20 +135,18 @@
                             <Trigger.EnterActions>
                                 <BeginStoryboard>
                                     <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="glow" Storyboard.TargetProperty="Opacity" To="0.75" Duration="0:0:0.2" EasingFunction="{StaticResource EaseOut}" />
-                                        <DoubleAnimation Storyboard.TargetName="hover" Storyboard.TargetProperty="Opacity" To="0.12" Duration="0:0:0.2" />
-                                        <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleX" To="1.06" Duration="0:0:0.22" EasingFunction="{StaticResource EaseBack}" />
-                                        <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleY" To="1.06" Duration="0:0:0.22" EasingFunction="{StaticResource EaseBack}" />
+                                        <DoubleAnimation Storyboard.TargetName="hover" Storyboard.TargetProperty="Opacity" To="0.14" Duration="0:0:0.15" EasingFunction="{StaticResource EaseOut}" />
+                                        <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleX" To="1.05" Duration="0:0:0.2" EasingFunction="{StaticResource EaseBack}" />
+                                        <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleY" To="1.05" Duration="0:0:0.2" EasingFunction="{StaticResource EaseBack}" />
                                     </Storyboard>
                                 </BeginStoryboard>
                             </Trigger.EnterActions>
                             <Trigger.ExitActions>
                                 <BeginStoryboard>
                                     <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="glow" Storyboard.TargetProperty="Opacity" To="0.28" Duration="0:0:0.3" />
-                                        <DoubleAnimation Storyboard.TargetName="hover" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.3" />
-                                        <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleX" To="1" Duration="0:0:0.3" EasingFunction="{StaticResource EaseOut}" />
-                                        <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleY" To="1" Duration="0:0:0.3" EasingFunction="{StaticResource EaseOut}" />
+                                        <DoubleAnimation Storyboard.TargetName="hover" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.25" />
+                                        <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleX" To="1" Duration="0:0:0.25" EasingFunction="{StaticResource EaseOut}" />
+                                        <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleY" To="1" Duration="0:0:0.25" EasingFunction="{StaticResource EaseOut}" />
                                     </Storyboard>
                                 </BeginStoryboard>
                             </Trigger.ExitActions>
@@ -169,16 +155,18 @@
                             <Trigger.EnterActions>
                                 <BeginStoryboard>
                                     <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleX" To="0.9" Duration="0:0:0.07" />
-                                        <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleY" To="0.9" Duration="0:0:0.07" />
+                                        <DoubleAnimation Storyboard.TargetName="press" Storyboard.TargetProperty="Opacity" To="0.12" Duration="0:0:0.07" />
+                                        <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleX" To="0.92" Duration="0:0:0.07" />
+                                        <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleY" To="0.92" Duration="0:0:0.07" />
                                     </Storyboard>
                                 </BeginStoryboard>
                             </Trigger.EnterActions>
                             <Trigger.ExitActions>
                                 <BeginStoryboard>
                                     <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleX" To="1.06" Duration="0:0:0.34" EasingFunction="{StaticResource EaseBack}" />
-                                        <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleY" To="1.06" Duration="0:0:0.34" EasingFunction="{StaticResource EaseBack}" />
+                                        <DoubleAnimation Storyboard.TargetName="press" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.2" />
+                                        <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleX" To="1.05" Duration="0:0:0.3" EasingFunction="{StaticResource EaseBack}" />
+                                        <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleY" To="1.05" Duration="0:0:0.3" EasingFunction="{StaticResource EaseBack}" />
                                     </Storyboard>
                                 </BeginStoryboard>
                             </Trigger.ExitActions>
@@ -257,9 +245,9 @@
                             <Setter TargetName="bg" Property="Background" Value="{DynamicResource PlayerPressedBrush}" />
                         </Trigger>
                         <Trigger Property="Tag" Value="Active">
-                            <Setter TargetName="bg" Property="Background" Value="{StaticResource AccentSoftBrush}" />
-                            <Setter TargetName="bg" Property="BorderBrush" Value="{StaticResource AccentBorderBrush}" />
-                            <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                            <Setter TargetName="bg" Property="Background" Value="{DynamicResource FxAccentSoftBrush}" />
+                            <Setter TargetName="bg" Property="BorderBrush" Value="{DynamicResource FxAccentBorderBrush}" />
+                            <Setter Property="Foreground" Value="{DynamicResource FxAccentTextBrush}" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="root" Property="Opacity" Value="0.38" />
@@ -271,9 +259,9 @@
     </Style>
 
     <Style x:Key="AccentButton" TargetType="Button" BasedOn="{StaticResource ChipButton}">
-        <Setter Property="Background" Value="{StaticResource AccentGradientBrush}" />
-        <Setter Property="BorderBrush" Value="#40FFFFFF" />
-        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Background" Value="{DynamicResource FxAccentFillBrush}" />
+        <Setter Property="BorderBrush" Value="#24FFFFFF" />
+        <Setter Property="Foreground" Value="{DynamicResource TextOnAccentFillColorPrimaryBrush}" />
         <Setter Property="Height" Value="34" />
         <Setter Property="Padding" Value="14,0" />
     </Style>
@@ -370,7 +358,7 @@
                                 <RepeatButton x:Name="fill" Command="Slider.DecreaseLarge" Height="4" Focusable="False">
                                     <RepeatButton.Template>
                                         <ControlTemplate TargetType="RepeatButton">
-                                            <Border CornerRadius="3" Background="{StaticResource AccentGradientHorizontalBrush}" />
+                                            <Border CornerRadius="3" Background="{DynamicResource FxAccentFillBrush}" />
                                         </ControlTemplate>
                                     </RepeatButton.Template>
                                 </RepeatButton>
@@ -383,7 +371,7 @@
                                     <Thumb.Template>
                                         <ControlTemplate TargetType="Thumb">
                                             <Grid>
-                                                <Ellipse Fill="#5560CDFF" Margin="-3" />
+                                                <Ellipse Fill="{DynamicResource FxAccentFillBrush}" Opacity="0.33" Margin="-3" />
                                                 <Ellipse Fill="White" />
                                             </Grid>
                                         </ControlTemplate>

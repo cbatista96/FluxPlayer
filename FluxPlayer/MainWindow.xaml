@@ -440,7 +440,7 @@
                         <Grid Margin="6,2">
                             <Border x:Name="bg" CornerRadius="8" Background="Transparent" />
                             <Border x:Name="hover" CornerRadius="8" Opacity="0" Background="{DynamicResource PlayerHoverBrush}" />
-                            <Border x:Name="accentBar" Width="3" Height="20" CornerRadius="1.5" HorizontalAlignment="Left" Margin="1,0,0,0" Background="{StaticResource AccentGradientBrush}" Visibility="Collapsed" />
+                            <Border x:Name="accentBar" Width="3" Height="20" CornerRadius="1.5" HorizontalAlignment="Left" Margin="1,0,0,0" Background="{DynamicResource FxAccentFillBrush}" Visibility="Collapsed" />
                             <ContentPresenter Margin="10,7,6,7" />
                         </Grid>
                         <ControlTemplate.Triggers>
@@ -464,7 +464,7 @@
                                 <Setter TargetName="bg" Property="Background" Value="{DynamicResource FxHoverBrush}" />
                             </Trigger>
                             <DataTrigger Binding="{Binding IsPlaying}" Value="True">
-                                <Setter TargetName="bg" Property="Background" Value="{StaticResource AccentSoftBrush}" />
+                                <Setter TargetName="bg" Property="Background" Value="{DynamicResource FxAccentSoftBrush}" />
                                 <Setter TargetName="accentBar" Property="Visibility" Value="Visible" />
                             </DataTrigger>
                         </ControlTemplate.Triggers>
@@ -496,7 +496,15 @@
                 <TextBlock Text="FluxPlayer" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource PlayerPrimaryForegroundBrush}" VerticalAlignment="Center" Margin="8,0,0,0" />
             </StackPanel>
 
-            <TextBlock Grid.Column="1" Text="{Binding WindowTitle}" FontSize="12" Opacity="0.55" HorizontalAlignment="Center" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" IsHitTestVisible="False" />
+            <TextBlock Grid.Column="1" Text="{Binding WindowTitle, Converter={StaticResource TitleOnly}}" FontSize="12" Opacity="0.55" HorizontalAlignment="Center" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" IsHitTestVisible="False">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+                        <Style.Triggers>
+                            <Trigger Property="Text" Value=""><Setter Property="Visibility" Value="Collapsed" /></Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
 
             <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,4,0" WindowChrome.IsHitTestVisibleInChrome="True">
 
@@ -815,13 +823,13 @@
 
                 <StackPanel x:Name="EmptyMediaState" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="24">
                     <Grid Width="112" Height="112" HorizontalAlignment="Center">
-                        <Ellipse Fill="{StaticResource AccentGradientBrush}" Opacity="0.22">
+                        <Ellipse Fill="{DynamicResource FxAccentFillBrush}" Opacity="0.22">
                             <Ellipse.Effect>
                                 <BlurEffect Radius="28" />
                             </Ellipse.Effect>
                         </Ellipse>
                         <Border Width="84" Height="84" CornerRadius="42" Background="#14FFFFFF" BorderBrush="#22FFFFFF" BorderThickness="1">
-                            <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="34" Foreground="{StaticResource AccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="4,0,0,0" />
+                            <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="34" Foreground="{DynamicResource FxAccentTextBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="4,0,0,0" />
                         </Border>
                     </Grid>
                     <TextBlock Text="Drop files here" FontSize="18" FontWeight="SemiBold" Foreground="#E6FFFFFF" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" Margin="0,18,0,0" />
@@ -954,7 +962,7 @@
                                 </Button>
                             </StackPanel>
                         </Grid>
-                        <TextBox x:Name="PlaylistFilterBox" Margin="0,8,0,0" Height="34" FontSize="12" VerticalContentAlignment="Center" MaxLength="120" ToolTip="Filter the playlist by name or folder" TextChanged="PlaylistFilterBox_TextChanged" />
+                        <ui:TextBox PlaceholderText="Filter playlist" Icon="{ui:SymbolIcon Search24}" ClearButtonEnabled="True" x:Name="PlaylistFilterBox" Margin="0,8,0,0" Height="34" FontSize="12" VerticalContentAlignment="Center" MaxLength="120" ToolTip="Filter the playlist by name or folder" TextChanged="PlaylistFilterBox_TextChanged" />
                       </StackPanel>
                     </Border>
 
@@ -1016,13 +1024,13 @@
                                         <TextBlock x:Name="TypeIcon" Text="{Binding Icon}" FontFamily="Segoe Fluent Icons" FontSize="13" Foreground="{DynamicResource PlayerSecondaryForegroundBrush}" VerticalAlignment="Center" />
 
                                         <StackPanel x:Name="PlayingBars" Orientation="Horizontal" Height="12" VerticalAlignment="Center" Visibility="Collapsed">
-                                            <Rectangle x:Name="Bar1" Width="3" Height="12" RadiusX="1" RadiusY="1" Fill="{StaticResource AccentBrush}" RenderTransformOrigin="0.5,1" Margin="0,0,2,0">
+                                            <Rectangle x:Name="Bar1" Width="3" Height="12" RadiusX="1" RadiusY="1" Fill="{DynamicResource FxAccentTextBrush}" RenderTransformOrigin="0.5,1" Margin="0,0,2,0">
                                                 <Rectangle.RenderTransform><ScaleTransform ScaleY="0.45" /></Rectangle.RenderTransform>
                                             </Rectangle>
-                                            <Rectangle x:Name="Bar2" Width="3" Height="12" RadiusX="1" RadiusY="1" Fill="{StaticResource AccentBrush}" RenderTransformOrigin="0.5,1" Margin="0,0,2,0">
+                                            <Rectangle x:Name="Bar2" Width="3" Height="12" RadiusX="1" RadiusY="1" Fill="{DynamicResource FxAccentTextBrush}" RenderTransformOrigin="0.5,1" Margin="0,0,2,0">
                                                 <Rectangle.RenderTransform><ScaleTransform ScaleY="0.9" /></Rectangle.RenderTransform>
                                             </Rectangle>
-                                            <Rectangle x:Name="Bar3" Width="3" Height="12" RadiusX="1" RadiusY="1" Fill="{StaticResource AccentBrush}" RenderTransformOrigin="0.5,1">
+                                            <Rectangle x:Name="Bar3" Width="3" Height="12" RadiusX="1" RadiusY="1" Fill="{DynamicResource FxAccentTextBrush}" RenderTransformOrigin="0.5,1">
                                                 <Rectangle.RenderTransform><ScaleTransform ScaleY="0.6" /></Rectangle.RenderTransform>
                                             </Rectangle>
                                         </StackPanel>
@@ -1229,7 +1237,10 @@
                     <StackPanel x:Name="RightControls" Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" ClipToBounds="True">
 
                         <StackPanel x:Name="ToolbarTier4" Orientation="Horizontal" VerticalAlignment="Center">
-                            <ComboBox x:Name="SubtitleCombo" Width="148" Height="32" FontSize="12" Margin="0,0,4,0" VerticalContentAlignment="Center" ItemsSource="{Binding SubtitleTracks}" SelectedItem="{Binding SelectedSubtitleTrack}" ItemTemplate="{StaticResource TrimmedTrackItem}" ToolTip="Subtitles" IsEnabled="{Binding HasMedia}" />
+                            <Grid Margin="0,0,4,0">
+                                <ComboBox x:Name="SubtitleCombo" Width="148" Height="32" FontSize="12" VerticalContentAlignment="Center" ItemsSource="{Binding SubtitleTracks}" SelectedItem="{Binding SelectedSubtitleTrack}" ItemTemplate="{StaticResource TrimmedTrackItem}" ToolTip="Subtitles" IsEnabled="{Binding HasMedia}" />
+                                <TextBlock Text="Subtitles" FontSize="12" IsHitTestVisible="False" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left" Foreground="{DynamicResource PlayerSecondaryForegroundBrush}" Visibility="{Binding SelectedItem, ElementName=SubtitleCombo, Converter={StaticResource NullToVisible}}" />
+                            </Grid>
 
                             <Button Style="{StaticResource TransportButton}" Width="36" Height="36" FontSize="15" Command="{Binding LoadSubtitleFileCommand}" ToolTip="Load external subtitle (.srt / .ass)" controls:ButtonFx.IconEffect="Bounce" IsEnabled="{Binding HasMedia}">
                                 <TextBlock Text="" FontFamily="Segoe Fluent Icons" />
@@ -1314,7 +1325,7 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="13" Foreground="{StaticResource AccentBrush}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="13" Foreground="{DynamicResource FxAccentTextBrush}" VerticalAlignment="Center" Margin="0,0,8,0" />
                             <TextBlock Text="Audio" FontSize="12.5" Foreground="#E6FFFFFF" VerticalAlignment="Center" />
                         </StackPanel>
                         <Button Grid.Column="1" Style="{StaticResource ChipButton}" Width="32" Padding="0" Command="{Binding DecreaseAudioDelayCommand}" ToolTip="Advance audio">
@@ -1338,7 +1349,7 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="13" Foreground="{StaticResource AccentBrush}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="13" Foreground="{DynamicResource FxAccentTextBrush}" VerticalAlignment="Center" Margin="0,0,8,0" />
                             <TextBlock Text="Subtitles" FontSize="12.5" Foreground="#E6FFFFFF" VerticalAlignment="Center" />
                         </StackPanel>
                         <Button Grid.Column="1" Style="{StaticResource ChipButton}" Width="32" Padding="0" Command="{Binding DecreaseSubtitleDelayCommand}" ToolTip="Advance subtitles" controls:HotkeyHint.Action="SubtitleDelayMinus">

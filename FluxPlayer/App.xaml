@@ -24,6 +24,7 @@
             <conv:NonZeroToActiveTagConverter x:Key="ActiveTag" />
             <conv:ZeroToVisibleConverter x:Key="ZeroToVisible" />
             <conv:NullToVisibleConverter x:Key="NullToVisible" />
+            <conv:TitleWithoutAppNameConverter x:Key="TitleOnly" />
 
             <Thickness x:Key="ComboBoxPadding">10,6,10,6</Thickness>
 
@@ -205,6 +206,19 @@
                                     <Setter TargetName="gesture" Property="Visibility" Value="Collapsed" />
                                 </Trigger>
                             </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="DataGridCell">
+                            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="True">
+                                <ContentPresenter VerticalAlignment="{TemplateBinding VerticalContentAlignment}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                            </Border>
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>

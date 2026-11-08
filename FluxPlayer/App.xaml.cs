@@ -4,6 +4,7 @@ using FluxPlayer.ViewModels;
 using FluxPlayer.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
+using System.Windows.Input;
 
 namespace FluxPlayer;
 
@@ -92,6 +93,16 @@ public partial class App : Application
 
         // Every window (including tool windows built in code) is translated once it is loaded, and again when the language changes.
         EventManager.RegisterClassHandler(typeof(Window), FrameworkElement.LoadedEvent, new RoutedEventHandler((sender, _) => Localizer.Apply((Window)sender)));
+        // Esc closes auxiliary windows the way Windows dialogs do. Windows that give Esc another meaning (leave fullscreen, cancel an edit, close a drop-down) keep their own handling.
+        EventManager.RegisterClassHandler(typeof(Window), Keyboard.KeyDownEvent, new KeyEventHandler((sender, e) =>
+        {
+            if (e.Key != Key.Escape || e.Handled || Keyboard.Modifiers != ModifierKeys.None) return;
+            if (sender is not Window window || window == Current.MainWindow
+                || window is MiniPlayerWindow or FluxPlayer.Windows.SettingsWindow or CalibrationWindow or CinemaTheaterWindow or PhotoViewerWindow or EqualizerWindow or HotkeyCaptureWindow or UrlInputWindow) return;
+            if (e.OriginalSource is System.Windows.Controls.Primitives.TextBoxBase { AcceptsReturn: true }) return;
+            window.Dispatcher.BeginInvoke(() => { if (window.IsLoaded && window.IsVisible) window.Close(); }, System.Windows.Threading.DispatcherPriority.Background);
+            e.Handled = true;
+        }));
         Localizer.Changed += (_, _) => Dispatcher.BeginInvoke(() => { foreach (Window window in Windows) Localizer.Apply(window); });
         var mainWindow = Services.GetRequiredService<MainWindow>();
         mainWindow.Show();

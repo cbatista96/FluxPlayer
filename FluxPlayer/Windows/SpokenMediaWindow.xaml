@@ -16,7 +16,7 @@
   </StackPanel>
   <Grid Grid.Row="2" Margin="0,0,0,12"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="180"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
    <TextBlock Text="Search titles" Grid.ColumnSpan="3" Margin="0,0,0,6"/>
-   <TextBox x:Name="Search" Grid.Row="1" TextChanged="Search_Changed" Padding="10,7" AutomationProperties.Name="Search spoken media" ToolTip="Search titles"/>
+   <ui:TextBox PlaceholderText="Search spoken media" Icon="{ui:SymbolIcon Search24}" ClearButtonEnabled="True" x:Name="Search" Grid.Row="1" TextChanged="Search_Changed" Padding="10,7" AutomationProperties.Name="Search spoken media" ToolTip="Search titles"/>
    <ComboBox x:Name="EpisodeFilter" Grid.Row="1" Grid.Column="1" Margin="10,0,0,0" SelectedIndex="0" SelectionChanged="Feed_Changed" AutomationProperties.Name="Episode filter"><ComboBoxItem Content="All episodes"/><ComboBoxItem Content="Not listened"/><ComboBoxItem Content="Downloaded"/></ComboBox>
    <Button Grid.Row="1" Grid.Column="2" Content="Refresh view" Click="Refresh_Click" Padding="14,7" Margin="10,0,0,0"/>
   </Grid>

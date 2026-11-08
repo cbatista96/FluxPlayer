@@ -105,7 +105,7 @@ public partial class LibraryWindow : FluentWindow
             EmptyText.Text = source.Length == 0 ? "Add a folder to get started. Files you play will also appear here."
                 : "No files match this view. Change the search, filters or browsing selection.";
             EmptyText.Visibility = _filtered.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
-            StatusText.Text = $"{_filtered.Length:N0} of {source.Length:N0} files · {result.Favorites:N0} favorites";
+            StatusText.Text = string.Format(Services.Localizer.T("{0} of {1} files · {2} favorites"), _filtered.Length.ToString("N0"), source.Length.ToString("N0"), result.Favorites.ToString("N0"));
         }
         catch (OperationCanceledException) when (cancellation.IsCancellationRequested) { }
         finally { if (_browseOperation == cancellation) _browseOperation = null; }

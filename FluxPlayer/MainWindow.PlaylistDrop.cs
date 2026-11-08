@@ -124,8 +124,8 @@ public partial class MainWindow
         {
             var layer = AdornerLayer.GetAdornerLayer(PlaylistBox);
             if (layer == null) return;
-            var brush = TryFindResource("AccentGradientHorizontalBrush") as Brush
-                        ?? TryFindResource("AccentBrush") as Brush
+            var brush = TryFindResource("FxAccentFillBrush") as Brush
+                        ?? TryFindResource("FxAccentTextBrush") as Brush
                         ?? Brushes.DeepSkyBlue;
             _playlistInsertAdorner = new PlaylistInsertAdorner(PlaylistBox, brush) { Opacity = 0 };
             layer.Add(_playlistInsertAdorner);

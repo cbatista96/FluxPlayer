@@ -34,16 +34,16 @@ public static class LibraryBrowser
             };
             if (include && predicate(entry)) candidates.Add(entry);
         }
-        var genres = Facets(candidates, entry => entry.Genre, genre, "All genres", "Unknown genre", token);
+        var genres = Facets(candidates, entry => entry.Genre, genre, Localizer.T("All genres"), Localizer.T("Unknown genre"), token);
         var byGenre = candidates.Where(entry => genre == null || Same(entry.Genre, genre)).ToArray();
         var decades = byGenre.GroupBy(entry => entry.Year > 0 ? entry.Year / 10 * 10 : -1).ToDictionary(group => group.Key, group => group.Count());
         if (decade.HasValue) decades.TryAdd(decade.Value, 0);
-        var decadeChoices = new[] { new LibraryFacet(null, "All decades", byGenre.Length) }.Concat(decades.OrderByDescending(pair => pair.Key)
-            .Select(pair => new LibraryFacet(pair.Key.ToString(System.Globalization.CultureInfo.InvariantCulture), pair.Key < 0 ? "Unknown year" : pair.Key + "s", pair.Value))).ToArray();
+        var decadeChoices = new[] { new LibraryFacet(null, Localizer.T("All decades"), byGenre.Length) }.Concat(decades.OrderByDescending(pair => pair.Key)
+            .Select(pair => new LibraryFacet(pair.Key.ToString(System.Globalization.CultureInfo.InvariantCulture), pair.Key < 0 ? Localizer.T("Unknown year") : pair.Key + "s", pair.Value))).ToArray();
         var byDecade = byGenre.Where(entry => decade == null || (entry.Year > 0 ? entry.Year / 10 * 10 : -1) == decade).ToArray();
-        var artists = Facets(byDecade, entry => entry.Artist, artist, "All artists", "Unknown artist", token);
+        var artists = Facets(byDecade, entry => entry.Artist, artist, Localizer.T("All artists"), Localizer.T("Unknown artist"), token);
         var byArtist = byDecade.Where(entry => artist == null || Same(entry.Artist, artist)).ToArray();
-        var albums = Facets(byArtist, entry => entry.Album, album, "All albums", "Unknown album", token);
+        var albums = Facets(byArtist, entry => entry.Album, album, Localizer.T("All albums"), Localizer.T("Unknown album"), token);
         var byAlbum = byArtist.Where(entry => album == null || Same(entry.Album, album)).ToArray();
         var labels = LabelFacets(byAlbum, label, token);
         IEnumerable<LibraryEntry> result = byAlbum.Where(entry => label == null || (label.Length == 0
@@ -73,8 +73,8 @@ public static class LibraryBrowser
                 counts[value] = counts.GetValueOrDefault(value) + 1;
         }
         if (selected != null) counts.TryAdd(selected, 0);
-        return new[] { new LibraryFacet(null, "All labels", entries.Length) }.Concat(counts
-            .Select(pair => new LibraryFacet(pair.Key, pair.Key.Length == 0 ? "No personal labels" : pair.Key, pair.Value))
+        return new[] { new LibraryFacet(null, Localizer.T("All labels"), entries.Length) }.Concat(counts
+            .Select(pair => new LibraryFacet(pair.Key, pair.Key.Length == 0 ? Localizer.T("No personal labels") : pair.Key, pair.Value))
             .OrderBy(item => item.Name, StringComparer.OrdinalIgnoreCase)).ToArray();
     }
 

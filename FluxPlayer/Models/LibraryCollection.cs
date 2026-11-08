@@ -38,7 +38,7 @@ public static class LibraryCollections
     public static LibraryCollectionChoice[] Choices(IReadOnlyCollection<LibraryCollection> collections, string rootName = "All collections")
     {
         Validate(collections);
-        var result = new List<LibraryCollectionChoice> { new(null, rootName) };
+        var result = new List<LibraryCollectionChoice> { new(null, FluxPlayer.Services.Localizer.T(rootName)) };
         var children = collections.ToLookup(node => node.ParentId ?? "", StringComparer.OrdinalIgnoreCase);
         void Add(string parent, int depth)
         {

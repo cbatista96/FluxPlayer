@@ -17,7 +17,7 @@
 
         <Grid Grid.Row="0" Height="40" Background="Transparent" MouseLeftButtonDown="Header_MouseLeftButtonDown">
             <StackPanel Orientation="Horizontal" Margin="16,0,0,0" VerticalAlignment="Center">
-                <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="14" Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Center" Margin="0,0,10,0" />
+                <TextBlock Text="" FontFamily="Segoe Fluent Icons" FontSize="14" Foreground="{DynamicResource FxAccentTextBrush}" VerticalAlignment="Center" Margin="0,0,10,0" />
                 <TextBlock Text="Open network URL" FontSize="12" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
             </StackPanel>
             <Button Style="{StaticResource CaptionCloseBtn}" Height="40" HorizontalAlignment="Right" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Content="" ToolTip="Close (Esc)" Click="CancelBtn_Click" />
@@ -29,7 +29,7 @@
 
             <ui:TextBox x:Name="UrlTextBox" PlaceholderText="https://... or rtsp://..." FontSize="13" TextChanged="UrlTextBox_TextChanged" />
 
-            <TextBlock x:Name="ValidationText" FontSize="11.5" Margin="2,6,0,0" Foreground="#FFFF9A8A" TextWrapping="Wrap" Visibility="Collapsed" />
+            <TextBlock x:Name="ValidationText" FontSize="11.5" Margin="2,6,0,0" Foreground="{DynamicResource FxDangerTextBrush}" TextWrapping="Wrap" Visibility="Collapsed" />
 
             <Grid Margin="0,18,0,0">
                 <Button Style="{StaticResource DialogChip}" HorizontalAlignment="Left" ToolTip="Paste from clipboard (Ctrl+V)" Click="PasteBtn_Click">

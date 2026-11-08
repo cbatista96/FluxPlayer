@@ -19,18 +19,13 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" /><ColumnDefinition Width="170" /><ColumnDefinition Width="200" /><ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <TextBox x:Name="SearchBox" MinWidth="160" Height="34" Padding="10,5" TextChanged="Search_Changed" ToolTip="Search text or rules: artist:&quot;First Last&quot; label:&quot;Road trip&quot; format:flac duration:&gt;3:00 plays:&gt;2 added:&gt;=2026-01-01. Use - to exclude." AutomationProperties.Name="Search the library" />
-            <TextBlock Text="Search title, artist, album or rules…" Margin="12,0,12,0" VerticalAlignment="Center" IsHitTestVisible="False" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis">
-                <TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Visibility" Value="Collapsed" />
-                    <Style.Triggers><DataTrigger Binding="{Binding Text, ElementName=SearchBox}" Value=""><Setter Property="Visibility" Value="Visible" /></DataTrigger></Style.Triggers>
-                </Style></TextBlock.Style>
-            </TextBlock>
+            <ui:TextBox PlaceholderText="Search title, artist, album or rules…" Icon="{ui:SymbolIcon Search24}" ClearButtonEnabled="True" x:Name="SearchBox" MinWidth="160" Height="34" Padding="10,5" TextChanged="Search_Changed" ToolTip="Search text or rules: artist:&quot;First Last&quot; label:&quot;Road trip&quot; format:flac duration:&gt;3:00 plays:&gt;2 added:&gt;=2026-01-01. Use - to exclude." AutomationProperties.Name="Search the library" />
             <ComboBox x:Name="KindFilter" Grid.Column="1" Margin="10,0,0,0" SelectedIndex="0" SelectionChanged="Filter_Changed">
-                <ComboBoxItem Content="All media" /><ComboBoxItem Content="Audio" /><ComboBoxItem Content="Video" />
+                <ComboBoxItem Tag="i" Content="All media" /><ComboBoxItem Tag="i" Content="Audio" /><ComboBoxItem Tag="i" Content="Video" />
             </ComboBox>
             <ComboBox x:Name="CollectionFilter" Grid.Column="2" Margin="10,0,0,0" SelectedIndex="0" SelectionChanged="Filter_Changed">
-                <ComboBoxItem Content="Entire library" /><ComboBoxItem Content="Favorites" /><ComboBoxItem Content="Recently played" />
-                <ComboBoxItem Content="Most played" /><ComboBoxItem Content="Not played" /><ComboBoxItem Content="Tags not analyzed" />
+                <ComboBoxItem Tag="i" Content="Entire library" /><ComboBoxItem Tag="i" Content="Favorites" /><ComboBoxItem Tag="i" Content="Recently played" />
+                <ComboBoxItem Tag="i" Content="Most played" /><ComboBoxItem Tag="i" Content="Not played" /><ComboBoxItem Tag="i" Content="Tags not analyzed" />
             </ComboBox>
             <CheckBox x:Name="WatchNewFolder" Grid.Column="3" Content="Watch when adding" IsChecked="True" VerticalAlignment="Center" Margin="14,0,0,0" />
             <StackPanel Grid.Row="3" Grid.ColumnSpan="4" Orientation="Horizontal" Margin="0,10,0,0">
@@ -39,7 +34,7 @@
                 <Button Content="Manage collections…" Click="ManageCollections_Click" Padding="12,5" Margin="12,0,0,0"/>
             </StackPanel>
             <StackPanel Grid.Row="1" Grid.ColumnSpan="4" Orientation="Horizontal" Margin="0,10,0,0">
-                <ComboBox x:Name="SmartListCombo" Width="240" DisplayMemberPath="Name" SelectionChanged="SmartList_Changed" AutomationProperties.Name="Saved smart playlists" />
+                <Grid Width="240"><ComboBox x:Name="SmartListCombo" DisplayMemberPath="Name" SelectionChanged="SmartList_Changed" AutomationProperties.Name="Saved smart playlists" /><TextBlock Text="Saved playlists" Margin="12,0,36,0" VerticalAlignment="Center" IsHitTestVisible="False" Foreground="{DynamicResource TextFillColorSecondaryBrush}"><TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Visibility" Value="Collapsed" /><Style.Triggers><DataTrigger Binding="{Binding SelectedItem, ElementName=SmartListCombo}" Value="{x:Null}"><Setter Property="Visibility" Value="Visible" /></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock></Grid>
                 <Button Content="Save view as playlist…" Click="SaveSmartList_Click" Margin="10,0,0,0" Padding="12,5" />
                 <Button Content="Remove saved playlist" Click="RemoveSmartList_Click" Margin="8,0,0,0" Padding="12,5" />
             </StackPanel>
@@ -89,7 +84,7 @@
                         <DataGridTextColumn Header="Album" SortMemberPath="Album" Binding="{Binding Album}" Width="*" MinWidth="110" />
                         <DataGridTextColumn Header="Format" SortMemberPath="Format" Binding="{Binding Format}" Width="75" />
                         <DataGridTextColumn Header="Duration" SortMemberPath="DurationMs" Binding="{Binding Duration}" Width="80" />
-                        <DataGridTextColumn Header="Plays" SortMemberPath="PlayCount" Binding="{Binding PlayCount}" Width="60" />
+                        <DataGridTextColumn Header="Plays" SortMemberPath="PlayCount" Binding="{Binding PlayCount}" Width="Auto" MinWidth="64" />
                         <DataGridTextColumn Header="Labels" SortMemberPath="LabelText" Binding="{Binding LabelText}" Width="140">
                             <DataGridTextColumn.ElementStyle><Style TargetType="TextBlock"><Setter Property="TextTrimming" Value="CharacterEllipsis"/><Setter Property="ToolTip" Value="{Binding LabelText}"/></Style></DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>

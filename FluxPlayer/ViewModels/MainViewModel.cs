@@ -119,6 +119,8 @@ public partial class MainViewModel : ObservableObject
     {
         _mediaService = mediaService;
         _settingsService = settingsService;
+        // Bound text is skipped by the localizer, so the mode label follows the interface language explicitly.
+        Localizer.Changed += (_, _) => OnPropertyChanged(nameof(ModeLabel));
         _settings = initialSettings ?? _settingsService.Load();
         _filePreferences = FilePlaybackPreference.Sanitize(_settings.FilePlaybackPreferences);
         _fileMemoryToken = _settings.FilePlaybackMemoryToken;
