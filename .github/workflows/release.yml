@@ -34,8 +34,15 @@ jobs:
         shell: pwsh
         env:
           RELEASE_VERSION: ${{ inputs.version }}
+          PUBLISH_DRAFT: ${{ inputs.publish_draft }}
         run: |
           if ($env:RELEASE_VERSION -notmatch '^\d+\.\d+\.\d+(\.\d+)?$') { throw 'Invalid numeric version.' }
+          if ($env:PUBLISH_DRAFT -eq 'true') {
+            foreach ($language in 'en', 'es') {
+              $notes = "docs/releases/$env:RELEASE_VERSION/release-notes.$language.md"
+              if (-not (Test-Path -LiteralPath $notes -PathType Leaf)) { throw "Missing release notes: $notes" }
+            }
+          }
       - name: Build and managed regression
         shell: pwsh
         run: |
@@ -111,11 +118,22 @@ jobs:
           RELEASE_VERSION: ${{ inputs.version }}
           REQUIRE_SIGNING: ${{ inputs.signed }}
         run: |
-          $files = Get-ChildItem -LiteralPath "artifacts/releases/$env:RELEASE_VERSION" -File | Select-Object -ExpandProperty FullName
-          $notes = Join-Path $env:RUNNER_TEMP 'fluxplayer-release-notes.md'
-          Copy-Item docs/RELEASE_NOTES.md $notes
-          if ($env:REQUIRE_SIGNING -eq 'true') {
-            (Get-Content $notes -Raw).Replace('Unsigned / Sin firma', 'Authenticode signatures verified during build / Firmas Authenticode verificadas durante la compilación') | Set-Content $notes
+          $directory = "artifacts/releases/$env:RELEASE_VERSION"
+          $imageBase = "https://raw.githubusercontent.com/$env:GITHUB_REPOSITORY/$env:GITHUB_SHA/docs/screenshots/"
+          $sections = foreach ($language in 'en', 'es') {
+            $source = "docs/releases/$env:RELEASE_VERSION/release-notes.$language.md"
+            $body = (Get-Content -LiteralPath $source -Raw).Replace('../../screenshots/', $imageBase)
+            if ($env:REQUIRE_SIGNING -eq 'true') {
+              $signature = if ($language -eq 'en') { 'Authenticode signatures verified during build' } else { 'Firmas Authenticode verificadas durante la compilación' }
+              $body = $body.Replace('Unsigned / Sin firma', $signature)
+            }
+            Set-Content -LiteralPath (Join-Path $directory "release-notes.$language.md") -Value $body -Encoding utf8NoBOM
+            $heading = if ($language -eq 'en') { 'English' } else { 'Español' }
+            "## $heading`n`n" + ($body -replace '\A# [^\r\n]+\r?\n\s*', '').Trim()
           }
+          $files = Get-ChildItem -LiteralPath $directory -File | Select-Object -ExpandProperty FullName
+          $notes = Join-Path $env:RUNNER_TEMP 'fluxplayer-release-notes.md'
+          $navigation = '[English](#english) · [Español](#español)'
+          Set-Content -LiteralPath $notes -Value (($navigation, $sections[0], $sections[1]) -join "`n`n") -Encoding utf8NoBOM
           gh release create "v$env:RELEASE_VERSION" @files --draft --target $env:GITHUB_SHA --title "FluxPlayer $env:RELEASE_VERSION" --notes-file $notes
           if ($LASTEXITCODE) { throw 'Draft creation failed' }
