@@ -87,26 +87,17 @@ Include the FluxPlayer version, Windows build and steps to reproduce the problem
 
 Dark Mica opens this page with the player active. These views show the same video in the other three themes.
 
-<details>
-<summary>Light Mica</summary>
+**Light Mica**
 
 <img src="docs/screenshots/en/mica-light.png" width="1100" alt="Light Mica">
 
-</details>
-
-<details>
-<summary>Acrylic Blur</summary>
+**Acrylic Blur**
 
 <img src="docs/screenshots/en/acrylic.png" width="1100" alt="Acrylic Blur">
 
-</details>
-
-<details>
-<summary>Full Black</summary>
+**Full Black**
 
 <img src="docs/screenshots/en/full-black.png" width="1100" alt="Full Black">
-
-</details>
 
 ### Player and tools
 
@@ -114,26 +105,17 @@ Dark Mica opens this page with the player active. These views show the same vide
 
 <img src="docs/screenshots/en/music.png" width="1100" alt="Music workspace and playlist">
 
-<details>
-<summary>Library and filters</summary>
+**Library and filters**
 
 <img src="docs/screenshots/en/library.png" width="1100" alt="Library and filters">
 
-</details>
-
-<details>
-<summary>Graphic equalizer</summary>
+**Graphic equalizer**
 
 <img src="docs/screenshots/en/equalizer.png" width="1100" alt="Graphic equalizer">
 
-</details>
-
-<details>
-<summary>Searchable settings</summary>
+**Searchable settings**
 
 <img src="docs/screenshots/en/settings.png" width="1100" alt="Searchable settings">
-
-</details>
 
 [Open full-size screenshots](docs/screenshots/)
 

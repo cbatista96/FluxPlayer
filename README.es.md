@@ -87,26 +87,17 @@ Incluye la versión de FluxPlayer, la compilación de Windows y los pasos para r
 
 Mica oscuro abre la página con el reproductor activo. Estas vistas muestran el mismo video en los otros tres temas.
 
-<details>
-<summary>Mica claro</summary>
+**Mica claro**
 
 <img src="docs/screenshots/es/mica-light.png" width="1100" alt="Mica claro">
 
-</details>
-
-<details>
-<summary>Acrílico</summary>
+**Acrílico**
 
 <img src="docs/screenshots/es/acrylic.png" width="1100" alt="Acrílico">
 
-</details>
-
-<details>
-<summary>Negro total</summary>
+**Negro total**
 
 <img src="docs/screenshots/es/full-black.png" width="1100" alt="Negro total">
-
-</details>
 
 ### Reproductor y herramientas
 
@@ -114,26 +105,17 @@ Mica oscuro abre la página con el reproductor activo. Estas vistas muestran el 
 
 <img src="docs/screenshots/es/music.png" width="1100" alt="Modo música y lista de reproducción">
 
-<details>
-<summary>Biblioteca y filtros</summary>
+**Biblioteca y filtros**
 
 <img src="docs/screenshots/es/library.png" width="1100" alt="Biblioteca y filtros">
 
-</details>
-
-<details>
-<summary>Ecualizador gráfico</summary>
+**Ecualizador gráfico**
 
 <img src="docs/screenshots/es/equalizer.png" width="1100" alt="Ecualizador gráfico">
 
-</details>
-
-<details>
-<summary>Ajustes con búsqueda</summary>
+**Ajustes con búsqueda**
 
 <img src="docs/screenshots/es/settings.png" width="1100" alt="Ajustes con búsqueda">
-
-</details>
 
 [Ver las capturas a tamaño completo](docs/screenshots/)
 
