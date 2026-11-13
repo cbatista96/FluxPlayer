@@ -52,7 +52,7 @@ Public downloads are listed under GitHub Releases. Packaging commands below crea
 
 Output is written to `publish/FluxPlayer/` and `installer/output/`, both ignored by Git. The packaging script validates its output paths before cleanup, removes the unused x86 LibVLC runtime and builds the VLC plugin cache. A self-contained build includes its .NET runtime. Keep the native LibVLC libraries and plugin folders next to the application; this project intentionally disables trimming and single-file publishing.
 
-An internal assembly version is used by local builds and the installer script. It does not represent a published GitHub release or tag.
+To reproduce the release layout with an installer and portable ZIP, check out the corresponding GitHub tag and run `pwsh -File tools/Build-Release.ps1 -BuildInstaller`. The script uses the project version by default and writes packages and SHA-256 sums under `artifacts/releases/`. For the Store package, see [Microsoft Store submission](MICROSOFT_STORE.md).
 
 ## Optional FFmpeg tools
 
