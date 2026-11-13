@@ -1,15 +1,20 @@
 [CmdletBinding()]
 param(
-    [string]$Version = '1.4.0',
+    [string]$Version = '',
     [string]$OutputDirectory = '',
     [string]$CertificateThumbprint = '',
     [switch]$RequireSigning,
     [switch]$BuildUnsignedMsix,
+    [switch]$BuildInstaller,
     [string]$MatroskaToolsDirectory = '',
     [string]$DownloadBaseUrl = 'https://github.com/cbatista96/FluxPlayer/releases/latest/download'
 )
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $PSScriptRoot
+$projectFile = Join-Path $projectRoot 'FluxPlayer/FluxPlayer.csproj'
+if ($Version -eq '') {
+    $Version = ([xml](Get-Content -LiteralPath $projectFile -Raw)).SelectSingleNode('/Project/PropertyGroup/Version').InnerText
+}
 if ($Version -notmatch '^\d+\.\d+\.\d+(\.\d+)?$') { throw 'Use a numeric release version.' }
 $packageVersion = if ($Version.Split('.').Count -eq 3) { "$Version.0" } else { $Version }
 if (($packageVersion.Split('.') | Where-Object { [int]$_ -gt 65535 }).Count -gt 0) { throw 'MSIX version fields must fit in 16 bits.' }
@@ -25,9 +30,17 @@ if ($CertificateThumbprint -ne '') {
 }
 New-Item -ItemType Directory -Path $OutputDirectory | Out-Null
 $publishPath = Join-Path $OutputDirectory 'app'
-& dotnet publish (Join-Path $projectRoot 'FluxPlayer/FluxPlayer.csproj') -c Release -p:Platform=x64 -r win-x64 --self-contained true -p:PublishSingleFile=false "-p:Version=$Version" -o $publishPath
+& dotnet publish $projectFile -c Release -p:Platform=x64 -r win-x64 --self-contained true -p:PublishSingleFile=false "-p:Version=$Version" -o $publishPath
 if ($LASTEXITCODE -ne 0) { throw 'Publish failed.' }
-Copy-Item -LiteralPath (Join-Path $projectRoot 'LICENSE'),(Join-Path $projectRoot 'THIRD_PARTY_NOTICES.md') -Destination $publishPath
+foreach ($required in @('FluxPlayer.exe','FluxPlayer.dll','coreclr.dll','libvlc/win-x64/libvlc.dll',
+    'libvlc/win-x64/plugins/audio_filter/libfluxdsp_plugin.dll','libvlc/win-x64/plugins/spu/libfluxsub_plugin.dll')) {
+    if (-not (Test-Path -LiteralPath (Join-Path $publishPath $required) -PathType Leaf)) { throw "Missing release file: $required" }
+}
+$unused = [IO.Path]::GetFullPath((Join-Path $publishPath 'libvlc/win-x86'))
+if (-not $unused.StartsWith([IO.Path]::GetFullPath($publishPath).TrimEnd('\') + '\', [StringComparison]::OrdinalIgnoreCase)) { throw 'Invalid cleanup path.' }
+if (Test-Path -LiteralPath $unused) { Remove-Item -LiteralPath $unused -Recurse -Force }
+Get-ChildItem -LiteralPath (Join-Path $publishPath 'libvlc/win-x64') -File -Filter '*.lib' | Remove-Item -Force
+Copy-Item -LiteralPath (Join-Path $projectRoot 'LICENSE'),(Join-Path $projectRoot 'THIRD_PARTY_NOTICES.md'),(Join-Path $projectRoot 'docs/PRIVACY.md') -Destination $publishPath
 if ($MatroskaToolsDirectory -ne '') {
     $MatroskaToolsDirectory = [IO.Path]::GetFullPath($MatroskaToolsDirectory)
     foreach ($required in @('mkvextract.exe','mkvpropedit.exe','doc/COPYING.txt')) {
@@ -56,9 +69,31 @@ if ($certificate) {
         if ($LASTEXITCODE -ne 0) { throw "Signature trust verification failed: $binary" }
     }
 }
-$zipPath = Join-Path $OutputDirectory "FluxPlayer-$Version-win-x64.zip"
+$zipPath = Join-Path $OutputDirectory "FluxPlayer-$Version-portable-x64.zip"
 Compress-Archive -Path (Join-Path $publishPath '*') -DestinationPath $zipPath -CompressionLevel Optimal
 $files = @($zipPath)
+if ($BuildInstaller) {
+    $iscc = @(
+        (Get-Command ISCC.exe -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source -First 1),
+        "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe",
+        "${env:ProgramFiles}\Inno Setup 6\ISCC.exe",
+        "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe"
+    ) | Where-Object { $_ -and (Test-Path -LiteralPath $_ -PathType Leaf) } | Select-Object -First 1
+    if (-not $iscc) { throw 'Install Inno Setup 6 or put ISCC.exe on PATH.' }
+    $arguments = @('/Qp', "/DMyAppVersion=$Version", "/DPublishDir=$publishPath", "/DInstallerOutputDir=$OutputDirectory")
+    if ($certificate) {
+        $arguments += '/DSignRelease'
+        $arguments += ('/Sfluxsign=$q{0}$q sign /sha1 {1} /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 $f' -f $signTool, $CertificateThumbprint)
+    }
+    & $iscc @arguments (Join-Path $projectRoot 'installer/FluxPlayerSetup.iss')
+    $setup = Join-Path $OutputDirectory "FluxPlayerSetup-$Version-x64.exe"
+    if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $setup -PathType Leaf)) { throw 'Installer build failed.' }
+    if ($certificate) {
+        & $signTool verify /pa $setup
+        if ($LASTEXITCODE -ne 0) { throw 'Installer signature verification failed.' }
+    }
+    $files += $setup
+}
 if ($certificate -or $BuildUnsignedMsix) {
     $publisher = if ($certificate) { $certificate.Subject } else { 'CN=FluxPlayer.Development' }
     $assets = Join-Path $publishPath 'PackageAssets'; New-Item -ItemType Directory -Path $assets | Out-Null

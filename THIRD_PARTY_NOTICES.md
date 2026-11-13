@@ -16,6 +16,10 @@ FluxPlayer source uses the [GNU GPL v3.0](LICENSE). External packages and tools 
 
 The entries above reflect the pinned packages' NuGet metadata. Consult the exact restored packages for their copyright notices and license files, including transitive dependencies and native plugins. The WPF UI license is available [upstream](https://github.com/lepoco/wpfui/blob/main/LICENSE).
 
+## Source for the distributed player
+
+FluxPlayer and its native plugins are built from the source tag corresponding to the release. Source for the playback runtime is available from [VideoLAN VLC 3.0.21](https://download.videolan.org/pub/videolan/vlc/3.0.21/); the VLC source archive is also offered alongside the first release. See its COPYING and COPYING.LIB files and the [LibVLC NuGet build project](https://code.videolan.org/videolan/libvlc-nuget). Source for the managed bindings and tag library is available from the upstream projects listed above, at the listed versions. The .NET runtime and Windows desktop components come from [dotnet/runtime](https://github.com/dotnet/runtime), [dotnet/wpf](https://github.com/dotnet/wpf) and [dotnet/winforms](https://github.com/dotnet/winforms).
+
 ## Build tools and optional tools
 
 Local packages may optionally include the unmodified MKVToolNix `mkvextract` and `mkvpropedit` executables under `Tools/MKVToolNix`, together with the upstream documentation and `doc/COPYING.txt`. The current local package uses version 103.0 from the [official portable download](https://mkvtoolnix.download/downloads.html#windows); copyright Moritz Bunkus and contributors, GNU GPL v2 with the additional component notices supplied by upstream. Corresponding source is available from the [official source downloads](https://mkvtoolnix.download/sources.html). The repository does not check these executables in. The optional packaging directory must be explicitly supplied to `tools/Build-Release.ps1`.

@@ -14,7 +14,7 @@ TestResults/
 *.coverage*
 *_wpftmp.csproj
 
-# Local builds and installers: this repository publishes source only
+# Generated builds and installers are distributed through Releases, not Git
 publish/
 artifacts/
 Data/

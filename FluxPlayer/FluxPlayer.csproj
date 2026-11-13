@@ -14,6 +14,10 @@
     <PlatformTarget>x64</PlatformTarget>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ApplicationIcon>app.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- WPF owns the entry point. Windows needs DPI awareness before WPF starts;
+         WinForms is used for auxiliary components and does not initialize the app. -->
+    <NoWarn>$(NoWarn);WFAC010</NoWarn>
     <TieredPGO>true</TieredPGO>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <Version>1.4.0</Version>

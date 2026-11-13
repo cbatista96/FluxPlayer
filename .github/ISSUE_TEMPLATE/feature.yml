@@ -1,0 +1,11 @@
+name: Feature request / Solicitar una función
+description: Suggest an improvement for FluxPlayer.
+title: "[Feature]: "
+body:
+  - type: textarea
+    id: workflow
+    attributes:
+      label: What would you like to do? / ¿Qué quieres hacer?
+      description: Describe the workflow, where it belongs and what currently gets in the way.
+    validations:
+      required: true

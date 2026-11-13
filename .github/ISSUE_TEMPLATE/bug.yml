@@ -1,0 +1,23 @@
+name: Report a bug / Informar de un fallo
+description: Report a reproducible problem with FluxPlayer.
+title: "[Bug]: "
+body:
+  - type: input
+    id: environment
+    attributes:
+      label: FluxPlayer version, Windows build and install method
+      placeholder: "1.4.0, Windows 11 24H2, setup EXE"
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce / Pasos para reproducirlo
+      description: Include the media format, settings or device if relevant, and say what you expected versus what happened.
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Sanitized log or screenshot / Registro o captura revisados
+      description: The crash log is usually at %LOCALAPPDATA%\FluxPlayer\logs\crash.log. Remove private paths, URLs and credentials before attaching anything.

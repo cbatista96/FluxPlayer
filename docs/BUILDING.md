@@ -40,7 +40,7 @@ The first command matches the managed service checks used in CI. The second addi
 
 ## Optional local packaging
 
-The public repository contains source only. Packaging commands below create files on your own machine; they do not upload anything to GitHub.
+Public downloads are listed under GitHub Releases. Packaging commands below create files on your own machine; they do not upload anything to GitHub.
 
 ```powershell
 # Self-contained Windows x64 build, without an installer

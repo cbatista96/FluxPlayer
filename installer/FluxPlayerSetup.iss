@@ -7,7 +7,12 @@
 #define MyAppPublisher "FluxPlayer"
 #define MyAppURL "https://github.com/cbatista96/FluxPlayer"
 #define MyAppExeName "FluxPlayer.exe"
-#define PublishDir "..\publish\FluxPlayer"
+#ifndef PublishDir
+  #define PublishDir "..\publish\FluxPlayer"
+#endif
+#ifndef InstallerOutputDir
+  #define InstallerOutputDir "..\installer\output"
+#endif
 
 [Setup]
 AppId={{B3F8A2D1-7C4E-4A9B-8D5F-1E2C3A4B5D6F}
@@ -19,7 +24,7 @@ AppPublisherURL={#MyAppURL}
 DefaultDirName={autopf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 PrivilegesRequiredOverridesAllowed=dialog
-OutputDir=..\installer\output
+OutputDir={#InstallerOutputDir}
 OutputBaseFilename=FluxPlayerSetup-{#MyAppVersion}-x64
 SetupIconFile=..\FluxPlayer\app.ico
 UninstallDisplayIcon={app}\{#MyAppExeName}
@@ -40,10 +45,15 @@ VersionInfoProductName={#MyAppName}
 VersionInfoDescription={#MyAppName} installer
 AppCopyright=Copyright (C) {#MyAppPublisher}
 RestartApplications=no
+#ifdef SignRelease
+SignTool=fluxsign
+SignedUninstaller=yes
+#endif
 
 [Languages]
 
 Name: "english"; MessagesFile: "compiler:Default.isl"
+Name: "spanish"; MessagesFile: "compiler:Languages\Spanish.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked

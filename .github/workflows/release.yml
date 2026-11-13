@@ -14,6 +14,10 @@ on:
         description: Upload assets into a draft GitHub release
         type: boolean
         default: false
+      store_preview:
+        description: Build a separate MSIX with a development identity
+        type: boolean
+        default: true
 permissions:
   contents: write
 jobs:
@@ -23,7 +27,9 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: |
+            8.0.x
+            10.0.402
       - name: Validate input
         shell: pwsh
         env:
@@ -51,33 +57,65 @@ jobs:
           if (-not $env:SIGNING_PFX_BASE64) { throw 'Signing secrets are required.' }
           $pfx = Join-Path $env:RUNNER_TEMP 'release-signing.pfx'
           [IO.File]::WriteAllBytes($pfx, [Convert]::FromBase64String($env:SIGNING_PFX_BASE64))
-          $certificate = Import-PfxCertificate -FilePath $pfx -Password (ConvertTo-SecureString $env:SIGNING_PFX_PASSWORD -AsPlainText -Force) -CertStoreLocation Cert:\CurrentUser\My
-          "RELEASE_CERT_THUMBPRINT=$($certificate.Thumbprint)" >> $env:GITHUB_ENV
+          try {
+            $certificate = Import-PfxCertificate -FilePath $pfx -Password (ConvertTo-SecureString $env:SIGNING_PFX_PASSWORD -AsPlainText -Force) -CertStoreLocation Cert:\CurrentUser\My
+            "RELEASE_CERT_THUMBPRINT=$($certificate.Thumbprint)" >> $env:GITHUB_ENV
+          } finally {
+            Remove-Item -LiteralPath $pfx -Force
+          }
       - name: Package
         shell: pwsh
         env:
           RELEASE_VERSION: ${{ inputs.version }}
           REQUIRE_SIGNING: ${{ inputs.signed }}
         run: |
-          $options = @{ Version=$env:RELEASE_VERSION }
+          $options = @{ Version=$env:RELEASE_VERSION; BuildInstaller=$true }
           if ($env:REQUIRE_SIGNING -eq 'true') { $options.RequireSigning=$true; $options.CertificateThumbprint=$env:RELEASE_CERT_THUMBPRINT }
           ./tools/Build-Release.ps1 @options
+      - name: Collect upstream VLC source
+        shell: pwsh
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          ./tools/Get-VlcSource.ps1 -OutputDirectory "artifacts/releases/$env:RELEASE_VERSION"
+      - name: Package Store preview
+        if: inputs.store_preview
+        shell: pwsh
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: ./tools/Build-Store.ps1 -ReleaseDirectory "artifacts/releases/$env:RELEASE_VERSION" -Preview
       - uses: actions/upload-artifact@v4
         with:
           name: FluxPlayer-${{ inputs.version }}-win-x64
           path: |
             artifacts/releases/${{ inputs.version }}/*.zip
-            artifacts/releases/${{ inputs.version }}/*.msix
-            artifacts/releases/${{ inputs.version }}/*.appinstaller
+            artifacts/releases/${{ inputs.version }}/*.exe
+            artifacts/releases/${{ inputs.version }}/*.tar.xz
             artifacts/releases/${{ inputs.version }}/*.json
             artifacts/releases/${{ inputs.version }}/SHA256SUMS.txt
+            artifacts/releases/${{ inputs.version }}/VLC-SOURCE-SHA256.txt
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: inputs.store_preview
+        with:
+          name: FluxPlayer-Store-preview-${{ inputs.version }}
+          path: |
+            artifacts/releases/${{ inputs.version }}/store-preview/*.msix
+            artifacts/releases/${{ inputs.version }}/store-preview/SHA256SUMS.txt
+          if-no-files-found: error
       - name: Create draft release
         if: inputs.publish_draft
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_VERSION: ${{ inputs.version }}
+          REQUIRE_SIGNING: ${{ inputs.signed }}
         run: |
           $files = Get-ChildItem -LiteralPath "artifacts/releases/$env:RELEASE_VERSION" -File | Select-Object -ExpandProperty FullName
-          gh release create "v$env:RELEASE_VERSION" @files --draft --title "FluxPlayer $env:RELEASE_VERSION" --notes-file docs/RELEASE_NOTES.md
+          $notes = Join-Path $env:RUNNER_TEMP 'fluxplayer-release-notes.md'
+          Copy-Item docs/RELEASE_NOTES.md $notes
+          if ($env:REQUIRE_SIGNING -eq 'true') {
+            (Get-Content $notes -Raw).Replace('Unsigned / Sin firma', 'Authenticode signatures verified during build / Firmas Authenticode verificadas durante la compilación') | Set-Content $notes
+          }
+          gh release create "v$env:RELEASE_VERSION" @files --draft --target $env:GITHUB_SHA --title "FluxPlayer $env:RELEASE_VERSION" --notes-file $notes
           if ($LASTEXITCODE) { throw 'Draft creation failed' }
